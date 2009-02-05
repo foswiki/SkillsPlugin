@@ -1,4 +1,3 @@
-%META:TOPICINFO{author="ProjectContributor" date="1176993381" format="1.1" version="0"}%
 %META:TOPICPARENT{name="SkillsPlugin"}%
 ---+!! SkillsPlugin: Search Skills
 
@@ -22,6 +21,8 @@ Search for users with a specific skill.
 <div class="twikiFormSteps">
 <div class="twikiFormStep">
 %SKILLS{action="search"}%
+%BR%
+%SKILLS{action="searchresults"}%
 </div>
 </div>
 %ENDSECTION{"searchskills"}%

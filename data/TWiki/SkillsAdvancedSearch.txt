@@ -1,4 +1,3 @@
-%META:TOPICINFO{author="ProjectContributor" date="1176298895" format="1.1" version="0"}%
 %META:TOPICPARENT{name="SkillsPlugin"}%
 ---++ Skills Plugin Advanced Search
 
@@ -65,4 +64,4 @@ You can also create a drop down menu in place of the topic search text box. This
 </select>
 </verbatim>
 
-TWiki searches are very powerful, so you could get your data from almost anywhere. See VarSEARCH for more information on searching.
+Foswiki searches are very powerful, so you could get your data from almost anywhere. See VarSEARCH for more information on searching.
