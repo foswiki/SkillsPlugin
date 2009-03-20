@@ -12,13 +12,13 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
-# For licensing info read LICENSE file in the TWiki root.
+# For licensing info read LICENSE file in the Foswiki root.
 
-package TWiki::Plugins::SkillsPlugin::UserSkills;
+package Foswiki::Plugins::SkillsPlugin::UserSkills;
 
 use strict;
 
-require TWiki::Plugins::SkillsPlugin::UserSkill;
+require Foswiki::Plugins::SkillsPlugin::UserSkill;
 
 my %_userSkills;    # contains an array of UserSkill objects keyed by user
 
@@ -43,14 +43,14 @@ sub _loadUserSkills {
 
     _Debug("Loading skills for $user");
 
-    my $mainWeb = TWiki::Func::getMainWebname();
+    my $mainWeb = Foswiki::Func::getMainWebname();
 
-    my ( $meta, undef ) = TWiki::Func::readTopic( $mainWeb, $user );
+    my ( $meta, undef ) = Foswiki::Func::readTopic( $mainWeb, $user );
     my @skillsMeta = $meta->find('SKILLS');
 
     my @userSkills;
     for my $skillMeta (@skillsMeta) {
-        my $obj_userSkill = TWiki::Plugins::SkillsPlugin::UserSkill->new(
+        my $obj_userSkill = Foswiki::Plugins::SkillsPlugin::UserSkill->new(
             $skillMeta->{name},   $skillMeta->{category},
             $skillMeta->{rating}, $skillMeta->{comment}
         );
@@ -105,8 +105,8 @@ sub eachUserSkill {
 
     $self->_loadUserSkills($user) unless $_userSkills{$user};
 
-    require TWiki::ListIterator;
-    return new TWiki::ListIterator( $_userSkills{$user} );
+    require Foswiki::ListIterator;
+    return new Foswiki::ListIterator( $_userSkills{$user} );
 }
 
 # gets each user that has skills
@@ -115,9 +115,9 @@ sub eachUserSkill {
 sub allUsers {
     my $self = shift;
 
-    my %allUsers = {};    # hash of user skill objects keyed by user name
+    my %allUsers = ();    # hash of user skill objects keyed by user name
 
-    my $users = TWiki::Func::eachUser();
+    my $users = Foswiki::Func::eachUser();
     while ( $users->hasNext() ) {
         my $user = $users->next();
 
@@ -153,7 +153,7 @@ sub addEditUserSkill {
     # new skill
     unless ($edited) {
         my $obj_newUserSkill =
-          TWiki::Plugins::SkillsPlugin::UserSkill->new( $skill, $cat, $rating,
+          Foswiki::Plugins::SkillsPlugin::UserSkill->new( $skill, $cat, $rating,
             $comment );
         push @{ $_userSkills{$user} }, $obj_newUserSkill;
     }
@@ -171,7 +171,7 @@ sub renameCategory {
     my ( $cat, $newCat ) = @_;
 
     # all users
-    my $users = TWiki::Func::eachUser();
+    my $users = Foswiki::Func::eachUser();
     while ( $users->hasNext() ) {
         my $user = $users->next();
 
@@ -204,7 +204,7 @@ sub renameSkill {
 
     my ( $cat, $skill, $newSkill ) = @_;
 
-    my $users = TWiki::Func::eachUser();
+    my $users = Foswiki::Func::eachUser();
     while ( $users->hasNext() ) {
         my $user = $users->next();
 
@@ -239,7 +239,7 @@ sub deleteCategory {
 
     my ($cat) = @_;
 
-    my $users = TWiki::Func::eachUser();
+    my $users = Foswiki::Func::eachUser();
     while ( $users->hasNext() ) {
         my $user = $users->next();
 
@@ -273,7 +273,7 @@ sub deleteSkill {
 
     my ( $cat, $skill ) = @_;
 
-    my $users = TWiki::Func::eachUser();
+    my $users = Foswiki::Func::eachUser();
     while ( $users->hasNext() ) {
         my $user = $users->next();
 
@@ -307,7 +307,7 @@ sub moveSkill {
 
     my ( $skill, $oldCat, $newCat ) = @_;
 
-    my $users = TWiki::Func::eachUser();
+    my $users = Foswiki::Func::eachUser();
     while ( $users->hasNext() ) {
         my $user = $users->next();
 
@@ -342,7 +342,7 @@ sub getUsersForSkill {
 
     my %usersWithSkill;
 
-    my $users = TWiki::Func::eachUser();
+    my $users = Foswiki::Func::eachUser();
     while ( $users->hasNext() ) {
         my $user = $users->next();
 
@@ -388,9 +388,9 @@ sub _saveUserSkills {
 
     _Debug("Save user skills - $user");
 
-    my $mainWeb = TWiki::Func::getMainWebname();
+    my $mainWeb = Foswiki::Func::getMainWebname();
 
-    my ( $meta, $text ) = TWiki::Func::readTopic( $mainWeb, $user );
+    my ( $meta, $text ) = Foswiki::Func::readTopic( $mainWeb, $user );
 
     $meta->remove('SKILLS');
     my $it = $self->eachUserSkill($user);
@@ -408,7 +408,7 @@ sub _saveUserSkills {
         );
     }
     my $error =
-      TWiki::Func::saveTopic( $mainWeb, $user, $meta, $text,
+      Foswiki::Func::saveTopic( $mainWeb, $user, $meta, $text,
         { dontlog => 1, comment => 'SkillsPlugin', minor => 1 } );
     if ($error) {
         _Warn("saveUserSkills error - $error");
@@ -418,15 +418,15 @@ sub _saveUserSkills {
 
 sub _Debug {
     my $text = shift;
-    my $debug = $TWiki::cfg{Plugins}{SkillsPlugin}{Debug} || 0;
-    TWiki::Func::writeDebug("- TWiki::Plugins::SkillsPlugin::UserSkills: $text")
+    my $debug = $Foswiki::cfg{Plugins}{SkillsPlugin}{Debug} || 0;
+    Foswiki::Func::writeDebug("- Foswiki::Plugins::SkillsPlugin::UserSkills: $text")
       if $debug;
 }
 
 sub _Warn {
     my $text = shift;
-    TWiki::Func::writeWarning(
-        "- TWiki::Plugins::SkillsPlugin::UserSkills: $text");
+    Foswiki::Func::writeWarning(
+        "- Foswiki::Plugins::SkillsPlugin::UserSkills: $text");
 }
 
 1;

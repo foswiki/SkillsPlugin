@@ -12,13 +12,13 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
-# For licensing info read LICENSE file in the TWiki root.
+# For licensing info read LICENSE file in the Foswiki root.
 
-package TWiki::Plugins::SkillsPlugin::SkillsStore;
+package Foswiki::Plugins::SkillsPlugin::SkillsStore;
 
 use strict;
 
-require TWiki::Plugins::SkillsPlugin::Category;
+require Foswiki::Plugins::SkillsPlugin::Category;
 
 my @_categories;
 my $_loaded = 0;
@@ -36,20 +36,20 @@ sub new {
 sub _load {
     my $self = shift;
 
-    _Debug('reading skills.txt');
-
-    my $file = TWiki::Func::getWorkArea('SkillsPlugin') . '/skills.txt';
-    return 1 unless ( -r $file );    # check file exists
-
-    require TWiki::LineIterator;
-    my $it = new TWiki::LineIterator($file);
-
-    unless ( $it->hasNext() ) {
-        _Debug('skills.txt is empty');
+    my $file = Foswiki::Func::getWorkArea('SkillsPlugin') . '/skills.txt';
+    
+    _Debug('reading skills.txt - ' . $file);
+    
+    my $fh;
+    unless( open( $fh, '<', $file ) ) {
+        # file could not be opened
+        _Debug('skills.txt can not be opened. Maybe it does not exist?');
         return 1;
     }
 
-    # we have elements in iterator
+    require Foswiki::LineIterator;
+    my $it = new Foswiki::LineIterator($fh);
+
     while ( $it->hasNext() ) {
         my $line = $it->next();
         next if $line =~ /^\#.*/;    # skip any comments
@@ -59,9 +59,11 @@ sub _load {
         my @skills = split( ',', $line );
 
         my $obj_cat =
-          TWiki::Plugins::SkillsPlugin::Category->new( $cat, \@skills );
+          Foswiki::Plugins::SkillsPlugin::Category->new( $cat, \@skills );
         push @_categories, $obj_cat;
     }
+    
+    close( $fh );
 
     $_loaded = 1;
 
@@ -92,8 +94,8 @@ sub eachCat {
 
     my @sorted = sort { $a->name cmp $b->name } @_categories;
 
-    require TWiki::ListIterator;
-    return new TWiki::ListIterator( \@sorted );
+    require Foswiki::ListIterator;
+    return new Foswiki::ListIterator( \@sorted );
 }
 
 # saves the skills to file
@@ -112,9 +114,9 @@ sub save {
           . join( ',', @{ $obj_cat->getSkillNames } ) . "\n";
     }
 
-    my $workArea = TWiki::Func::getWorkArea('SkillsPlugin');
+    my $workArea = Foswiki::Func::getWorkArea('SkillsPlugin');
 
-    TWiki::Func::saveFile( $workArea . '/skills.txt', $out );
+    Foswiki::Func::saveFile( $workArea . '/skills.txt', $out );
 }
 
 # adds new skill to category
@@ -210,7 +212,7 @@ sub addNewCategory {
       if ( $self->categoryExists($newCat) );
 
     # create new object and add to array
-    my $new_obj_cat = TWiki::Plugins::SkillsPlugin::Category->new($newCat);
+    my $new_obj_cat = Foswiki::Plugins::SkillsPlugin::Category->new($newCat);
     push @_categories, $new_obj_cat;
 
     # save
@@ -297,16 +299,16 @@ sub getCategoryByName {
 
 sub _Debug {
     my $text = shift;
-    my $debug = $TWiki::cfg{Plugins}{SkillsPlugin}{Debug} || 0;
-    TWiki::Func::writeDebug(
-        "- TWiki::Plugins::SkillsPlugin::SkillsStore: $text")
+    my $debug = $Foswiki::cfg{Plugins}{SkillsPlugin}{Debug} || 0;
+    Foswiki::Func::writeDebug(
+        "- Foswiki::Plugins::SkillsPlugin::SkillsStore: $text")
       if $debug;
 }
 
 sub _Warn {
     my $text = shift;
-    TWiki::Func::writeWarning(
-        "- TWiki::Plugins::SkillsPlugin::SkillsStore: $text");
+    Foswiki::Func::writeWarning(
+        "- Foswiki::Plugins::SkillsPlugin::SkillsStore: $text");
 }
 
 1;

@@ -12,13 +12,13 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
-# For licensing info read LICENSE file in the TWiki root.
+# For licensing info read LICENSE file in the Foswiki root.
 
-package TWiki::Plugins::SkillsPlugin::Category;
+package Foswiki::Plugins::SkillsPlugin::Category;
 
 use strict;
 
-require TWiki::Plugins::SkillsPlugin::Skill;
+require Foswiki::Plugins::SkillsPlugin::Skill;
 
 my $totalCategories;
 
@@ -65,8 +65,8 @@ sub getSkillNames {
 sub eachSkill {
     my $self = shift;
 
-    require TWiki::ListIterator;
-    return new TWiki::ListIterator( $self->{SKILLS} );
+    require Foswiki::ListIterator;
+    return new Foswiki::ListIterator( $self->{SKILLS} );
 }
 
 # populate SKILLS array
@@ -75,7 +75,7 @@ sub populateSkills {
 
     if ($skills) {
         for my $skill ( sort @$skills ) {
-            my $obj_skill = TWiki::Plugins::SkillsPlugin::Skill->new($skill);
+            my $obj_skill = Foswiki::Plugins::SkillsPlugin::Skill->new($skill);
 
             #$obj_skill->name( $skill );
             push @{ $self->{SKILLS} }, $obj_skill;
@@ -86,7 +86,7 @@ sub populateSkills {
 # append skill to SKILLS array
 sub addSkill {
     my ( $self, $skill ) = @_;
-    my $obj_skill = TWiki::Plugins::SkillsPlugin::Skill->new($skill);
+    my $obj_skill = Foswiki::Plugins::SkillsPlugin::Skill->new($skill);
     push @{ $self->{SKILLS} }, $obj_skill;
 }
 

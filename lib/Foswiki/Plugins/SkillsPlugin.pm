@@ -12,15 +12,15 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
-# For licensing info read LICENSE file in the TWiki root.
+# For licensing info read LICENSE file in the Foswiki root.
 
-package TWiki::Plugins::SkillsPlugin;
+package Foswiki::Plugins::SkillsPlugin;
 
 # Conditionally required in this module
-#require TWiki::Plugins::SkillsPlugin::Category;
-#require TWiki::Plugins::SkillsPlugin::UserSkill;
-#require TWiki::Plugins::SkillsPlugin::UserSkills;
-#require TWiki::Plugins::SkillsPlugin::SkillsStore;
+#require Foswiki::Plugins::SkillsPlugin::Category;
+#require Foswiki::Plugins::SkillsPlugin::UserSkill;
+#require Foswiki::Plugins::SkillsPlugin::UserSkills;
+#require Foswiki::Plugins::SkillsPlugin::SkillsStore;
 
 use strict;
 use vars qw(    $VERSION
@@ -42,31 +42,25 @@ $pluginName = 'SkillsPlugin';
 # ========================= INIT
 sub initPlugin {
 
-    # check for Plugins.pm versions
-    if ( $TWiki::Plugins::VERSION < 1.1 ) {
-        _Warn("Version mismatch between $pluginName and Plugins.pm");
-        return 0;
-    }
-
     # Register tag %SKILLS%
-    TWiki::Func::registerTagHandler( 'SKILLS', \&_handleTag );
+    Foswiki::Func::registerTagHandler( 'SKILLS', \&_handleTag );
 
     # Register REST handlers
-    TWiki::Func::registerRESTHandler( 'addNewCategory', \&_restAddNewCategory );
-    TWiki::Func::registerRESTHandler( 'renameCategory', \&_restRenameCategory );
-    TWiki::Func::registerRESTHandler( 'deleteCategory', \&_restDeleteCategory );
-    TWiki::Func::registerRESTHandler( 'addNewSkill',    \&_restAddNewSkill );
-    TWiki::Func::registerRESTHandler( 'renameSkill',    \&_restRenameSkill );
-    TWiki::Func::registerRESTHandler( 'moveSkill',      \&_restMoveSkill );
-    TWiki::Func::registerRESTHandler( 'deleteSkill',    \&_restDeleteSkill );
+    Foswiki::Func::registerRESTHandler( 'addNewCategory', \&_restAddNewCategory );
+    Foswiki::Func::registerRESTHandler( 'renameCategory', \&_restRenameCategory );
+    Foswiki::Func::registerRESTHandler( 'deleteCategory', \&_restDeleteCategory );
+    Foswiki::Func::registerRESTHandler( 'addNewSkill',    \&_restAddNewSkill );
+    Foswiki::Func::registerRESTHandler( 'renameSkill',    \&_restRenameSkill );
+    Foswiki::Func::registerRESTHandler( 'moveSkill',      \&_restMoveSkill );
+    Foswiki::Func::registerRESTHandler( 'deleteSkill',    \&_restDeleteSkill );
 
-    TWiki::Func::registerRESTHandler( 'search', \&_restSearch );
+    Foswiki::Func::registerRESTHandler( 'search', \&_restSearch );
 
-    TWiki::Func::registerRESTHandler( 'getCategories', \&_restGetCategories );
-    TWiki::Func::registerRESTHandler( 'getSkills',     \&_restGetSkills );
-    TWiki::Func::registerRESTHandler( 'getSkillDetails',
+    Foswiki::Func::registerRESTHandler( 'getCategories', \&_restGetCategories );
+    Foswiki::Func::registerRESTHandler( 'getSkills',     \&_restGetSkills );
+    Foswiki::Func::registerRESTHandler( 'getSkillDetails',
         \&_restGetSkillDetails );
-    TWiki::Func::registerRESTHandler( 'addEditSkill', \&_restAddEditSkill );
+    Foswiki::Func::registerRESTHandler( 'addEditSkill', \&_restAddEditSkill );
 
     _Debug("initPlugin is OK");
 
@@ -91,31 +85,31 @@ sub _handleTag {
     for ($action) {
         /user/
           and $out =
-          $start . TWiki::Plugins::SkillsPlugin::_tagUserSkills( $_[1] ) . $end,
+          $start . Foswiki::Plugins::SkillsPlugin::_tagUserSkills( $_[1] ) . $end,
           last;
 
-#    /group/ and $out = $start . TWiki::Plugins::SkillsPlugin::Tag::_tagGroupSkills($_[1]) . $end, last; # shows skills for a particular group
+#    /group/ and $out = $start . Foswiki::Plugins::SkillsPlugin::Tag::_tagGroupSkills($_[1]) . $end, last; # shows skills for a particular group
         /browse/
           and $out =
             $start
-          . TWiki::Plugins::SkillsPlugin::_tagBrowseSkills( $_[1] )
+          . Foswiki::Plugins::SkillsPlugin::_tagBrowseSkills( $_[1] )
           . $end, last;
         /edit/
           and $out =
-          $start . TWiki::Plugins::SkillsPlugin::_tagEditSkills( $_[1] ) . $end,
+          $start . Foswiki::Plugins::SkillsPlugin::_tagEditSkills( $_[1] ) . $end,
           last;
         /showskill/
           and $out =
-          $start . TWiki::Plugins::SkillsPlugin::_tagShowSkills( $_[1] ) . $end,
+          $start . Foswiki::Plugins::SkillsPlugin::_tagShowSkills( $_[1] ) . $end,
           last;
         /showcat/
           and $out =
             $start
-          . TWiki::Plugins::SkillsPlugin::_tagShowCategories( $_[1] )
+          . Foswiki::Plugins::SkillsPlugin::_tagShowCategories( $_[1] )
           . $end, last;    # show all categories in a format
         /^search$/
           and $out =
-          $start . TWiki::Plugins::SkillsPlugin::_tagSearchForm( $_[1] ) . $end,
+          $start . Foswiki::Plugins::SkillsPlugin::_tagSearchForm( $_[1] ) . $end,
           last;            # creates a search form
         /searchresults/
           and $out = $start . '<div id="search-skill-results"></div>' . $end,
@@ -123,7 +117,7 @@ sub _handleTag {
 
         # action not valid
         $out =
-          "<span class='twikiAlert'>Error: Unknown action ('$action')</span>",
+          "<span class='foswikiAlert'>Error: Unknown action ('$action')</span>",
           last;
     }
 
@@ -150,9 +144,9 @@ sub _tagShowSkills {
 
 # creates a form allowing users to edit their skills
 sub _tagEditSkills {
-    my $user = TWiki::Func::getWikiName();
+    my $user = Foswiki::Func::getWikiName();
 
-    my $out = TWiki::Func::readTemplate('skillsedit');
+    my $out = Foswiki::Func::readTemplate('skillsedit');
 
     # expand our variables in template
     my $formDef = 'name="addedit-skill-form" id="addedit-skill-form"';
@@ -195,7 +189,7 @@ s!%RATINGSELECT\{0\}%!<input type="radio" name="addedit-skill-rating" value="0" 
     $out =~ s/%SKILLCOMMENTCLEAR%/$clear/g;
 
     my $submit =
-'<input name="skill-submit" id="addedit-skill-submit" type="button" value="Add/Edit" class="twikiSubmit">';
+'<input name="skill-submit" id="addedit-skill-submit" type="button" value="Add/Edit" class="foswikiSubmit">';
     $out =~ s/%SKILLSUBMIT%/$submit/g;
 
     my $jsVars =
@@ -209,11 +203,11 @@ sub _tagUserSkills {
 
     my $params = shift;
 
-    my $user   = $params->{user}   || TWiki::Func::getWikiName();
+    my $user   = $params->{user}   || Foswiki::Func::getWikiName();
     my $twisty = $params->{twisty} || 'closed';
 
-    my $out        = TWiki::Func::readTemplate('skillsuserview');
-    my $tmplRepeat = TWiki::Func::readTemplate('skillsuserviewrepeated');
+    my $out        = Foswiki::Func::readTemplate('skillsuserview');
+    my $tmplRepeat = Foswiki::Func::readTemplate('skillsuserviewrepeated');
 
     my (
         undef,           $tmplCat,      $tmplSkillContStart,
@@ -221,11 +215,11 @@ sub _tagUserSkills {
         $tmplComment,    $tmplSkillEnd, $tmplSkillContEnd
     ) = split( /%SPLIT%/, $tmplRepeat );
 
-    require TWiki::Plugins::SkillsPlugin::SkillsStore;
-    require TWiki::Plugins::SkillsPlugin::UserSkills;
-    my $skills = TWiki::Plugins::SkillsPlugin::SkillsStore->new()
+    require Foswiki::Plugins::SkillsPlugin::SkillsStore;
+    require Foswiki::Plugins::SkillsPlugin::UserSkills;
+    my $skills = Foswiki::Plugins::SkillsPlugin::SkillsStore->new()
       ;    # FIXME: dont need to go here!
-    my $userSkills = TWiki::Plugins::SkillsPlugin::UserSkills->new();
+    my $userSkills = Foswiki::Plugins::SkillsPlugin::UserSkills->new();
 
     # get image paths
     my $ratingPic      = _getImages()->{star};
@@ -307,7 +301,7 @@ sub _tagUserSkills {
                 $lineOut =~ s/%SKILL%/$skillName/g;
                 $lineOut =~ s/%SKILLICON%/$skillPic/g;
                 if ( $obj_userSkill->comment ) {
-                    my $url = TWiki::Func::getScriptUrl(
+                    my $url = Foswiki::Func::getScriptUrl(
                         'Main', 'WebHome', 'oops',
                         template => 'oopsgeneric',
                         param1   => 'Skills Plugin Comment',
@@ -372,7 +366,7 @@ sub _tagUserSkills {
 }
 
 sub _tagSearchForm {
-    my $out = TWiki::Func::readTemplate('skillssearchform');
+    my $out = Foswiki::Func::readTemplate('skillssearchform');
 
     # expand our variables in template
     my $formDef = 'name="search-skill-form" id="search-skill-form"';
@@ -394,7 +388,7 @@ sub _tagSearchForm {
     $out =~ s/%SKILLSELECT%/$skillSelect/g;
 
     my $submit =
-'<input name="skill-submit" id="search-skill-submit" type="button" value="Search" class="twikiSubmit">';
+'<input name="skill-submit" id="search-skill-submit" type="button" value="Search" class="foswikiSubmit">';
     $out =~ s/%SKILLSUBMIT%/$submit/g;
 
     my $jsVars =
@@ -410,8 +404,8 @@ sub _tagBrowseSkills {
 
     my $twisty = $params->{twisty} || 'closed';
 
-    my $out        = TWiki::Func::readTemplate('skillsbrowseview');
-    my $tmplRepeat = TWiki::Func::readTemplate('skillsbrowseviewrepeated');
+    my $out        = Foswiki::Func::readTemplate('skillsbrowseview');
+    my $tmplRepeat = Foswiki::Func::readTemplate('skillsbrowseviewrepeated');
 
     my (
         undef,           $tmplCat,     $tmplCatContStart,
@@ -423,11 +417,11 @@ sub _tagBrowseSkills {
     # loop over all skills from skills.txt
     # if a user has this skill, output them
 
-    require TWiki::Plugins::SkillsPlugin::SkillsStore;
-    require TWiki::Plugins::SkillsPlugin::UserSkills;
-    my $skills = TWiki::Plugins::SkillsPlugin::SkillsStore->new()
+    require Foswiki::Plugins::SkillsPlugin::SkillsStore;
+    require Foswiki::Plugins::SkillsPlugin::UserSkills;
+    my $skills = Foswiki::Plugins::SkillsPlugin::SkillsStore->new()
       ;    # FIXME: dont need to go here!
-    my $userSkills = TWiki::Plugins::SkillsPlugin::UserSkills->new();
+    my $userSkills = Foswiki::Plugins::SkillsPlugin::UserSkills->new();
 
     # get image paths
     my $ratingPic      = _getImages()->{star};
@@ -500,7 +494,7 @@ sub _tagBrowseSkills {
 # if so, output
 # users should only be loaded the first time, the rest is in memory
 # if this was an iterator of each user with skills
-#my $users = TWiki::Plugins::SkillsPlugin::UserSkills->new()->getUsersForSkill( $skillName, $catName );
+#my $users = Foswiki::Plugins::SkillsPlugin::UserSkills->new()->getUsersForSkill( $skillName, $catName );
 
             #for my $user ( sort keys %{ $users } ) {
             #my $obj_userSkill = $allUsers->{ $user };
@@ -521,7 +515,7 @@ sub _tagBrowseSkills {
                       . '_twist"';
                     $repeatedLine =~ s/%SKILLTWISTDEF%/$skillTwist/g;
                     $repeatedLine =~ s/%USERROWDEF%/class="userRow"/g;
-                    $repeatedLine =~ s/%SKILLUSER%/[[%MAINWEB%.$user][$user]]/g;
+                    $repeatedLine =~ s/%SKILLUSER%/[[$Foswiki::cfg{UsersWebName}.$user][$user]]/g;
                     $repeatedLine =~ s/%USERICON%/$open/g;
 
                     # rating
@@ -551,7 +545,7 @@ sub _tagBrowseSkills {
 
                     # comment link
                     if ( $obj_userSkill->comment ) {
-                        my $url = TWiki::Func::getScriptUrl(
+                        my $url = Foswiki::Func::getScriptUrl(
                             'Main', 'WebHome', 'oops',
                             template => 'oopsgeneric',
                             param1   => 'Skills Plugin Comment',
@@ -629,24 +623,24 @@ sub _restAddNewCategory {
     _Debug('REST handler: addNewCategory');
 
     my ( $web, $topic ) =
-      TWiki::Func::normalizeWebTopicName( undef,
-        TWiki::Func::getCgiQuery()->param('topic') );
+      Foswiki::Func::normalizeWebTopicName( undef,
+        Foswiki::Func::getCgiQuery()->param('topic') );
 
-    my $newCat = TWiki::Func::getCgiQuery()->param('newcategory');
+    my $newCat = Foswiki::Func::getCgiQuery()->param('newcategory');
 
-    unless ( TWiki::Func::isAnAdmin() ) {
-        if ( my $pref = TWiki::Func::getPreferencesValue('ALLOWADDSKILLS') ) {
+    unless ( Foswiki::Func::isAnAdmin() ) {
+        if ( my $pref = Foswiki::Func::getPreferencesValue('ALLOWADDSKILLS') ) {
             my @allowedUsers = split( /,/, $pref );
-            my $user = TWiki::Func::getWikiName();
+            my $user = Foswiki::Func::getWikiName();
             return _returnFromRest( $web, $topic,
 "Error adding category '$newCat' - You are not permitted to add categories or skills ($user)."
             ) unless grep( /$user/, @allowedUsers );
         }
     }
 
-    require TWiki::Plugins::SkillsPlugin::SkillsStore;
+    require Foswiki::Plugins::SkillsPlugin::SkillsStore;
     my $error =
-      TWiki::Plugins::SkillsPlugin::SkillsStore->new()->addNewCategory($newCat);
+      Foswiki::Plugins::SkillsPlugin::SkillsStore->new()->addNewCategory($newCat);
     return _returnFromRest( $web, $topic,
         "Error adding category '$newCat' - $error" )
       if $error;
@@ -662,30 +656,30 @@ sub _restRenameCategory {
     _Debug('REST handler: renameCategory');
 
     my ( $web, $topic ) =
-      TWiki::Func::normalizeWebTopicName( undef,
-        TWiki::Func::getCgiQuery()->param('topic') );
+      Foswiki::Func::normalizeWebTopicName( undef,
+        Foswiki::Func::getCgiQuery()->param('topic') );
 
     return _returnFromRest('Error - user is not an admin')
-      unless TWiki::Func::isAnAdmin();    # check admin
+      unless Foswiki::Func::isAnAdmin();    # check admin
 
-    my $oldCat = TWiki::Func::getCgiQuery()->param('oldcategory')
+    my $oldCat = Foswiki::Func::getCgiQuery()->param('oldcategory')
       || return _returnFromRest( $web, $topic,
         "'oldcategory' parameter is required'" );
-    my $newCat = TWiki::Func::getCgiQuery()->param('newcategory')
+    my $newCat = Foswiki::Func::getCgiQuery()->param('newcategory')
       || return _returnFromRest( $web, $topic,
         "'newcategory' parameter is required'" );
 
     # rename in skills.txt
-    require TWiki::Plugins::SkillsPlugin::SkillsStore;
-    my $renameSkillsError = TWiki::Plugins::SkillsPlugin::SkillsStore->new()
+    require Foswiki::Plugins::SkillsPlugin::SkillsStore;
+    my $renameSkillsError = Foswiki::Plugins::SkillsPlugin::SkillsStore->new()
       ->renameCategory( $oldCat, $newCat );
     return _returnFromRest( $web, $topic,
         "Error renaming category '$oldCat' to '$newCat' - $renameSkillsError" )
       if $renameSkillsError;
 
     # rename in users
-    require TWiki::Plugins::SkillsPlugin::UserSkills;
-    my $renameUserError = TWiki::Plugins::SkillsPlugin::UserSkills->new()
+    require Foswiki::Plugins::SkillsPlugin::UserSkills;
+    my $renameUserError = Foswiki::Plugins::SkillsPlugin::UserSkills->new()
       ->renameCategory( $oldCat, $newCat );
     return _returnFromRest( $web, $topic,
         "Error renaming category '$oldCat' to '$newCat' - $renameUserError" )
@@ -701,27 +695,27 @@ sub _restRenameCategory {
 sub _restDeleteCategory {
     _Debug('REST handler: deleteCategory');
 
-    my $cat = TWiki::Func::getCgiQuery()->param('oldcategory');
+    my $cat = Foswiki::Func::getCgiQuery()->param('oldcategory');
 
     my ( $web, $topic ) =
-      TWiki::Func::normalizeWebTopicName( undef,
-        TWiki::Func::getCgiQuery()->param('topic') );
+      Foswiki::Func::normalizeWebTopicName( undef,
+        Foswiki::Func::getCgiQuery()->param('topic') );
 
     return _returnFromRest('Error - user is not an admin')
-      unless TWiki::Func::isAnAdmin();    # check admin
+      unless Foswiki::Func::isAnAdmin();    # check admin
 
     # delete in skills.txt
-    require TWiki::Plugins::SkillsPlugin::SkillsStore;
+    require Foswiki::Plugins::SkillsPlugin::SkillsStore;
     my $deleteStoreError =
-      TWiki::Plugins::SkillsPlugin::SkillsStore->new()->deleteCategory($cat);
+      Foswiki::Plugins::SkillsPlugin::SkillsStore->new()->deleteCategory($cat);
     return _returnFromRest( $web, $topic,
         "Error deleting category '$cat' - $deleteStoreError" )
       if $deleteStoreError;
 
     # rename in users
-    require TWiki::Plugins::SkillsPlugin::UserSkills;
+    require Foswiki::Plugins::SkillsPlugin::UserSkills;
     my $deleteUserError =
-      TWiki::Plugins::SkillsPlugin::UserSkills->new()->deleteCategory($cat);
+      Foswiki::Plugins::SkillsPlugin::UserSkills->new()->deleteCategory($cat);
     return _returnFromRest( $web, $topic,
         "Error deleting category '$cat' - $deleteUserError" )
       if $deleteUserError;
@@ -741,24 +735,24 @@ sub _restAddNewSkill {
     _Debug('REST handler: addNewCategory');
 
     my ( $web, $topic ) =
-      TWiki::Func::normalizeWebTopicName( undef,
-        TWiki::Func::getCgiQuery()->param('topic') );
+      Foswiki::Func::normalizeWebTopicName( undef,
+        Foswiki::Func::getCgiQuery()->param('topic') );
 
-    my $newSkill = TWiki::Func::getCgiQuery()->param('newskill');
-    my $cat      = TWiki::Func::getCgiQuery()->param('incategory');
+    my $newSkill = Foswiki::Func::getCgiQuery()->param('newskill');
+    my $cat      = Foswiki::Func::getCgiQuery()->param('incategory');
 
-    unless ( TWiki::Func::isAnAdmin() ) {
-        if ( my $pref = TWiki::Func::getPreferencesValue('ALLOWADDSKILLS') ) {
+    unless ( Foswiki::Func::isAnAdmin() ) {
+        if ( my $pref = Foswiki::Func::getPreferencesValue('ALLOWADDSKILLS') ) {
             my @allowedUsers = split( /,/, $pref );
-            my $user = TWiki::Func::getWikiName();
+            my $user = Foswiki::Func::getWikiName();
             return _returnFromRest( $web, $topic,
 "Error adding skill '$newSkill' to category '$cat' - You are not permitted to add skills ($user)."
             ) unless grep( /$user/, @allowedUsers );
         }
     }
 
-    require TWiki::Plugins::SkillsPlugin::SkillsStore;
-    my $error = TWiki::Plugins::SkillsPlugin::SkillsStore->new()
+    require Foswiki::Plugins::SkillsPlugin::SkillsStore;
+    my $error = Foswiki::Plugins::SkillsPlugin::SkillsStore->new()
       ->addNewSkill( $newSkill, $cat );
     return _returnFromRest( $web, $topic,
         "Error adding skill '$newSkill' to category '$cat' - $error" )
@@ -776,28 +770,28 @@ sub _restRenameSkill {
     _Debug('REST handler: renameSkill');
 
     my ( $web, $topic ) =
-      TWiki::Func::normalizeWebTopicName( undef,
-        TWiki::Func::getCgiQuery()->param('topic') );
+      Foswiki::Func::normalizeWebTopicName( undef,
+        Foswiki::Func::getCgiQuery()->param('topic') );
 
     return _returnFromRest('Error - user is not an admin')
-      unless TWiki::Func::isAnAdmin();    # check admin
+      unless Foswiki::Func::isAnAdmin();    # check admin
 
     my ( $category, $oldSkill ) =
-      split( /\|/, TWiki::Func::getCgiQuery()->param('oldskill') )
+      split( /\|/, Foswiki::Func::getCgiQuery()->param('oldskill') )
       ;                                   # oldskill looks like Category|Skill
-    my $newSkill = TWiki::Func::getCgiQuery()->param('newskill');
+    my $newSkill = Foswiki::Func::getCgiQuery()->param('newskill');
 
     # rename in skills.txt
-    require TWiki::Plugins::SkillsPlugin::SkillsStore;
-    my $renameStoreError = TWiki::Plugins::SkillsPlugin::SkillsStore->new()
+    require Foswiki::Plugins::SkillsPlugin::SkillsStore;
+    my $renameStoreError = Foswiki::Plugins::SkillsPlugin::SkillsStore->new()
       ->renameSkill( $category, $oldSkill, $newSkill );
     return _returnFromRest( $web, $topic,
 "Error renaming skill '$oldSkill' to '$newSkill' in category '$category' - $renameStoreError"
     ) if $renameStoreError;
 
     # rename in users
-    require TWiki::Plugins::SkillsPlugin::UserSkills;
-    my $renameUserError = TWiki::Plugins::SkillsPlugin::UserSkills->new()
+    require Foswiki::Plugins::SkillsPlugin::UserSkills;
+    my $renameUserError = Foswiki::Plugins::SkillsPlugin::UserSkills->new()
       ->renameSkill( $category, $oldSkill, $newSkill );
     return _returnFromRest( $web, $topic,
 "Error renaming skill '$oldSkill' to '$newSkill' in category '$category' - $renameUserError"
@@ -816,30 +810,30 @@ sub _restMoveSkill {
     _Debug('REST handler: moveSkill');
 
     my ( $web, $topic ) =
-      TWiki::Func::normalizeWebTopicName( undef,
-        TWiki::Func::getCgiQuery()->param('topic') );
+      Foswiki::Func::normalizeWebTopicName( undef,
+        Foswiki::Func::getCgiQuery()->param('topic') );
 
     return _returnFromRest('Error - user is not an admin')
-      unless TWiki::Func::isAnAdmin();    # check admin
+      unless Foswiki::Func::isAnAdmin();    # check admin
 
     my ( $oldCat, $skill ) =
-      split( /\|/, TWiki::Func::getCgiQuery()->param('movefrom') )
+      split( /\|/, Foswiki::Func::getCgiQuery()->param('movefrom') )
       ;                                   # movefrom looks like Category|Skill
-    my $newCat = TWiki::Func::getCgiQuery()->param('moveto');
+    my $newCat = Foswiki::Func::getCgiQuery()->param('moveto');
 
     _Debug("$skill, $oldCat, $newCat");
 
     # rename in skills.txt
-    require TWiki::Plugins::SkillsPlugin::SkillsStore;
-    my $moveStoreError = TWiki::Plugins::SkillsPlugin::SkillsStore->new()
+    require Foswiki::Plugins::SkillsPlugin::SkillsStore;
+    my $moveStoreError = Foswiki::Plugins::SkillsPlugin::SkillsStore->new()
       ->moveSkill( $skill, $oldCat, $newCat );
     return _returnFromRest( $web, $topic,
 "Error moving skill '$skill' from '$oldCat' to '$newCat' - $moveStoreError"
     ) if $moveStoreError;
 
     # rename in users
-    require TWiki::Plugins::SkillsPlugin::UserSkills;
-    my $moveUserError = TWiki::Plugins::SkillsPlugin::UserSkills->new()
+    require Foswiki::Plugins::SkillsPlugin::UserSkills;
+    my $moveUserError = Foswiki::Plugins::SkillsPlugin::UserSkills->new()
       ->moveSkill( $skill, $oldCat, $newCat );
     return _returnFromRest( $web, $topic,
 "Error moving skill '$skill' from '$oldCat' to '$newCat' - $moveUserError"
@@ -858,27 +852,27 @@ sub _restDeleteSkill {
     _Debug('REST handler: deleteSkill');
 
     my ( $web, $topic ) =
-      TWiki::Func::normalizeWebTopicName( undef,
-        TWiki::Func::getCgiQuery()->param('topic') );
+      Foswiki::Func::normalizeWebTopicName( undef,
+        Foswiki::Func::getCgiQuery()->param('topic') );
 
     return _returnFromRest('Error - user is not an admin')
-      unless TWiki::Func::isAnAdmin();    # check admin
+      unless Foswiki::Func::isAnAdmin();    # check admin
 
     my ( $cat, $oldSkill ) =
-      split( /\|/, TWiki::Func::getCgiQuery()->param('oldskill') )
+      split( /\|/, Foswiki::Func::getCgiQuery()->param('oldskill') )
       ;                                   # oldskill looks like Category|Skill
 
     # delete in skills.txt
-    require TWiki::Plugins::SkillsPlugin::SkillsStore;
-    my $deleteStoreError = TWiki::Plugins::SkillsPlugin::SkillsStore->new()
+    require Foswiki::Plugins::SkillsPlugin::SkillsStore;
+    my $deleteStoreError = Foswiki::Plugins::SkillsPlugin::SkillsStore->new()
       ->deleteSkill( $cat, $oldSkill );
     return _returnFromRest( $web, $topic,
         "Error deleting skill '$oldSkill' - $deleteStoreError" )
       if $deleteStoreError;
 
     # rename in users
-    require TWiki::Plugins::SkillsPlugin::UserSkills;
-    my $deleteUserError = TWiki::Plugins::SkillsPlugin::UserSkills->new()
+    require Foswiki::Plugins::SkillsPlugin::UserSkills;
+    my $deleteUserError = Foswiki::Plugins::SkillsPlugin::UserSkills->new()
       ->deleteSkill( $cat, $oldSkill );
     return _returnFromRest( $web, $topic,
         "Error deleting skill '$oldSkill' - $deleteUserError" )
@@ -906,7 +900,7 @@ sub _restGetSkills {
 
     _Debug('REST handler: getSkills');
 
-    my $cat = TWiki::Func::getCgiQuery()->param('category');
+    my $cat = Foswiki::Func::getCgiQuery()->param('category');
     return _tagShowSkills(
         { category => $cat, format => '$skill', separator => '|' } );
 }
@@ -918,13 +912,13 @@ sub _restGetSkillDetails {
 
     _Debug('REST handler: getSkillDetails');
 
-    my $cat   = TWiki::Func::getCgiQuery()->param('category');
-    my $skill = TWiki::Func::getCgiQuery()->param('skill');
+    my $cat   = Foswiki::Func::getCgiQuery()->param('category');
+    my $skill = Foswiki::Func::getCgiQuery()->param('skill');
 
-    my $user = TWiki::Func::getWikiName();
+    my $user = Foswiki::Func::getWikiName();
 
-    require TWiki::Plugins::SkillsPlugin::UserSkills;
-    my $obj_userSkill = TWiki::Plugins::SkillsPlugin::UserSkills->new()
+    require Foswiki::Plugins::SkillsPlugin::UserSkills;
+    my $obj_userSkill = Foswiki::Plugins::SkillsPlugin::UserSkills->new()
       ->getSkillForUser( $user, $skill, $cat );
 
     unless ($obj_userSkill) {
@@ -950,15 +944,15 @@ sub _restAddEditSkill {
 
     _Debug('REST handler: getSkillDetails');
 
-    my $cat     = TWiki::Func::getCgiQuery()->param('category');
-    my $skill   = TWiki::Func::getCgiQuery()->param('skill');
-    my $rating  = TWiki::Func::getCgiQuery()->param('addedit-skill-rating');
-    my $comment = TWiki::Func::getCgiQuery()->param('comment');
+    my $cat     = Foswiki::Func::getCgiQuery()->param('category');
+    my $skill   = Foswiki::Func::getCgiQuery()->param('skill');
+    my $rating  = Foswiki::Func::getCgiQuery()->param('addedit-skill-rating');
+    my $comment = Foswiki::Func::getCgiQuery()->param('comment');
 
-    my $user = TWiki::Func::getWikiName();
+    my $user = Foswiki::Func::getWikiName();
 
-    require TWiki::Plugins::SkillsPlugin::UserSkills;
-    my $error = TWiki::Plugins::SkillsPlugin::UserSkills->new()
+    require Foswiki::Plugins::SkillsPlugin::UserSkills;
+    my $error = Foswiki::Plugins::SkillsPlugin::UserSkills->new()
       ->addEditUserSkill( $user, $cat, $skill, $rating, $comment );
 
     my $message;
@@ -973,26 +967,26 @@ sub _restAddEditSkill {
 }
 
 sub _restSearch {
-    my $cat        = TWiki::Func::getCgiQuery()->param('category');
-    my $skill      = TWiki::Func::getCgiQuery()->param('skill');
-    my $ratingFrom = TWiki::Func::getCgiQuery()->param('ratingFrom');
-    my $ratingTo   = TWiki::Func::getCgiQuery()->param('ratingTo');
+    my $cat        = Foswiki::Func::getCgiQuery()->param('category');
+    my $skill      = Foswiki::Func::getCgiQuery()->param('skill');
+    my $ratingFrom = Foswiki::Func::getCgiQuery()->param('ratingFrom');
+    my $ratingTo   = Foswiki::Func::getCgiQuery()->param('ratingTo');
 
     return 'Error: Category and Skill must be defined'
       unless ( $skill and $cat );
 
-    my $out = TWiki::Func::readTemplate('skillssearchresults');
+    my $out = Foswiki::Func::readTemplate('skillssearchresults');
 
-    my $tmplRepeat = TWiki::Func::readTemplate('skillssearchresultsrepeated');
+    my $tmplRepeat = Foswiki::Func::readTemplate('skillssearchresultsrepeated');
 
     my ( undef, $tmplUserStart, $tmplUser, $tmplRating, $tmplComment,
         $tmplUserEnd )
       = split( /%SPLIT%/, $tmplRepeat );
 
-    require TWiki::Plugins::SkillsPlugin::SkillsStore;
-    require TWiki::Plugins::SkillsPlugin::UserSkills;
-    my $skills     = TWiki::Plugins::SkillsPlugin::SkillsStore->new();
-    my $userSkills = TWiki::Plugins::SkillsPlugin::UserSkills->new();
+    require Foswiki::Plugins::SkillsPlugin::SkillsStore;
+    require Foswiki::Plugins::SkillsPlugin::UserSkills;
+    my $skills     = Foswiki::Plugins::SkillsPlugin::SkillsStore->new();
+    my $userSkills = Foswiki::Plugins::SkillsPlugin::UserSkills->new();
 
     # get image paths
     my $ratingPic      = _getImages()->{star};
@@ -1003,7 +997,7 @@ sub _restSearch {
     my $repeatedLine;
 
     # hash of UserSkill objects keyed by user name
-    my $users = TWiki::Plugins::SkillsPlugin::UserSkills->new()
+    my $users = Foswiki::Plugins::SkillsPlugin::UserSkills->new()
       ->getUsersForSkill( $skill, $cat );
 
     for my $user ( sort keys %{$users} ) {
@@ -1045,13 +1039,13 @@ sub _restSearch {
 
         # subsitutions
         my $userLink =
-          TWiki::Func::internalLink( undef, TWiki::Func::getMainWebname(),
+          Foswiki::Func::internalLink( undef, Foswiki::Func::getMainWebname(),
             $user, $user, undef, '0' );
         $lineOut =~ s/%SKILLUSER%/$userLink/g;
 
         # comment link
         if ( $obj_userSkill->comment ) {
-            my $url = TWiki::Func::getScriptUrl(
+            my $url = Foswiki::Func::getScriptUrl(
                 'Main', 'WebHome', 'oops',
                 template => 'oopsgeneric',
                 param1   => 'Skills Plugin Comment',
@@ -1086,9 +1080,9 @@ sub _restSearch {
     my $matches = keys( %{$users} );
     $out =~ s/%SEARCHMATCES%/$matches/g;
 
-    $out = TWiki::Func::expandCommonVariables($out);
+    $out = Foswiki::Func::expandCommonVariables($out);
 
-    #$out = TWiki::Func::renderText( $out );
+    #$out = Foswiki::Func::renderText( $out );
 
     return $out;
 }
@@ -1098,10 +1092,11 @@ sub _restSearch {
 sub _showCategories {
     my ( $format, $separator ) = @_;
 
-    my $hasSeparator = $separator ne '';
-    my $hasFormat    = $format    ne '';
+    my $hasSeparator = $separator ne '' if $separator;
+    my $hasFormat    = $format    ne '' if $format;
 
     $separator = ', ' unless ( $hasSeparator || $hasFormat );
+    $separator ||= '';
     $separator =~ s/\$n/\n/go;
 
     $format = '$category' unless $hasFormat;
@@ -1111,13 +1106,15 @@ sub _showCategories {
     my $text = '';
     my $line = '';
 
-    require TWiki::Plugins::SkillsPlugin::SkillsStore;
+    require Foswiki::Plugins::SkillsPlugin::SkillsStore;
     my $cats =
-      TWiki::Plugins::SkillsPlugin::SkillsStore->new()->getCategoryNames();
+      Foswiki::Plugins::SkillsPlugin::SkillsStore->new()->getCategoryNames();
+      
+      
     $text = join(
         $separator,
         map {
-            $line = $format;
+            $line = $format if $format;
             $line =~ s/\$category/$_/go;
             $line;
           } @{$cats}
@@ -1132,10 +1129,11 @@ sub _showSkills {
 
     my ( $cat, $format, $separator, $prefix, $suffix, $catSeparator ) = @_;
 
-    my $hasSeparator = $separator ne '';
-    my $hasFormat    = $format    ne '';
+    my $hasSeparator = $separator ne '' if $separator;
+    my $hasFormat    = $format    ne '' if $format;
 
     $separator = ', ' unless ( $hasSeparator || $hasFormat );
+    $separator ||= '';
     $separator =~ s/\$n/\n/go;
 
     $format = '$skill' unless $hasFormat;
@@ -1153,8 +1151,8 @@ sub _showSkills {
     # else, show them all
 
     # iterator of all categories
-    require TWiki::Plugins::SkillsPlugin::SkillsStore;
-    my $categories = TWiki::Plugins::SkillsPlugin::SkillsStore->new()->eachCat;
+    require Foswiki::Plugins::SkillsPlugin::SkillsStore;
+    my $categories = Foswiki::Plugins::SkillsPlugin::SkillsStore->new()->eachCat;
 
     if ($cat) {    # category specified
 
@@ -1183,7 +1181,7 @@ sub _showSkills {
 
     # all skills and categories
     else {
-        $catSeparator = "\n" unless ( $catSeparator ne '' );
+        $catSeparator = "\n" unless ( defined $catSeparator && $catSeparator ne '' );
 
         while ( $categories->hasNext() ) {
             my $obj_cat    = $categories->next();
@@ -1202,7 +1200,7 @@ sub _showSkills {
                   } @{ $obj_cat->getSkillNames }
             );
 
-            my $suffixLine = $suffix;
+            my $suffixLine = $suffix || '';
             $suffixLine =~ s/\$category/$obj_cat->name/goe;
             $suffixLine =~ s/\$n/\n/go;
             $text .= $suffixLine;
@@ -1229,7 +1227,7 @@ sub _addHeads {
           ;    # create namespace in JS
         $jsVars .= $vars;
     }
-    if ( TWiki::Func::isGuest() ) {
+    if ( Foswiki::Func::isGuest() ) {
         $jsVars .= 'SkillsPlugin.vars.loggedIn = 0;';
     }
     else {
@@ -1240,20 +1238,21 @@ sub _addHeads {
 # adds the YUI Javascript files from header
 # these are from the YahooUserInterfaceContrib, if installed
 # or directly from the internet (See http://developer.yahoo.com/yui/articles/hosting/)
+# TODO: Could be configurable?
     my $yui;
-    eval 'use TWiki::Contrib::YahooUserInterfaceContrib';
+    eval 'use Foswiki::Contrib::YahooUserInterfaceContrib';
     if ( !$@ ) {
         _Debug('YahooUserInterfaceContrib is installed, using local files');
         $yui =
-'<script type="text/javascript" src="%PUBURL%/%TWIKIWEB%/YahooUserInterfaceContrib/build/yahoo-dom-event/yahoo-dom-event.js"></script>'
-          . '<script type="text/javascript" src="%PUBURL%/%TWIKIWEB%/YahooUserInterfaceContrib/build/connection/connection-min.js"></script>'
-          . '<script type="text/javascript" src="%PUBURL%/%TWIKIWEB%/YahooUserInterfaceContrib/build/element/element-beta-min.js"></script>'
-          . '<script type="text/javascript" src="%PUBURL%/%TWIKIWEB%/YahooUserInterfaceContrib/build/json/json-min.js"></script>'
-          . '<script type="text/javascript" src="%PUBURL%/%TWIKIWEB%/YahooUserInterfaceContrib/build/animation/animation-min.js"></script>'
-          . '<script type="text/javascript" src="%PUBURL%/%TWIKIWEB%/YahooUserInterfaceContrib/build/container/container-min.js"></script>'
+'<script type="text/javascript" src="%PUBURL%/%SYSTEMWEB%/YahooUserInterfaceContrib/build/yahoo-dom-event/yahoo-dom-event.js"></script>'
+          . '<script type="text/javascript" src="%PUBURL%/%SYSTEMWEB%/YahooUserInterfaceContrib/build/connection/connection-min.js"></script>'
+          . '<script type="text/javascript" src="%PUBURL%/%SYSTEMWEB%/YahooUserInterfaceContrib/build/element/element-beta-min.js"></script>'
+          . '<script type="text/javascript" src="%PUBURL%/%SYSTEMWEB%/YahooUserInterfaceContrib/build/json/json-min.js"></script>'
+          . '<script type="text/javascript" src="%PUBURL%/%SYSTEMWEB%/YahooUserInterfaceContrib/build/animation/animation-min.js"></script>'
+          . '<script type="text/javascript" src="%PUBURL%/%SYSTEMWEB%/YahooUserInterfaceContrib/build/container/container-min.js"></script>'
 
           # style
-          . '<link rel="stylesheet" type="text/css" href="%PUBURL%/%TWIKIWEB%/YahooUserInterfaceContrib/build/container/assets/skins/sam/container.css" />';
+          . '<link rel="stylesheet" type="text/css" href="%PUBURL%/%SYSTEMWEB%/YahooUserInterfaceContrib/build/container/assets/skins/sam/container.css" />';
     }
     else {
         _Debug(
@@ -1271,12 +1270,16 @@ sub _addHeads {
     }
 
     # css
+    my $urlPath = Foswiki::Func::getPubUrlPath() . '/' . $Foswiki::cfg{SystemWebName} . '/' . $pluginName;
     my $css =
-'<style type="text/css" media="all">@import url("/twiki/pub/TWiki/SkillsPlugin/style.css");</style>';
+'<style type="text/css" media="all">@import url("' . $urlPath . '/style.css");</style>';
+
+    my $js = '<script src="' . $urlPath . '/main.js" language="javascript" type="text/javascript"></script>';
 
     # add to head
-    TWiki::Func::addToHEAD( 'SKILLSPLUGIN_JS',
-"$css $yui <script language='javascript' type='text/javascript'>$jsVars</script><script src='/twiki/pub/TWiki/SkillsPlugin/main.js' language='javascript' type='text/javascript'></script>"
+    # FIXME: use the 'requires' parameter? for YUI?
+    Foswiki::Func::addToHEAD( 'SKILLSPLUGIN_JS',
+"$css $yui <script language='javascript' type='text/javascript'>$jsVars</script> $js"
     );
 }
 
@@ -1304,8 +1307,8 @@ sub _createJSON {
 # returns a hash of image html elements
 sub _getImages {
 
-    my $docpath = TWiki::Func::getPubUrlPath() . '/' .    # /pub/
-      TWiki::Func::getTwikiWebname() . '/' .              # TWiki/
+    my $docpath = Foswiki::Func::getPubUrlPath() . '/' .    # /pub/
+      $Foswiki::cfg{SystemWebName} . '/' .              # System/
       'DocumentGraphics';                                 # doc topic
 
     my %images = (
@@ -1330,8 +1333,8 @@ sub _getImages {
 # returns a hash of image paths
 sub _getImagesSrc {
 
-    my $docpath = TWiki::Func::getPubUrlPath() . '/' .    # /pub/
-      TWiki::Func::getTwikiWebname() . '/' .              # TWiki/
+    my $docpath = Foswiki::Func::getPubUrlPath() . '/' .    # /pub/
+      $Foswiki::cfg{SystemWebName} . '/' .              # System/
       'DocumentGraphics';                                 # doc topic
 
     my %images = (
@@ -1348,22 +1351,22 @@ sub _returnFromRest {
     $message = _urlEncode($message);
 
     my $url =
-        TWiki::Func::getScriptUrl( $web, $topic, 'view' )
+        Foswiki::Func::getScriptUrl( $web, $topic, 'view' )
       . '?skillsmessage='
       . $message;
-    TWiki::Func::redirectCgiQuery( undef, $url );
+    Foswiki::Func::redirectCgiQuery( undef, $url );
 }
 
 # =========================
 sub _Debug {
     my $text = shift;
-    my $debug = $TWiki::cfg{Plugins}{$pluginName}{Debug} || 0;
-    TWiki::Func::writeDebug("- TWiki::Plugins::${pluginName}: $text") if $debug;
+    my $debug = $Foswiki::cfg{Plugins}{$pluginName}{Debug} || 0;
+    Foswiki::Func::writeDebug("- Foswiki::Plugins::${pluginName}: $text") if $debug;
 }
 
 sub _Warn {
     my $text = shift;
-    TWiki::Func::writeWarning("- TWiki::Plugins::${pluginName}: $text");
+    Foswiki::Func::writeWarning("- Foswiki::Plugins::${pluginName}: $text");
 }
 
 # logs actions
@@ -1372,10 +1375,10 @@ sub _Log {
     return;
     my ($message) = @_;
 
-    my $logAction = $TWiki::cfg{Plugins}{$pluginName}{Log} || 1;
+    my $logAction = $Foswiki::cfg{Plugins}{$pluginName}{Log} || 1;
     return unless $logAction;
 
-    my $user = TWiki::Func::getWikiName();
+    my $user = Foswiki::Func::getWikiName();
 
     my $out = "| date,time | $user | $message |";
 
