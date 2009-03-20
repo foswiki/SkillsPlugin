@@ -33,15 +33,15 @@
 Delete an existing category. %BR%
 %ICON{"warning"}% This will also delete all the skills in this category. It can not be undone.
 
-<div class="twikiFormSteps">
-<div class="twikiFormStep">
+<div class="foswikiFormSteps">
+<div class="foswikiFormStep">
 Category to delete: %BR%
 <select name="oldcategory">
 <option>%URLPARAM{deletecategory}%</option>
 %SKILLS{action="showcategories" format="<option value='$category'>$category</option>" }%
 </select>
 </div>
-<div class="twikiFormStep twikiLast">
+<div class="foswikiFormStep foswikiLast">
 <input type="hidden" name="topic" value="%WEB%.%TOPIC%" />
 <input name="deletecategory" type="submit" class="twikiSubmit" value="%MAKETEXT{"Delete"}%" /> _Note: May take a while, as it searches though all users. Do not cancel._
 </div>
@@ -52,7 +52,7 @@ Category to delete: %BR%
 %STOPINCLUDE%
 
 %BR%
-<span class="twikiGrayText">Other skill options: [[SkillsBrowseAll][Browse All Skills]], [[SkillsEditMySkills][Edit My Skills]], [[SkillsSearch][Search Skills]]</span>
+<span class="foswikiGrayText">Other skill options: [[SkillsBrowseAll][Browse All Skills]], [[SkillsEditMySkills][Edit My Skills]], [[SkillsSearch][Search Skills]]</span>
 
 %STARTSECTION{"dialogJavascript"}%
 <script language="javascript" type="text/javascript">

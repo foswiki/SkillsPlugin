@@ -32,21 +32,21 @@
 
 Rename an existing category.
 
-<div class="twikiFormSteps">
-<div class="twikiFormStep">
+<div class="foswikiFormSteps">
+<div class="foswikiFormStep">
 Category to rename: %BR%
 <select name="oldcategory">
 <option>%URLPARAM{renamecategoryfrom}%</option>
 %SKILLS{action="showcategories" format="<option value='$category'>$category</option>" }%
 </select>
 </div>
-<div class="twikiFormStep">
+<div class="foswikiFormStep">
 New name for this category: %BR%
-<input type="text" value="%URLPARAM{"renamecategoryto"}%" name="newcategory" class="twikiInputField" size="20" />
+<input type="text" value="%URLPARAM{"renamecategoryto"}%" name="newcategory" class="foswikiInputField" size="20" />
 </div>
-<div class="twikiFormStep twikiLast">
+<div class="foswikiFormStep foswikiLast">
 <input type="hidden" name="topic" value="%WEB%.%TOPIC%" />
-<input name="renamecategory" type="submit" class="twikiSubmit" value="%MAKETEXT{"Rename"}%" /> _Note: May take a while, as it searches though all users. Do not cancel._
+<input name="renamecategory" type="submit" class="foswikiSubmit" value="%MAKETEXT{"Rename"}%" /> _Note: May take a while, as it searches though all users. Do not cancel._
 </div>
 </div>
 </form>
@@ -55,4 +55,4 @@ New name for this category: %BR%
 %STOPINCLUDE%
 
 %BR%
-<span class="twikiGrayText">Other skill options: [[SkillsBrowseAll][Browse All Skills]], [[SkillsEditMySkills][Edit My Skills]], [[SkillsSearch][Search Skills]]</span>
+<span class="foswikiGrayText">Other skill options: [[SkillsBrowseAll][Browse All Skills]], [[SkillsEditMySkills][Edit My Skills]], [[SkillsSearch][Search Skills]]</span>

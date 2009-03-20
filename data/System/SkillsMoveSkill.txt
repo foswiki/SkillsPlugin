@@ -32,22 +32,22 @@
 
 Move an existing skill to a different category.
 
-<div class="twikiFormSteps">
-<div class="twikiFormStep">
+<div class="foswikiFormSteps">
+<div class="foswikiFormStep">
 Skill to move: %BR%
 <select name="movefrom">
 %SKILLS{action="showskills" format="<option value='$category|$skill'>$skill</option>" prefix="<optgroup label='$category'>" suffix="</optgroup>"}%
 </select>
 </div>
-<div class="twikiFormStep">
+<div class="foswikiFormStep">
 New category: %BR%
 <select name="moveto">
 %SKILLS{action="showcategories" format="<option value='$category'>$category</option>" }%
 </select>
 </div>
-<div class="twikiFormStep twikiLast">
+<div class="foswikiFormStep foswikiLast">
 <input type="hidden" name="topic" value="%WEB%.%TOPIC%" />
-<input name="moveskill" type="submit" class="twikiSubmit" value="%MAKETEXT{"Move"}%" /> _Note: May take a while, as it searches though all users. Do not cancel._
+<input name="moveskill" type="submit" class="foswikiSubmit" value="%MAKETEXT{"Move"}%" /> _Note: May take a while, as it searches though all users. Do not cancel._
 </div>
 </div>
 </form>
@@ -56,4 +56,4 @@ New category: %BR%
 %STOPINCLUDE%
 
 %BR%
-<span class="twikiGrayText">Other skill options: [[SkillsBrowseAll][Browse All Skills]], [[SkillsEditMySkills][Edit My Skills]], [[SkillsSearch][Search Skills]]</span>
+<span class="foswikiGrayText">Other skill options: [[SkillsBrowseAll][Browse All Skills]], [[SkillsEditMySkills][Edit My Skills]], [[SkillsSearch][Search Skills]]</span>

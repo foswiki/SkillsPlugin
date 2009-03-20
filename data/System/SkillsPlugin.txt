@@ -4,8 +4,6 @@ This plugin allows users to specify what skills they have and their level of pro
 
 %TOC%
 
-%ICON{warning}% *NOTE:* This extension requires Foswiki 1.1. However. it will work without any problems on 1.0 if you follow the instructions <a href="#Foswiki_1_0">below</a>.
-
 ---++ Example
 
 Below is a screenshot of the users skill being displayed on their homepage (on TWiki). Click for the full image.
@@ -71,7 +69,7 @@ Plugin settings are stored as preferences variables in %LOCALSITEPREFS%.
       * Set ALLOWADDSKILLS = Main.UnknownUser
 
    * By default, the styles using in the plugins forms are found in the =style.css=, attached to this topic. To define your own style sheet, add the following to %LOCALSITEPREFS%:
-      * Set STYLEURL = %PUBURL%/%TWIKIWEB%/SkillsPlugin/style.css
+      * Set STYLEURL = %PUBURL%/%SYSTEMWEB%/SkillsPlugin/style.css
 
    * Debug plugin
       * To see the output in =data/debug.txt=, add the following to =LocalSite.cfg=:
@@ -80,47 +78,35 @@ Plugin settings are stored as preferences variables in %LOCALSITEPREFS%.
    * Short description of plugin
       * Set SHORTDESCRIPTION = Allows users to list their skills, which can then be searched
 
----++ Plugin Installation Instructions
+---++ Installation Instructions
 
-   * Download the ZIP file from the Extensions web (see below)
-   * Unzip ==%TOPIC%.zip== in your twiki installation directory. Content:
-   | *File:* | *Description:* |
-%$MANIFEST%
+%$INSTALL_INSTRUCTIONS%
 
-   * Configure the Plugin:
-      * Run the [[%SCRIPTURL%/configure%SCRIPTSUFFIX%][configure]] script to enable the Plugin
-      * Change the Plugin settings as needed
-   * Test if the installation was successful:
-      * [[SkillsEditMySkills][You should see a form allowing you to add/edit your skills]]
+Next:
    * If needed, customise the styles by creating a new style sheet and adding the setting above to %LOCALSITEPREFS%
    * Start adding some categories and skills
       * SkillsCreateNewCategory
       * SkillsCreateNewSkill
+      
+---++ Plugin Files
 
----+++ Foswiki 1.0
-
-This plugin can be installed on Foswiki 1.0 by downloading the following files and placing them in your =lib/TWiki/= directory:
-
-   * http://svn.foswiki.org/trunk/TWikiCompatibilityPlugin/lib/TWiki/LineIterator.pm
-   * http://svn.foswiki.org/trunk/TWikiCompatibilityPlugin/lib/TWiki/ListIterator.pm
-
-This is not needed in Foswiki 1.1 or later.
+   | *File:* | *Description:* |
+%$MANIFEST%
 
 ---++ Plugin Info
 
 |  Plugin Author: | Foswiki:Main.AndrewJones |
 |  Copyright: | &copy; 2007 - 2009, Foswiki:Main.AndrewJones |
 |  License: | GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]]) |
+|  Plugin Release: | %$RELEASE% |
 |  Plugin Version: | %$VERSION% |
 |  Change History: | <!-- versions below in reverse order -->&nbsp; |
+|  20 Mar 2009 | Foswiki:Tasks.Item1260 - Ported to Foswiki as version 1.0; Small code improvements; Update docs & screenshots |
 |  05 Feb 2009 | Complete rewrite; more scaleable; better performace; can use special characters in skill names; can use templates to change output; tested on Foswiki |
 |  14032 | Initial release |
 |  Dependencies: | %$DEPENDENCIES% |
-|  Perl Version: | Tested on 5.8.4 |
 |  Plugin Home: | http://Foswiki.org/Extensions/%TOPIC% |
 |  Support: | http://Foswiki.org/Support/%TOPIC% |
-|  Bugs: | http://Foswiki.org/Tasks/%TOPIC% |
 
 %META:FILEATTACHMENT{name="skills_screenshot_thumb.png" attr="" autoattached="1" comment="" date="1171248289" path="skills_screenshot_thumb.png" size="48997" user="Main.ProjectContributor" version="2"}%
 %META:FILEATTACHMENT{name="skills_screenshot_full.png" attr="" autoattached="1" comment="" date="1171248281" path="skills_screenshot_full.png" size="131655" user="Main.ProjectContributor" version="1"}%
-%META:FILEATTACHMENT{name="skills_screenshot_search.png" attr="" autoattached="1" comment="" date="1172430565" path="skills_screenshot_search.png" size="9636" user="Main.ProjectContributor" version="1"}%

@@ -32,20 +32,20 @@
 
 Rename an existing skill.
 
-<div class="twikiFormSteps">
-<div class="twikiFormStep">
+<div class="foswikiFormSteps">
+<div class="foswikiFormStep">
 Skill to rename: %BR%
 <select name="oldskill">
 %SKILLS{action="showskills" format="<option value='$category|$skill'>$skill</option>" prefix="<optgroup label='$category'>" suffix="</optgroup>"}%
 </select>
 </div>
-<div class="twikiFormStep">
+<div class="foswikiFormStep">
 New name for this skill: %BR%
-<input type="text" name="newskill" class="twikiInputField" size="20" />
+<input type="text" name="newskill" class="foswikiInputField" size="20" />
 </div>
-<div class="twikiFormStep twikiLast">
+<div class="foswikiFormStep foswikiLast">
 <input type="hidden" name="topic" value="%WEB%.%TOPIC%" />
-<input name="renameskill" type="submit" class="twikiSubmit" value="%MAKETEXT{"Rename"}%" /> _Note: May take a while, as it searches though all users. Do not cancel._
+<input name="renameskill" type="submit" class="foswikiSubmit" value="%MAKETEXT{"Rename"}%" /> _Note: May take a while, as it searches though all users. Do not cancel._
 </div>
 </div>
 </form>
@@ -54,4 +54,4 @@ New name for this skill: %BR%
 %STOPINCLUDE%
 
 %BR%
-<span class="twikiGrayText">Other skill options: [[SkillsBrowseAll][Browse All Skills]], [[SkillsEditMySkills][Edit My Skills]], [[SkillsSearch][Search Skills]]</span>
+<span class="foswikiGrayText">Other skill options: [[SkillsBrowseAll][Browse All Skills]], [[SkillsEditMySkills][Edit My Skills]], [[SkillsSearch][Search Skills]]</span>

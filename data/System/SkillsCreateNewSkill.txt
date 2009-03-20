@@ -30,21 +30,21 @@
 Create a new skill.
 
 <form name="createskill" action="%SCRIPTURL{rest}%/SkillsPlugin/addNewSkill" method="post">
-<div class="twikiFormSteps">
-<div class="twikiFormStep">
+<div class="foswikiFormSteps">
+<div class="foswikiFormStep">
 Name of new skill: %BR%
-<input name="newskill" type="text" class="twikiInputField" size="20" value="%URLPARAM{"createskill"}%" />
+<input name="newskill" type="text" class="foswikiInputField" size="20" value="%URLPARAM{"createskill"}%" />
 <input type="hidden" name="topic" value="%WEB%.%TOPIC%" />
 </div>
-<div class="twikiFormStep">
+<div class="foswikiFormStep">
 In category: %BR%
 <select name="incategory">
 <option>%URLPARAM{incategory}%</option>
 %SKILLS{action="showcategories" format="<option value='$category'>$category</option>" }%
 </select>
 </div>
-<div class="twikiFormStep twikiLast">
-<input name="createskill" type="submit" class="twikiSubmit" value="%MAKETEXT{"Create"}%" />
+<div class="foswikiFormStep foswikiLast">
+<input name="createskill" type="submit" class="foswikiSubmit" value="%MAKETEXT{"Create"}%" />
 </div>
 </div>
 </form>
@@ -57,4 +57,4 @@ Existing skills:
 %STOPINCLUDE%
 
 %BR%
-<span class="twikiGrayText">Other skills options: [[SkillsBrowseAll][Browse All Skills]], [[SkillsEditMySkills][Edit My Skills]], [[SkillsSearch][Search Skills]]</span>
+<span class="foswikiGrayText">Other skills options: [[SkillsBrowseAll][Browse All Skills]], [[SkillsEditMySkills][Edit My Skills]], [[SkillsSearch][Search Skills]]</span>

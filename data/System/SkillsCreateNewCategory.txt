@@ -32,12 +32,12 @@
 Create a new category.
 
 <form name="createcategory" action="%SCRIPTURL{rest}%/SkillsPlugin/addNewCategory" method="post">
-<div class="twikiFormSteps">
-<div class="twikiFormStep">
+<div class="foswikiFormSteps">
+<div class="foswikiFormStep">
 Name of new category: %BR% <input name="newcategory" type="text" class="twikiInputField" size="20" value="%URLPARAM{"createcategory"}%" />
 </div>
-<div class="twikiFormStep twikiLast">
-<input name="createcategory" type="submit" class="twikiSubmit" value="%MAKETEXT{"Create"}%" />
+<div class="foswikiFormStep foswikiLast">
+<input name="createcategory" type="submit" class="foswikiSubmit" value="%MAKETEXT{"Create"}%" />
 <input type="hidden" name="topic" value="%WEB%.%TOPIC%" />
 </div>
 </div>
@@ -50,4 +50,4 @@ Existing categories: %SKILLS{action="showcategories"}%
 %STOPINCLUDE%
 
 %BR%
-<span class="twikiGrayText">Other skills options: [[SkillsBrowseAll][Browse All Skills]], [[SkillsEditMySkills][Edit My Skills]], [[SkillsSearch][Search Skills]]</span>
+<span class="foswikiGrayText">Other skills options: [[SkillsBrowseAll][Browse All Skills]], [[SkillsEditMySkills][Edit My Skills]], [[SkillsSearch][Search Skills]]</span>
