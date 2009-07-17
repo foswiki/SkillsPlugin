@@ -23,20 +23,21 @@ package Foswiki::Plugins::SkillsPlugin;
 #require Foswiki::Plugins::SkillsPlugin::SkillsStore;
 
 use strict;
-use vars qw(    $VERSION
-  $RELEASE
-  $NO_PREFS_IN_TOPIC
-  $SHORTDESCRIPTION
+
+use JSON ();
+
+use vars qw(
   $pluginName
   $doneHeads
 );
 
 # Plugin Variables
-$VERSION           = '$Rev$';
-$RELEASE           = 'Dakar';
-$NO_PREFS_IN_TOPIC = 1;
-$SHORTDESCRIPTION =
+our $VERSION           = '$Rev$';
+our $RELEASE           = '16 Jul 2009';
+our $NO_PREFS_IN_TOPIC = 1;
+our $SHORTDESCRIPTION =
   'Allows users to list their skills, which can then be searched';
+
 $pluginName = 'SkillsPlugin';
 
 # ========================= INIT
@@ -44,23 +45,39 @@ sub initPlugin {
 
     # Register tag %SKILLS%
     Foswiki::Func::registerTagHandler( 'SKILLS', \&_handleTag );
+    # Register tag %SKILLRATINGS%
+    Foswiki::Func::registerTagHandler( 'SKILLRATINGS', \&_SKILLRATINGS );
 
     # Register REST handlers
-    Foswiki::Func::registerRESTHandler( 'addNewCategory', \&_restAddNewCategory );
-    Foswiki::Func::registerRESTHandler( 'renameCategory', \&_restRenameCategory );
-    Foswiki::Func::registerRESTHandler( 'deleteCategory', \&_restDeleteCategory );
-    Foswiki::Func::registerRESTHandler( 'addNewSkill',    \&_restAddNewSkill );
-    Foswiki::Func::registerRESTHandler( 'renameSkill',    \&_restRenameSkill );
-    Foswiki::Func::registerRESTHandler( 'moveSkill',      \&_restMoveSkill );
-    Foswiki::Func::registerRESTHandler( 'deleteSkill',    \&_restDeleteSkill );
+    Foswiki::Func::registerRESTHandler(
+        'addNewCategory', \&_restAddNewCategory );
+    Foswiki::Func::registerRESTHandler(
+        'renameCategory', \&_restRenameCategory );
+    Foswiki::Func::registerRESTHandler(
+        'deleteCategory', \&_restDeleteCategory );
+    Foswiki::Func::registerRESTHandler(
+        'addNewSkill',    \&_restAddNewSkill );
+    Foswiki::Func::registerRESTHandler(
+        'renameSkill',    \&_restRenameSkill );
+    Foswiki::Func::registerRESTHandler(
+        'moveSkill',      \&_restMoveSkill );
+    Foswiki::Func::registerRESTHandler(
+        'deleteSkill',    \&_restDeleteSkill );
+    Foswiki::Func::registerRESTHandler(
+        'search', \&_restSearch );
+    Foswiki::Func::registerRESTHandler(
+        'getCategories', \&_restGetCategories );
+    Foswiki::Func::registerRESTHandler(
+        'getSkills',     \&_restGetSkills );
+    Foswiki::Func::registerRESTHandler(
+        'getSkillDetails', \&_restGetSkillDetails );
+    Foswiki::Func::registerRESTHandler(
+        'addEditSkill', \&_restAddEditSkill );
 
-    Foswiki::Func::registerRESTHandler( 'search', \&_restSearch );
-
-    Foswiki::Func::registerRESTHandler( 'getCategories', \&_restGetCategories );
-    Foswiki::Func::registerRESTHandler( 'getSkills',     \&_restGetSkills );
-    Foswiki::Func::registerRESTHandler( 'getSkillDetails',
-        \&_restGetSkillDetails );
-    Foswiki::Func::registerRESTHandler( 'addEditSkill', \&_restAddEditSkill );
+    Foswiki::Func::registerRESTHandler(
+        'getSkillsAndDetails', \&_restGetSkillsAndDetails );
+    Foswiki::Func::registerRESTHandler(
+        'saveUserChanges', \&_restSaveUserChanges );
 
     _Debug("initPlugin is OK");
 
@@ -94,6 +111,10 @@ sub _handleTag {
             $start
           . Foswiki::Plugins::SkillsPlugin::_tagBrowseSkills( $_[1] )
           . $end, last;
+        /editall/
+          and $out =
+          $start . Foswiki::Plugins::SkillsPlugin::_tagEditAllSkills( $_[1] ) . $end,
+          last;
         /edit/
           and $out =
           $start . Foswiki::Plugins::SkillsPlugin::_tagEditSkills( $_[1] ) . $end,
@@ -126,6 +147,45 @@ sub _handleTag {
     return $out;
 }
 
+sub _respaceName {
+    my ($name, $br) = @_;
+    $name =~ s/ /$br/g;
+    return $name;
+}
+
+sub _SKILLRATINGS {
+    my ($session, $params) = @_;
+
+    my $skillNames =
+      Foswiki::Func::getPreferencesValue("SKILLSPLUGIN_RATINGS")
+          || "None,Ancient Knowledge,Working Knowledge,Expert,Guru";
+    my @skills = split(/,\s*/, $skillNames);
+
+    my $format =
+      defined $params->{format} ? $params->{format} : '$name: $value';
+    my $marker =
+      defined $params->{marker} ? $params->{marker} : 'selected';
+    my $separator =
+      defined $params->{separator} ? $params->{separator} : '$n()';
+    my $selection =
+      defined $params->{selection} ? $params->{selection} : -1;
+    $selection = $#skills if $selection eq '$';
+
+    my @values = ();
+    foreach my $value (0..$#skills) {
+        my $name = $skills[$value];
+        my $mark = ($value == $selection) ? $marker : '';
+        my $item = $format;
+        $item =~ s/\$name\((.*?)\)/_respaceName($name, $1)/ge;
+        $item =~ s/\$name/$name/g;
+        $item =~ s/\$value/$value/g;
+        $item =~ s/\$marker/$mark/g;
+        push(@values, $item);
+    }
+    my $out = join($separator, @values);
+    return Foswiki::Func::decodeFormatTokens($out);
+}
+
 # allows the user to print all categories in format of their choice
 sub _tagShowCategories {
     my $params = shift;
@@ -144,56 +204,44 @@ sub _tagShowSkills {
 
 # creates a form allowing users to edit their skills
 sub _tagEditSkills {
+    my $params = shift;
     my $user = Foswiki::Func::getWikiName();
+    my $style = $params->{style} || '';
 
-    my $out = Foswiki::Func::readTemplate('skillsedit');
+    my $out = Foswiki::Func::readTemplate('skillsedit'.$style);
 
     # expand our variables in template
-    my $formDef = 'name="addedit-skill-form" id="addedit-skill-form"';
-    $out =~ s/%FORMDEFINITION%/$formDef/g;
-
-    my $messageContainerDef =
-      'id="addedit-skills-message-container"  style="display:none;"';
-    $out =~ s/%SKILLMESSAGECONTAINERDEF%/$messageContainerDef/g;
     my $messagePic = _getImages()->{info};
-    my $message    = "$messagePic <span id='addedit-skills-message'></span>";
-    $out =~ s/%SKILLMESSAGE%/$message/g;
-
-    # get categories
-    my $catSelect =
-      '<select name="category" id="addedit-category-select"></select>';
-    $out =~ s/%CATEGORYSELECT%/$catSelect/g;
-
-    my $skillSelect =
-      '<select name="skill" id="addedit-skill-select"></select>';
-    $out =~ s/%SKILLSELECT%/$skillSelect/g;
-
-    $out =~
-s!%RATINGSELECT\{1\}%!<input type="radio" name="addedit-skill-rating" value="1" />!g;
-    $out =~
-s!%RATINGSELECT\{2\}%!<input type="radio" name="addedit-skill-rating" value="2" />!g;
-    $out =~
-s!%RATINGSELECT\{3\}%!<input type="radio" name="addedit-skill-rating" value="3" />!g;
-    $out =~
-s!%RATINGSELECT\{4\}%!<input type="radio" name="addedit-skill-rating" value="4" />!g;
-    $out =~
-s!%RATINGSELECT\{0\}%!<input type="radio" name="addedit-skill-rating" value="0" />!g;
-
-    my $comment = 'id="addedit-skill-comment" type="text" name="comment"';
-    $out =~ s/%SKILLCOMMENTDEF%/$comment/g;
+    $out =~ s/%SKILLMESSAGEPIC%/$messagePic/g;
 
     # to clear textbox
     my $clearPic = _getImages()->{clear};
-    my $clear =
-"<span id='addedit-skill-comment-clear' style='display:none;'>$clearPic</span>";
-    $out =~ s/%SKILLCOMMENTCLEAR%/$clear/g;
+    $out =~ s/%SKILLCOMMENTCLEARPIC%/$clearPic/g;
 
-    my $submit =
-'<input name="skill-submit" id="addedit-skill-submit" type="button" value="Add/Edit" class="foswikiSubmit">';
-    $out =~ s/%SKILLSUBMIT%/$submit/g;
+    my $jsVars = <<JS;
+SkillsPlugin.vars.addEditSkills = 1;
+SkillsPlugin.vars.restUrl = "%SCRIPTURL{"rest"}%";
+JS
+    _addHeads($jsVars);
 
-    my $jsVars =
-'SkillsPlugin.vars.addEditSkills = 1; SkillsPlugin.vars.restUrl = "%SCRIPTURL{"rest"}%";';
+    return $out;
+}
+
+# creates a form allowing users to edit their skills
+sub _tagEditAllSkills {
+    my $params = shift;
+    my $user = Foswiki::Func::getWikiName();
+
+    my $out = Foswiki::Func::readTemplate('skillseditall');
+
+    # expand our variables in template
+    my $messagePic = _getImages()->{info};
+    $out =~ s/%SKILLMESSAGEPIC%/$messagePic/g;
+
+    my $jsVars = <<JS;
+SkillsPlugin.vars.editAllSkills = 1;
+SkillsPlugin.vars.restUrl = "%SCRIPTURL{"rest"}%";
+JS
     _addHeads($jsVars);
 
     return $out;
@@ -206,14 +254,24 @@ sub _tagUserSkills {
     my $user   = $params->{user}   || Foswiki::Func::getWikiName();
     my $twisty = $params->{twisty} || 'closed';
 
-    my $out        = Foswiki::Func::readTemplate('skillsuserview');
-    my $tmplRepeat = Foswiki::Func::readTemplate('skillsuserviewrepeated');
+    my $out = Foswiki::Func::readTemplate('skillsuserview');
 
-    my (
-        undef,           $tmplCat,      $tmplSkillContStart,
-        $tmplSkillStart, $tmplSkill,    $tmplRating,
-        $tmplComment,    $tmplSkillEnd, $tmplSkillContEnd
-    ) = split( /%SPLIT%/, $tmplRepeat );
+    my $tmplCat = Foswiki::Func::expandTemplate(
+        "skills:userview:repeated:category");
+    my $tmplCatContStart = Foswiki::Func::expandTemplate(
+        "skills:userview:repeated:categorycontainerstart");
+    my $tmplSkillStart = Foswiki::Func::expandTemplate(
+        "skills:userview:repeated:skillstart");
+    my $tmplSkill = Foswiki::Func::expandTemplate(
+        "skills:userview:repeated:skill");
+    my $tmplRating = Foswiki::Func::expandTemplate(
+        "skills:userview:repeated:rating");
+    my $tmplComment = Foswiki::Func::expandTemplate(
+        "skills:userview:repeated:comment");
+    my $tmplSkillEnd = Foswiki::Func::expandTemplate(
+        "skills:userview:repeated:skillend");
+    my $tmplCatContEnd = Foswiki::Func::expandTemplate(
+        "skills:userview:repeated:categorycontainerend");
 
     require Foswiki::Plugins::SkillsPlugin::SkillsStore;
     require Foswiki::Plugins::SkillsPlugin::UserSkills;
@@ -260,7 +318,7 @@ sub _tagUserSkills {
                 # category
                 unless ( $catDone == 1 ) {
                     $lineOut .= $tmplCat;
-                    $lineOut .= $tmplSkillContStart;
+                    $lineOut .= $tmplCatContStart;
                 }
                 $catDone = 1;
 
@@ -270,7 +328,7 @@ sub _tagUserSkills {
                 $lineOut .= $tmplSkill;
 
                 # rating
-                my $i = 1;
+                my $i = 0;
                 while ( $i < $obj_userSkill->rating ) {
                     my $ratingOut = $tmplRating;
                     $ratingOut =~ s/%RATING%/&nbsp;/g;
@@ -348,16 +406,17 @@ sub _tagUserSkills {
         my $skillContDef = 'class="' . _urlEncode( $cat->name ) . '_twist"';
         $repeatedLine =~ s/%SKILLCONTDEF%/$skillContDef/g;
 
-        $repeatedLine .= $tmplSkillContEnd unless ( $skillOut == 0 );
+        $repeatedLine .= $tmplCatContEnd unless ( $skillOut == 0 );
     }
 
     $out =~ s/%REPEAT%/$repeatedLine/g;
     $out =~ s/%SKILLUSER%/$user/g;
 
-    $jsVars .= "SkillsPlugin.vars.twistyState = '$twisty';";
     my $twistyOpenImgSrc = _getImagesSrc()->{twistyopen};
-    $jsVars .= "SkillsPlugin.vars.twistyOpenImgSrc = \"$twistyOpenImgSrc\";";
     my $twistyCloseImgSrc = _getImagesSrc()->{twistyclose};
+
+    $jsVars .= "SkillsPlugin.vars.twistyState = '$twisty';";
+    $jsVars .= "SkillsPlugin.vars.twistyOpenImgSrc = \"$twistyOpenImgSrc\";";
     $jsVars .= "SkillsPlugin.vars.twistyCloseImgSrc = \"$twistyCloseImgSrc\";";
     $jsVars .= 'SkillsPlugin.vars.viewUserSkills = 1;';
     _addHeads($jsVars);
@@ -369,31 +428,13 @@ sub _tagSearchForm {
     my $out = Foswiki::Func::readTemplate('skillssearchform');
 
     # expand our variables in template
-    my $formDef = 'name="search-skill-form" id="search-skill-form"';
-    $out =~ s/%FORMDEFINITION%/$formDef/g;
-
-    my $messageContainerDef =
-      'id="search-skills-message-container"  style="display:none;"';
-    $out =~ s/%SKILLMESSAGECONTAINERDEF%/$messageContainerDef/g;
     my $messagePic = _getImages()->{info};
-    my $message    = "$messagePic <span id='search-skills-message'></span>";
-    $out =~ s/%SKILLMESSAGE%/$message/g;
+    $out =~ s/%SKILLMESSAGEPIC%/$messagePic/g;
 
-    # get categories
-    my $catSelect =
-      '<select name="category" id="search-category-select"></select>';
-    $out =~ s/%CATEGORYSELECT%/$catSelect/g;
-
-    my $skillSelect = '<select name="skill" id="search-skill-select"></select>';
-    $out =~ s/%SKILLSELECT%/$skillSelect/g;
-
-    my $submit =
-'<input name="skill-submit" id="search-skill-submit" type="button" value="Search" class="foswikiSubmit">';
-    $out =~ s/%SKILLSUBMIT%/$submit/g;
-
-    my $jsVars =
-'SkillsPlugin.vars.searchSkills = 1; SkillsPlugin.vars.restUrl = "%SCRIPTURL{"rest"}%";';
-    _addHeads($jsVars);
+    _addHeads(<<JS);
+SkillsPlugin.vars.searchSkills = 1;
+SkillsPlugin.vars.restUrl = "%SCRIPTURL{"rest"}%";
+JS
 
     return $out;
 }
@@ -404,15 +445,30 @@ sub _tagBrowseSkills {
 
     my $twisty = $params->{twisty} || 'closed';
 
-    my $out        = Foswiki::Func::readTemplate('skillsbrowseview');
-    my $tmplRepeat = Foswiki::Func::readTemplate('skillsbrowseviewrepeated');
+    my $out    = Foswiki::Func::readTemplate('skillsbrowseview');
 
-    my (
-        undef,           $tmplCat,     $tmplCatContStart,
-        $tmplSkillStart, $tmplSkill,   $tmplSkillEnd,
-        $tmplUserStart,  $tmplUser,    $tmplRating,
-        $tmplComment,    $tmplUserEnd, $tmplCatContEnd
-    ) = split( /%SPLIT%/, $tmplRepeat );
+    my $tmplCat = Foswiki::Func::expandTemplate(
+        "skills:browseview:repeated:category");
+    my $tmplCatContStart = Foswiki::Func::expandTemplate(
+        "skills:browseview:repeated:categorycontainerstart");
+    my $tmplSkillStart = Foswiki::Func::expandTemplate(
+        "skills:browseview:repeated:skillstart");
+    my $tmplSkill = Foswiki::Func::expandTemplate(
+        "skills:browseview:repeated:skill");
+    my $tmplUserStart = Foswiki::Func::expandTemplate(
+        "skills:browseview:repeated:userstart");
+    my $tmplUser = Foswiki::Func::expandTemplate(
+        "skills:browseview:repeated:user");
+    my $tmplUserEnd = Foswiki::Func::expandTemplate(
+        "skills:browseview:repeated:userend");
+    my $tmplRating = Foswiki::Func::expandTemplate(
+        "skills:browseview:repeated:rating");
+    my $tmplComment = Foswiki::Func::expandTemplate(
+        "skills:browseview:repeated:comment");
+    my $tmplSkillEnd = Foswiki::Func::expandTemplate(
+        "skills:browseview:repeated:skillend");
+    my $tmplCatContEnd = Foswiki::Func::expandTemplate(
+        "skills:browseview:repeated:categorycontainerend");
 
     # loop over all skills from skills.txt
     # if a user has this skill, output them
@@ -429,7 +485,7 @@ sub _tagBrowseSkills {
     my $commentPic     = _getImages()->{comment};
     my $twistyCloseImg = _getImages()->{twistyclose};
 
-    my $repeatedLine;
+    my $repeatedLine = '';
 
     # loop over all users that have skills
     # if they do, store in hash/array ## CANT cos C++, etc
@@ -476,8 +532,8 @@ sub _tagBrowseSkills {
         $repeatedLine .= $tmplCat;
 
         $repeatedLine .= $tmplCatContStart;
-        my $contId = 'class="' . _urlEncode($catName) . '_twist"';
-        $repeatedLine =~ s/%CATEGORYCONTDEF%/$contId/g;
+        my $contId = _urlEncode($catName) . '_twist';
+        $repeatedLine =~ s/%CATEGORYCONTCLASS%/$contId/g;
 
         # iterator over skills
         my $itSkills = $cat->eachSkill;
@@ -515,11 +571,11 @@ sub _tagBrowseSkills {
                       . '_twist"';
                     $repeatedLine =~ s/%SKILLTWISTDEF%/$skillTwist/g;
                     $repeatedLine =~ s/%USERROWDEF%/class="userRow"/g;
-                    $repeatedLine =~ s/%SKILLUSER%/[[$Foswiki::cfg{UsersWebName}.$user][$user]]/g;
+                    $repeatedLine =~ s/%SKILLUSER%/$user/g;
                     $repeatedLine =~ s/%USERICON%/$open/g;
 
                     # rating
-                    my $i = 1;
+                    my $i = 0;
                     while ( $i < $obj_userSkill->rating ) {
                         my $ratingOut = $tmplRating;
                         $ratingOut =~ s/%RATING%/&nbsp;/g;
@@ -604,10 +660,10 @@ sub _tagBrowseSkills {
 
     $out =~ s/%REPEAT%/$repeatedLine/g;
 
-    my $jsVars           = "SkillsPlugin.vars.twistyState = '$twisty';";
     my $twistyOpenImgSrc = _getImagesSrc()->{twistyopen};
-    $jsVars .= "SkillsPlugin.vars.twistyOpenImgSrc = \"$twistyOpenImgSrc\";";
     my $twistyCloseImgSrc = _getImagesSrc()->{twistyclose};
+    my $jsVars           = "SkillsPlugin.vars.twistyState = '$twisty';";
+    $jsVars .= "SkillsPlugin.vars.twistyOpenImgSrc = \"$twistyOpenImgSrc\";";
     $jsVars .= "SkillsPlugin.vars.twistyCloseImgSrc = \"$twistyCloseImgSrc\";";
     $jsVars .= 'SkillsPlugin.vars.browseSkills = 1;';
     _addHeads($jsVars);
@@ -891,7 +947,11 @@ sub _restGetCategories {
 
     _Debug('REST handler: getCategories');
 
-    return _tagShowCategories( { format => '$category', separator => '|' } );
+    require Foswiki::Plugins::SkillsPlugin::SkillsStore;
+    my $cats =
+      Foswiki::Plugins::SkillsPlugin::SkillsStore->new()->getCategoryNames();
+
+    return JSON::to_json($cats);
 }
 
 # returns all skills for a particular category in a comma seperated list
@@ -901,8 +961,113 @@ sub _restGetSkills {
     _Debug('REST handler: getSkills');
 
     my $cat = Foswiki::Func::getCgiQuery()->param('category');
-    return _tagShowSkills(
-        { category => $cat, format => '$skill', separator => '|' } );
+    require Foswiki::Plugins::SkillsPlugin::SkillsStore;
+    my $categories = Foswiki::Plugins::SkillsPlugin::SkillsStore->new()
+      ->eachCat();
+
+    my $skills;
+    while ( $categories->hasNext() ) {
+        my $obj_cat = $categories->next();
+        if ( $cat eq $obj_cat->name ) {
+            $skills = $obj_cat->getSkillNames();
+            return JSON::to_json($skills);
+        }
+    }
+    return '[]';
+}
+
+# gets all the details for skills in a particular category for the
+# current user. If 'cat' isn't given, get details for all categories.
+# results is returned as a JSON hash indexed by category name, where
+# each value is a hash indexed by skill name mapping to priority and
+# comment.
+sub _restGetSkillsAndDetails {
+    my ( $session, $plugin, $verb, $response ) = @_;
+
+    _Debug('REST handler: getSkillsAndDetails');
+
+    my $cat   = Foswiki::Func::getCgiQuery()->param('category');
+
+    my $user = Foswiki::Func::getWikiName();
+
+    require Foswiki::Plugins::SkillsPlugin::SkillsStore;
+    require Foswiki::Plugins::SkillsPlugin::UserSkills;
+
+    if (!$cat) {
+        my $cats =
+          Foswiki::Plugins::SkillsPlugin::SkillsStore->new()
+              ->getCategoryNames();
+        $cat = join('|', @$cats);
+    }
+
+    my $categories =
+      Foswiki::Plugins::SkillsPlugin::SkillsStore->new()->eachCat;
+    my %data = ();
+    my $us = Foswiki::Plugins::SkillsPlugin::UserSkills->new();
+    while ( $categories->hasNext() ) {
+        my $obj_cat = $categories->next();
+        if ( $obj_cat->name() =~ /^($cat)$/ ) {
+            my %cat_data;
+            my $skills = $obj_cat->getSkillNames();
+            foreach my $skill (@$skills) {
+                my %user_data = ();
+                my $obj_userSkill =
+                  $us->getSkillForUser( $user, $skill, $cat );
+                if ($obj_userSkill) {
+                    # The user has the skill
+                    $user_data{rating}   = $obj_userSkill->rating;
+                    $user_data{comment}  = $obj_userSkill->comment;
+                } # otherwise they don't have it
+                $cat_data{$skill} = \%user_data;
+            }
+            $data{$obj_cat->name()} = \%cat_data;
+        }
+    }
+    return JSON::to_json(\%data);
+}
+
+# Save changes made in the flat category form
+sub _restSaveUserChanges {
+    my ( $session, $plugin, $verb, $response ) = @_;
+
+    _Debug('REST handler: getSkillDetails');
+
+    my $query = Foswiki::Func::getCgiQuery();
+    my $user = Foswiki::Func::getWikiName();
+
+    require Foswiki::Plugins::SkillsPlugin::UserSkills;
+    my $us = Foswiki::Plugins::SkillsPlugin::UserSkills->new();
+
+    require Foswiki::Plugins::SkillsPlugin::SkillsStore;
+    my $categories =
+      Foswiki::Plugins::SkillsPlugin::SkillsStore->new()->eachCat;
+
+    my $error;
+    while ( !$error && $categories->hasNext() ) {
+        my $obj_cat = $categories->next();
+        my $cat = $obj_cat->name();
+        my $skills = $obj_cat->getSkillNames();
+        foreach my $skill (@$skills) {
+            my $rating = $query->param(
+                "editall.$cat.$skill-rating");
+            my $comment = $query->param(
+                "editall.$cat.$skill-comment");
+            if (defined $rating || defined $comment) {
+                $error = $us->addEditUserSkill(
+                    $user, $cat, $skill, $rating, $comment );
+                last if $error;
+            }
+        }
+    }
+
+    my $message;
+    if ($error) {
+        $message = "Error updating skills - $error";
+    }
+    else {
+        $message = "Skills updated.";
+    }
+    return $message;
 }
 
 # gets all the details for a particular skill for the user logged in
@@ -922,20 +1087,16 @@ sub _restGetSkillDetails {
       ->getSkillForUser( $user, $skill, $cat );
 
     unless ($obj_userSkill) {
-        return '{ }';
+        return '{}';
     }
 
-    my $out = '{';
-    $out .= _createJSON(
+    return JSON::to_json(
         {
             skill    => $obj_userSkill->name,
             category => $obj_userSkill->category,
             rating   => $obj_userSkill->rating,
-            comment  => $obj_userSkill->comment
-        }
-    );
-    $out .= '}';
-    return $out;
+            comment  => $obj_userSkill->comment,
+        });
 }
 
 # allows a user to add a new skill or edit an existing one
@@ -948,6 +1109,8 @@ sub _restAddEditSkill {
     my $skill   = Foswiki::Func::getCgiQuery()->param('skill');
     my $rating  = Foswiki::Func::getCgiQuery()->param('addedit-skill-rating');
     my $comment = Foswiki::Func::getCgiQuery()->param('comment');
+
+    die unless defined($cat) && defined($skill);
 
     my $user = Foswiki::Func::getWikiName();
 
@@ -1038,10 +1201,7 @@ sub _restSearch {
         $lineOut .= $tmplUserEnd;
 
         # subsitutions
-        my $userLink =
-          Foswiki::Func::internalLink( undef, Foswiki::Func::getMainWebname(),
-            $user, $user, undef, '0' );
-        $lineOut =~ s/%SKILLUSER%/$userLink/g;
+        $lineOut =~ s/%SKILLUSER%/$user/g;
 
         # comment link
         if ( $obj_userSkill->comment ) {
@@ -1078,7 +1238,7 @@ sub _restSearch {
     $out =~ s/%SEARCHCATEGORY%/$cat/g;
     $out =~ s/%SEARCHSKILL%/$skill/g;
     my $matches = keys( %{$users} );
-    $out =~ s/%SEARCHMATCES%/$matches/g;
+    $out =~ s/%SEARCHMATCHES%/$matches/g;
 
     $out = Foswiki::Func::expandCommonVariables($out);
 
@@ -1109,8 +1269,7 @@ sub _showCategories {
     require Foswiki::Plugins::SkillsPlugin::SkillsStore;
     my $cats =
       Foswiki::Plugins::SkillsPlugin::SkillsStore->new()->getCategoryNames();
-      
-      
+
     $text = join(
         $separator,
         map {
@@ -1271,16 +1430,27 @@ sub _addHeads {
 
     # css
     my $urlPath = Foswiki::Func::getPubUrlPath() . '/' . $Foswiki::cfg{SystemWebName} . '/' . $pluginName;
-    my $css =
-'<style type="text/css" media="all">@import url("' . $urlPath . '/style.css");</style>';
-
-    my $js = '<script src="' . $urlPath . '/main.js" language="javascript" type="text/javascript"></script>';
 
     # add to head
     # FIXME: use the 'requires' parameter? for YUI?
-    Foswiki::Func::addToHEAD( 'SKILLSPLUGIN_JS',
-"$css $yui <script language='javascript' type='text/javascript'>$jsVars</script> $js"
-    );
+    Foswiki::Func::addToHEAD( 'SKILLSPLUGIN_JS', <<THIS);
+<style type="text/css" media="all">
+ \@import url("$urlPath/style.css");
+</style>
+$yui
+<style>
+.skillsSpinner {
+ width: 16px;
+ height: 16px;
+ margin: 0px;
+ padding: 0px;
+ background-image: url("$urlPath/spinner.gif");
+}
+</style>
+<script language='javascript' type='text/javascript'>$jsVars</script>
+<script src="$urlPath/main.js" language="javascript" type="text/javascript">
+</script>
+THIS
 }
 
 # Taken from TagMePlugin (http://twiki.org/cgi-bin/view/Plugins/TagMePlugin)
@@ -1288,20 +1458,6 @@ sub _urlEncode {
     my $text = shift;
     $text =~ s/([^0-9a-zA-Z-_.:~!*'()\/%])/'%'.sprintf('%02x',ord($1))/ge;
     return $text;
-}
-
-sub _createJSON {
-    my $params = shift;
-
-    # loop over param keys
-    # create the JSON
-    # "param":"key"
-    my $out;
-    while ( my ( $key, $value ) = each( %{$params} ) ) {
-        $out .= "\"$key\":\"$value\",";
-    }
-    $out =~ s/,$//;
-    return $out;
 }
 
 # returns a hash of image html elements

@@ -48,7 +48,7 @@ sub category {
 sub rating {
     my $self = shift;
     if (@_) { $self->{RATING} = shift }
-    return $self->{RATING};
+    return $self->{RATING} || 0;
 }
 
 sub comment {

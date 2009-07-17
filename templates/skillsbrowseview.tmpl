@@ -1,21 +1,36 @@
 %TMPL:INCLUDE{"skills"}%
 
-%TMPL:DEF{"skills:browseview:head"}%
-<a href='%SCRIPTURL{view}%/%SYSTEMWEB%/SkillsPlugin'>Browse All Skills</a>
-%TMPL:END%
-
-%TMPL:DEF{"skills:browseview:footer"}%
-[[%SYSTEMWEB%.SkillsBrowseAll][Browse Skills]] | [[%SYSTEMWEB%.SkillsEditMySkills][Edit Your Skills]] | [[%SYSTEMWEB%.SkillsSearch][SearchSkills]]
-%TMPL:END%
+%TMPL:DEF{"skills:browseview:repeated:category"}%<tr class='skillsContent'>
+<th colspan='6'>%CATEGORYICON% %CATEGORY%</th></tr>%TMPL:END%
+%TMPL:DEF{"skills:browseview:repeated:categorycontainerstart"}%<tbody class="%CATEGORYCONTCLASS%">%TMPL:END%
+%TMPL:DEF{"skills:browseview:repeated:categorycontainerend"}%</tbody>%TMPL:END%
+%TMPL:DEF{"skills:browseview:repeated:skillstart"}%<tr>%TMPL:END%
+%TMPL:DEF{"skills:browseview:repeated:skill"}%<td class="head2" colspan="6">
+%SKILLICON% %SKILL%</td>%TMPL:END%
+%TMPL:DEF{"skills:browseview:repeated:skillend"}%</tr>%TMPL:END%
+%TMPL:DEF{"skills:browseview:repeated:userstart"}%<tr %SKILLTWISTDEF%>%TMPL:END%
+%TMPL:DEF{"skills:browseview:repeated:user"}%<td %USERROWDEF%>
+%USERICON% [[%USERSWEB%.%SKILLUSER%][%SKILLUSER%]](%FORMFIELD{"Location" topic="%USERSWEB%.%SKILLUSER%"}%)
+</td>%TMPL:END%
+%TMPL:DEF{"skills:browseview:repeated:userend"}%</tr>%TMPL:END%
+%TMPL:DEF{"skills:browseview:repeated:rating"}%<td %RATINGDEF%>
+%RATING%</td>%TMPL:END%
+%TMPL:DEF{"skills:browseview:repeated:comment"}%<td>
+%COMMENTLINK%</td>%TMPL:END%
 
 <!-- SKILLSPLUGIN - BROWSE SKILLS TABLE -->
 <table id='skillsTable' class='skillsTable' cellpadding="2px" syle="margin:7px 0;">
-<tr>
-<th class='skillsHeading' colspan='6'>%TMPL:P{"skills:browseview:head"}%</th>
-</tr><tr>
-<td style="padding-left:120px;"></td><td class='skillsRatingHeader'>%TMPL:P{"skills:ratinghead1"}%</td><td class='skillsRatingHeader'>%TMPL:P{"skills:ratinghead2"}%</td><td class='skillsRatingHeader'>%TMPL:P{"skills:ratinghead3"}%</td><td class='skillsRatingHeader'>%TMPL:P{"skills:ratinghead4"}%</td><td>&nbsp;</td>
-</tr>
-<noautolink>
-%REPEAT%
-</noautolink>
+ <thead>
+  <tr>
+   <th class='skillsHeading' colspan='6'>
+    <a href='%SCRIPTURL{view}%/%SYSTEMWEB%/SkillsPlugin'>Browse All Skills</a>
+   </th>
+  </tr>
+  %TMPL:P{"skills:std-rating-heads"}%
+ </thead>
+ <tbody>
+  <noautolink>
+  %REPEAT%
+  </noautolink>
+ </tbody>
 </table>

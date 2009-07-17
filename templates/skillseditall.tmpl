@@ -1,0 +1,27 @@
+<form name="editall-skills-form" id="editall-skills-form" >
+ <table width="100%" cols="8" class="skillsCatTable" name="category">
+  <thead>
+   <tr class="skillsCatTable_banner">
+    <th>Category</th>
+    <th>Skill</th>
+    %SKILLRATINGS{format="<td class='skillsFormRating'>$name</td>"}%
+    <th>Comment</th>
+   </tr>
+  </thead>
+  <tbody id="editall-tbody">
+  </tbody>
+  <tfoot>
+   <tr>
+    <td colspan="8" class="skillsCatTable_footer">
+     <input name="editall-skills-submit" id="editall-skills-submit" type="button" value="Save Changes" class="foswikiHidden"></td>
+   </tr>
+   <tr>
+    <td colspan='8'>
+     <span id="editall-skills-message-container" style="display:none;">
+      %SKILLMESSAGEPIC%<span id='editall-skills-message'></span>
+     </span>
+    </td>
+   </tr>
+  </tfoot>
+ </table>
+</form>

@@ -184,3 +184,26 @@ color:#06c;
 
 #foo_Overlay { background:orange;width:100px;height:25px; }
 
+/* The flat cat table */
+table.skillsCatTable { }
+
+/* Banner row along top of skills cat table */
+.skillsCatTable_banner {
+  border-bottom: 1pt dotted black;
+}
+
+/* Footer row along bottom of skills cat table */
+.skillsCatTable_footer {
+  border-top: 1pt dotted black;
+}
+
+/* A category name cell (and row)) */
+.skillsCatTable_category {
+  border-top: 1pt dotted black;
+}
+
+/* A skill name cell (and row)) */
+.skillsCatTable_skill { }
+
+/* A radio button in the skills table */
+input.skillsCatTable { }

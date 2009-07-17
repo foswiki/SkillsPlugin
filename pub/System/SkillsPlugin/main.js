@@ -1,4 +1,5 @@
-if( !SkillsPlugin ) var SkillsPlugin = {};
+if( !SkillsPlugin )
+    var SkillsPlugin = {};
 
 SkillsPlugin.main = function() {
     
@@ -13,12 +14,15 @@ SkillsPlugin.main = function() {
             
             var twistyId = elTwistyLink.id.replace( /_.*$/, '');
             
-            var elsToTwist = yuiEl.getElementsByClassName( twistyId + '_twist' );
+            var elsToTwist = yuiEl.getElementsByClassName(
+                twistyId + '_twist' );
             
             var elTwistyImgCont;
             var elTwistyImg;
-            if( elTwistyImgCont = document.getElementById( twistyId + '_twistyImage' ) ){
-                elTwistyImg = document.getElementById( twistyId + '_twistyImage' ).childNodes[1];
+            if( elTwistyImgCont = document.getElementById(
+                    twistyId + '_twistyImage' ) ){
+                elTwistyImg = document.getElementById(
+                    twistyId + '_twistyImage' ).childNodes[1];
             }
             
             // are we open or close?
@@ -60,19 +64,133 @@ SkillsPlugin.main = function() {
             if( imageEl ){
                 imageEl.src = SkillsPlugin.vars.twistyOpenImgSrc;
             }
-        }
-    }
-}();
-//SkillsPlugin.main.init();
-
-SkillsPlugin.viewUserSkills = function () {
-    
-    return {
-        
-        init: function(){
-            YAHOO.util.Event.onDOMReady(this.initTwisty, this, true);
         },
+
+        // enable/disable inputs for the given class
+        enableByClassName: function(className, enable){
+            var yuiEl = new YAHOO.util.Element();
+            var els = yuiEl.getElementsByClassName(className);
+            for (var i in els) {
+                els[i].disabled = !enable;
+            }
+        },
+
+        enableById: function(id, enable){
+            var el = document.getElementById(document, id);
+            if (el != null)
+                el.disabled = !enable;
+        },
+
+        // common function for all connection failures
+        _connectionFailure: function(o){
+            alert("Connection failure '" + o.statusText + "'. Please notify your administrator, giving the reason for this failure and as much information about the problem as possible.");
+        },
+    
+        // gets the categories from the server
+        getCategories: function( fnCallback ){
+            var url = SkillsPlugin.vars.restUrl +
+            "/SkillsPlugin/getCategories";
         
+            var obCallbacks = {
+                success: function(o){                
+                    var arCats = YAHOO.lang.JSON.parse(o.responseText);
+                    arCats.sort();
+                    fnCallback( arCats );
+                },
+                failure: function(o){_connectionFailure(o)}
+            }
+            var request = YAHOO.util.Connect.asyncRequest(
+                'GET', url, obCallbacks); 
+        },
+    
+        // gets the skills from the server
+        getSkills: function( category, fnCallback ){
+            var url = SkillsPlugin.vars.restUrl + "/SkillsPlugin/getSkills";
+            url += "?category=" + encodeURIComponent(category);
+        
+            var obCallbacks = {
+                success: function(o){                
+                    // TODO: need to check there are some skills!!
+                    var arSkills = YAHOO.lang.JSON.parse(o.responseText);
+                    arSkills.sort();
+                    fnCallback( arSkills, category );
+                },
+                failure: function(o){
+                    _connectionFailure(o);
+                }
+            }
+            var request = YAHOO.util.Connect.asyncRequest(
+                'GET', url, obCallbacks);
+        },
+    
+        // gets the skills with associated rating and the comment
+        getSkillsAndDetails: function( category, fnCallback ){
+            var url = SkillsPlugin.vars.restUrl
+            + "/SkillsPlugin/getSkillsAndDetails";
+            url += "?category=" + encodeURIComponent(category);
+        
+            var obCallbacks = {
+                success: function(o){
+                    obData = YAHOO.lang.JSON.parse(o.responseText);
+                    fnCallback( obData, category );
+                },
+                failure: function(o){_connectionFailure(o)}
+            }
+            var request = YAHOO.util.Connect.asyncRequest(
+                'GET', url, obCallbacks);
+        },
+
+        // gets the rating and the comment for a particular skill
+        // from the server
+        getSkillDetails: function( category, skill, fnCallback ){
+            var url = SkillsPlugin.vars.restUrl
+            + "/SkillsPlugin/getSkillDetails";
+            url += "?category=" + encodeURIComponent(category);
+            url += "&skill=" + encodeURIComponent(skill);
+        
+            var obCallbacks = {
+                success: function(o){
+                    obSkillDetails = YAHOO.lang.JSON.parse(o.responseText);
+                    fnCallback( obSkillDetails );
+                },
+                failure: function(o){_connectionFailure(o)}
+            }
+            var request = YAHOO.util.Connect.asyncRequest(
+                'GET', url, obCallbacks);
+        },
+
+        submit: function(rest, formid, messid, fnCallback) {
+            var url = SkillsPlugin.vars.restUrl + '/SkillsPlugin/' + rest;
+            var obForm = document.getElementById(formid);
+            YAHOO.util.Connect.setForm(obForm);
+
+            var obCallbacks = {
+                success: function(o){
+                    SkillsPlugin.main.unlockForm();
+                    if (fnCallback)
+                        fnCallback(o);
+                    SkillsPlugin.main.displayMessage(o.responseText, messid);
+                },
+                failure: function(o){
+                    SkillsPlugin.main.unlockForm();
+                    SkillsPlugin.main._connectionFailure(o);
+                }
+            }
+
+            SkillsPlugin.main.lockForm();
+            YAHOO.util.Connect.asyncRequest('POST', url, obCallbacks);
+        },
+
+        // lock form when AJAX in progress
+        lockForm: function(){
+            SkillsPlugin.main.enableByClassName('skillsControl', false);
+        },
+    
+        // unlocks the form
+        unlockForm: function(){
+            SkillsPlugin.main.enableByClassName('skillsControl', true);
+        },
+
         initTwisty: function(){
             // sets up the twisty
             var yuiEl = new YAHOO.util.Element();
@@ -81,7 +199,8 @@ SkillsPlugin.viewUserSkills = function () {
                 return;
             }
             
-            var arEls = yuiEl.getElementsByClassName('SkillsPlugin-twisty-link', 'span');
+            var arEls = yuiEl.getElementsByClassName(
+                'SkillsPlugin-twisty-link', 'span');
             
             var fnTwistCallback = function(){
                 SkillsPlugin.main.twist( this );
@@ -98,9 +217,11 @@ SkillsPlugin.viewUserSkills = function () {
             for ( var i = arEls.length - 1; i >= 0; --i ){
                 var twistyId = arEls[i].id.replace( /_.*$/, '');
                 
-                var elLink = new YAHOO.util.Element( twistyId + '_twistyLink' );
+                var elLink = new YAHOO.util.Element(
+                    twistyId + '_twistyLink' );
                 elLink.addClass('active');
-                var elImg = new YAHOO.util.Element( twistyId + '_twistyImage' );
+                var elImg = new YAHOO.util.Element(
+                    twistyId + '_twistyImage' );
                 elImg.addClass('active');
                 
                 // set initial state
@@ -108,6 +229,43 @@ SkillsPlugin.viewUserSkills = function () {
                     SkillsPlugin.main.twist( arEls[i] );
                 }
             }
+        },
+
+        // displays a notification recieved from the server
+        displayMessage: function(message, id){
+		
+            var elMessage = document.getElementById(id);
+            elMessage.innerHTML = message;
+		
+            this.showMessage( id );
+        },
+	
+        // shows the message
+        showMessage: function(id){
+            var elMessageContainer = document.getElementById(
+                id + '-container');
+            elMessageContainer.style.display = '';
+            // message is shown for 10 seconds
+            var obAnim = new YAHOO.util.Anim(
+                elMessageContainer,
+                {
+                  opacity: {to: 0, from:1}
+                }, 
+                10
+                );
+            obAnim.animate();
+        }
+    }
+}();
+//SkillsPlugin.main.init();
+
+SkillsPlugin.viewUserSkills = function () {
+    
+    return {
+        
+        init: function(){
+            YAHOO.util.Event.onDOMReady(
+                SkillsPlugin.main.initTwisty, this, true);
         }
     }
 }();
@@ -118,240 +276,90 @@ if( SkillsPlugin.vars.viewUserSkills ){
 SkillsPlugin.addEditSkills = function () {
     
     var
-        _idSelCategory = "addedit-category-select",
-        _idSelSkill = "addedit-skill-select",
-        _idRating = "addedit-skill-rating",
-        _idComment = "addedit-skill-comment",
-        _idClearComment = "addedit-skill-comment-clear",
-        _idSubmit = "addedit-skill-submit",
-        _idForm = "addedit-skill-form",
-        _idMessageContainer = "addedit-skills-message-container",
-        _idMessage = "addedit-skills-message",
+    _idRating       = "addedit-skill-rating",
+    _idComment      = "addedit-skill-comment",
+    _idClearComment = "addedit-skill-comment-clear",
+    _idSubmit       = "addedit-skill-submit",
+    _idMessageContainer = "addedit-skills-message-container",
+    _idMessage      = "addedit-skills-message";
         
-        _locked = 0;
-        
-    // common function for all connection failures
-    var _connectionFailure = function(o){
-        alert("Connection failure '" + o.statusText + "'. Please notify your administrator, giving the reason for this failure and as much information about the problem as possible.");
-    }
-    
-    // gets the categories from the server
-    var _getCategories = function( fnCallback ){
-        var url = SkillsPlugin.vars.restUrl + "/SkillsPlugin/getCategories";
-        
-        var obCallbacks = {
-			success: function(o){
-                _unlock();
-                _disableRatingSelect();
-                _disableCommentInput();
-                _resetSkillDetails();
-                
-                var arCats = o.responseText.split( "|" ); // JSON?
-                arCats.sort();
-                fnCallback( arCats );
-			},
-			failure: function(o){_connectionFailure(o)}
-		}
-        _lock();
-		var request = YAHOO.util.Connect.asyncRequest('GET', url, obCallbacks); 
-    }
-    
-    // gets the skills from the server
-    var _getSkills = function( category, fnCallback ){
-        var url = SkillsPlugin.vars.restUrl + "/SkillsPlugin/getSkills";
-        url += "?category=" + encodeURIComponent(category);
-        
-        var obCallbacks = {
-			success: function(o){
-                _unlock();
-                _disableRatingSelect();
-                _disableCommentInput();
-                _resetSkillDetails();
-                
-                // TODO: need to check there are some skills!!
-                var arSkills = o.responseText.split( "|" ); // JSON?
-                arSkills.sort();
-                fnCallback( arSkills );
-			},
-			failure: function(o){_connectionFailure(o)}
-		}
-        _lock();
-		var request = YAHOO.util.Connect.asyncRequest('GET', url, obCallbacks);
-    }
-    
-    // gets the rating and the comment for a particular skill from the server
-    var _getSkillDetails = function( category, skill, fnCallback ){
-        var url = SkillsPlugin.vars.restUrl + "/SkillsPlugin/getSkillDetails";
-        url += "?category=" + encodeURIComponent(category);
-        url += "&skill=" + encodeURIComponent(skill);
-        
-        var obCallbacks = {
-			success: function(o){
-                _unlock();
-                obSkillDetails = YAHOO.lang.JSON.parse(o.responseText);
-                if( obSkillDetails.rating ){
-                    fnCallback( obSkillDetails.rating, obSkillDetails.comment );
-                } else {
-                    // skill not found (new skill)
-                    // set 'None' on skill rating
-                    for( var i=0; i < document[_idForm][_idRating].length; i++ ){
-                        if( document[_idForm][_idRating][i].value == 0 ){
-                            document[_idForm][_idRating][i].checked = true;
-                        }
-                    }
-                }
-            },
-            failure: function(o){_connectionFailure(o)}
-        }
-        _lock();
-		var request = YAHOO.util.Connect.asyncRequest('GET', url, obCallbacks);
-    }
-    
     // hides the 'clear comment' button
     var _hideClearComment = function(){
         var el = document.getElementById(_idClearComment);
-        el.style.display='none';
+        if (el != null)
+            el.style.display='none';
     }
     
     // shows the 'clear comment' button
     var _showClearComment = function(){
         var el = document.getElementById(_idClearComment);
-        el.style.display='';
+        if (el != null)
+            el.style.display='';
     }
     
     // clears the rating and the comment
     var _resetSkillDetails = function(){
         // reset details
-        for( var i=0; i < document[_idForm][_idRating].length; i++ ){
-            if( document[_idForm][_idRating][i].checked == true ){
-                document[_idForm][_idRating][i].checked = false;
-            }
+        var yuiEl = new YAHOO.util.Element();
+        var els = yuiEl.getElementsByClassName('skillsRating');
+        for( var i in els) {
+            if (els[i].checked )
+                els[i].checked = false;
         }
-        var elComment = document.getElementById(_idComment);
-        elComment.value = '';
+        var els = yuiEl.getElementsByClassName('skillsComment');
+        for( var i in els)
+            els[i].value = '';
         _hideClearComment();
-    }
-    
-    // clears the skill drop down menu
-    var _resetSkillSelect = function(){
-        var elSkillSelect = document.getElementById(_idSelSkill);
-        elSkillSelect.options.length = 0;
     }
     
     // resets the entire form to its initial state
     var _resetForm = function(){
-        _resetSkillSelect();
-        _resetSkillDetails();
+        // Reset skill select
+        var elSkillSelect = document.getElementById("addedit-skill-select");
+        if (elSkillSelect != null)
+            elSkillSelect.options.length = 0;
         SkillsPlugin.addEditSkills.populateCategories();
     }
-    
-    // disable the rating option boxes
-    var _disableRatingSelect = function(){
-        for( var i=0; i < document[_idForm][_idRating].length; i++ ){
-            document[_idForm][_idRating][i].disabled = true;
-        }
-    }
-    
-    // enables the rating options
-    var _enableRatingSelect = function(){
-        for( var i=0; i < document[_idForm][_idRating].length; i++ ){
-            document[_idForm][_idRating][i].disabled = false;
-        }
-    }
-    
-    // disables the comment text box
-    var _disableCommentInput = function(){
-        var elComment = document.getElementById(_idComment);
-        elComment.disabled = true;
-    }
-    
-    // enables the comment text box
-    var _enableCommentInput = function(){
-        var elComment = document.getElementById(_idComment);
-        elComment.disabled = false;
-    }
-    
-    // lock form when AJAX in progress
-    var _lock = function(){
-        if( _locked == 1 ){
-            return;
-        }
-        _locked = 1;
-        
-        var elSelCat = document.getElementById(_idSelCategory);
-        elSelCat.disabled = true;
-        var elSelSkill = document.getElementById(_idSelSkill);
-        elSelSkill.disabled = true;
-        _disableRatingSelect();
-        _disableCommentInput();
-        var elSubmit = document.getElementById(_idSubmit);
-        elSubmit.disabled = true;
-    }
-    
-    // unlocks the form
-    var _unlock = function(){
-        if( _locked == 0 ){
-            return;
-        }
-        _locked = 0;
-        
-        var elSelCat = document.getElementById(_idSelCategory);
-        elSelCat.disabled = false;
-        var elSelSkill = document.getElementById(_idSelSkill);
-        elSelSkill.disabled = false;
-        _enableRatingSelect();
-        _enableCommentInput();
-        var elSubmit = document.getElementById(_idSubmit);
-        elSubmit.disabled = false;
-    }
-    
-    // displays a notification recieved from the server
-    var _displayMessage = function(message){
-		
-        var elMessage = document.getElementById(_idMessage);
-		elMessage.innerHTML = message;
-		
-		_showMessage( elMessage );
-	}
-	
-    // shows the message
-	var _showMessage = function(){
-        var elMessageContainer = document.getElementById(_idMessageContainer);
-        elMessageContainer.style.display = '';
-		// message is shown for 10 seconds
-		var obAnim = new YAHOO.util.Anim(
-			elMessageContainer,
-			{
-				opacity: {to: 0, from:1}
-			}, 
-			10
-		);
-		obAnim.animate();
-	}
-    
+       
     return {
         
         init: function(){
+            this.locked = false;
+
             // register events
-            YAHOO.util.Event.onAvailable(_idSelCategory, this.populateCategories, this, true);
+            YAHOO.util.Event.onAvailable(
+                "addedit-category-select", this.populateCategories,
+                this, true);
+           
+            YAHOO.util.Event.addListener(
+                "addedit-category-select", "change", this.populateSkills,
+                this, true);
+            YAHOO.util.Event.addListener(
+                "addedit-skill-select", "change", this.populateSkillDetails,
+                this, true);
             
-            YAHOO.util.Event.addListener(_idSelCategory, "change", this.populateSkills, this, true);
-            YAHOO.util.Event.addListener(_idSelSkill, "change", this.populateSkillDetails, this, true);
+            YAHOO.util.Event.addListener(
+                _idComment, "keyup", this.commentKeyPress, this, true);
             
-            YAHOO.util.Event.addListener(_idComment, "keyup", this.commentKeyPress, this, true);
-            
-            YAHOO.util.Event.addListener(_idClearComment, "click", this.clearComment, this, true);
-            YAHOO.util.Event.addListener(_idSubmit, "click", this.submit, this, true);
+            YAHOO.util.Event.addListener(
+                _idClearComment, "click", this.clearComment, this, true);
+            YAHOO.util.Event.addListener(
+                _idSubmit, "click", this.submit, this, true);
         },
         
         // populates the category select menu
         populateCategories: function(){
-            var elCatSelect = document.getElementById(_idSelCategory);
+            var elCatSelect =
+            document.getElementById("addedit-category-select");
+            if (elCatSelect == null)
+                return;
+
             elCatSelect.options.length = 0;
-            
+            _resetSkillDetails();
+
             if( SkillsPlugin.vars.loggedIn == 0 ){
                 elCatSelect.options[0] = new Option("Please log in...", "0", true);
-                _lock();
+                SkillsPlugin.main.lockForm();
                 return;
             }
             elCatSelect.options[0] = new Option("Loading...", "0", true);
@@ -363,20 +371,26 @@ SkillsPlugin.addEditSkills = function () {
                     elCatSelect.options[count] = new Option(arCats[i], arCats[i]);
                     count ++;
                 }
+                SkillsPlugin.main.unlockForm();
             }
-            
-            _getCategories( fnCallback );
+
+            SkillsPlugin.main.lockForm();
+            _resetSkillDetails();
+            SkillsPlugin.main.getCategories( fnCallback );
             elCatSelect.selectedIndex = 0;
-            var elSkillSelect = document.getElementById(_idSelSkill);
+            var elSkillSelect = document.getElementById(
+                "addedit-skill-select");
             elSkillSelect.options[0] = new Option("Select a category above...", "0", true);
         },
         
         // populates the skill select menu
         populateSkills: function(){
-            var elSkillSelect = document.getElementById(_idSelSkill);
+            var elSkillSelect = document.getElementById(
+                "addedit-skill-select");
             
             // get selected category (could be stored in global variable)?
-            var elCatSelect = document.getElementById(_idSelCategory);
+            var elCatSelect = document.getElementById(
+                "addedit-category-select");
             var catSelIndex = elCatSelect.selectedIndex;
             var cat = elCatSelect.options[catSelIndex].value;
             
@@ -400,9 +414,12 @@ SkillsPlugin.addEditSkills = function () {
                     elSkillSelect.options[count] = new Option(arSkills[i], arSkills[i]);
                     count ++;
                 }
+                SkillsPlugin.main.unlockForm();
             }
             
-            _getSkills( cat, fnCallback );
+            SkillsPlugin.main.lockForm();
+            _resetSkillDetails();
+            SkillsPlugin.main.getSkills( cat, fnCallback );
         },
         
         // populates the rating and the comment for a skill
@@ -410,58 +427,58 @@ SkillsPlugin.addEditSkills = function () {
             _resetSkillDetails();
             
             // get selected category and skill
-            var elCatSelect = document.getElementById(_idSelCategory);
+            var elCatSelect = document.getElementById(
+                "addedit-category-select");
             var catSelIndex = elCatSelect.selectedIndex;
             var cat = elCatSelect.options[catSelIndex].value;
             
-            var elSkillSelect = document.getElementById(_idSelSkill);
+            var elSkillSelect = document.getElementById(
+                "addedit-skill-select");
             var skillSelIndex = elSkillSelect.selectedIndex;
             var skill = elSkillSelect.options[skillSelIndex].value;
             
-            var fnCallback = function( ratingValue, comment ){
-                if( ratingValue ){
-                    // select the rating radio button
-                    for( var i=0; i < document[_idForm][_idRating].length; i++ ){
-                        if( document[_idForm][_idRating][i].value == ratingValue ){
-                            document[_idForm][_idRating][i].checked = true;
-                            break;
-                        }
+            var fnCallback = function( skid ){
+                if (!skid.rating == null)
+                    skid.rating = 0;
+                var yuiEl = new YAHOO.util.Element();
+                var els = yuiEl.getElementsByClassName('skillsRating');
+
+                // select the rating radio button
+                for( var i in els) {
+                    if( els[i].value == skid.rating ){
+                        els[i].checked = true;
+                        break;
                     }
                 }
                 
-                if( comment ){
+                if( skid.comment != null ){
                     // set comment
                     var elComment = document.getElementById(_idComment);
-                    elComment.value = comment;
+                    if (elComment != null)
+                        elComment.value = skid.comment;
                     _showClearComment();
                 }
+                SkillsPlugin.main.unlockForm();
             }
-            
-            _getSkillDetails( cat, skill, fnCallback );
+
+            SkillsPlugin.main.lockForm();
+            SkillsPlugin.main.getSkillDetails( cat, skill, fnCallback );
         },
         
         // submits the form
-        submit: function(){
-            var url = SkillsPlugin.vars.restUrl + "/SkillsPlugin/addEditSkill";
-            
-            var obCallbacks = {
-                success: function(o){
-                    _unlock();
-                    _displayMessage(o.responseText);
-                    _resetForm();
-                },
-                failure: function(o){_connectionFailure(o)}
-            }
-            
-            YAHOO.util.Connect.setForm(_idForm);
-            _lock();
-            YAHOO.util.Connect.asyncRequest('POST', url, obCallbacks);
+        submit: function() {
+            SkillsPlugin.main.lockForm();
+            SkillsPlugin.main.submit(
+                'addEditSkill', "addedit-skill-form",
+                "addedit-skills-message",
+                _resetForm);
         },
         
         // clears the comment text field
         clearComment: function(){
             var elComment = document.getElementById(_idComment);
-            elComment.value = '';
+            if (elComment != null)
+                elComment.value = '';
             _hideClearComment();
         },
         
@@ -481,155 +498,238 @@ if( SkillsPlugin.vars.addEditSkills ){
     SkillsPlugin.addEditSkills.init();
 }
 
-SkillsPlugin.searchSkills = function () {
+SkillsPlugin.editAllSkills = function () {
     
     var
-        _idSelCategory = "search-category-select",
-        _idSelSkill = "search-skill-select",
-        _idSubmit = "search-skill-submit",
-        _idForm = "search-skill-form",
-        _idResults = "search-skill-results"
+    _idSubmit       = "editall-skills-submit",
+    _idMessageContainer = "editall-skills-message-container",
+    _idMessage      = "editall-skills-message";
         
-        _locked = 0;
+    return {
+
+        init: function(){
+            this.locked = false;
+
+            // register events
+            YAHOO.util.Event.onAvailable(
+                "editall-tbody", this.populateTable,
+                this, true);
+            
+            YAHOO.util.Event.addListener(
+                _idSubmit, "click", this.submit, this, true);
+        },
         
-    // common function for all connection failures
-    // SMELL: could be in main
-    var _connectionFailure = function(o){
-        alert("Connection failure '" + o.statusText + "'. Please notify your administrator, giving the reason for this failure and as much information about the problem as possible.");
-    }
-    
-    // gets the categories from the server
-    var _getCategories = function( fnCallback ){
-        var url = SkillsPlugin.vars.restUrl + "/SkillsPlugin/getCategories";
+        populateTable: function(){
+            var elCatTableTBody = document.getElementById(
+                "editall-tbody");
+            if (elCatTableTBody == null)
+                return;
+
+            if( SkillsPlugin.vars.loggedIn == 0 ){
+                var tr = document.createElement('tr');
+                tr.className = 'skillsCatTable_category';
+                var td = document.createElement('td');
+                td.appendChild(
+                    document.createTextNode("Please log in..."));
+                tr.appendChild(td);
+                elCatTableTBody.appendChild(tr);
+                SkillsPlugin.main.lockForm();
+                return;
+            }
+            
+            // Clean out the category table. The ID points to the tbody,
+            // so we can just vacuum that.
+            while (elCatTableTBody.firstChild != null) {
+                elCatTableTBody.removeChild(elCatTableTBody.firstChild);
+            }
+            
+            var fnCallback = function( arCats ){
+                for( var i in arCats ){
+                    // Create a table row to contain the category and
+                    // act as an anchor for the added entries
+                    var tr = document.createElement('tr');
+                    tr.className = 'skillsCatTable_category';
+                    elCatTableTBody.appendChild(tr);
+                    var th = document.createElement('th');
+                    th.className = 'skillsCatTable_category';
+                    th.colSpan = 8;
+                    tr.appendChild(th);
+                    th.appendChild(document.createTextNode(arCats[i]));
+
+                    var id = 'editall.' + arCats[i];
+                    tr.id = id;
+
+                    var img = document.createElement('div');
+                    img.className = 'skillsSpinner';
+                    img.id = id + '_spinner';
+                    th.appendChild(img);
+
+                    // Now get the skills and add each as a row
+                    SkillsPlugin.main.getSkillsAndDetails(
+                        arCats[i],
+                        function( data, cat ) {
+                            var catid = 'editall.' + cat;
+                            var reltotr = document.getElementById(catid);
+                            var spinner = document.getElementById(
+                                catid + "_spinner");
+                            if (spinner != null)
+                                spinner.parentNode.removeChild(spinner);
+                            var skills = data[cat];
+                            for( var skill in skills ) {
+                                var skill_data = skills[skill];
+                                var skid = catid + '.' + skill;
+                                var tr = document.createElement('tr');
+                                tr.className = "skillsCatTable_skill";
+                                if (reltotr.nextSibling == null) {
+                                    reltotr.parentNode.appendChild(tr);
+                                } else {
+                                    reltotr.parentNode.insertBefore(
+                                        tr, reltotr.nextSibling);
+                                }
+                                tr.appendChild(document.createElement('td'));
+                                var th = document.createElement('th');
+                                th.className = "skillsCatTable_skill";
+                                tr.appendChild(th);
+                                th.appendChild(
+                                    document.createTextNode(skill));
+                                // Radio buttons for the priority
+                                var prios = [ 1, 2, 3, 4, 0 ];
+                                for (var k in prios) {
+                                    var td = document.createElement('td');
+                                    tr.appendChild(td);
+                                    var inp = document.createElement('input');
+                                    inp.className = "skillsCatTable skillsRating skillsControl";
+                                    td.appendChild(inp);
+                                    inp.type = 'radio';
+                                    inp.name = skid + "-rating";
+                                    inp.id = skid + "-rating";
+                                    inp.value = prios[k];
+                                    if (skill_data.rating != null &&
+                                        skill_data.rating == prios[k]) {
+                                        inp.checked = "checked";
+                                    }
+                                    inp.onclick = function() {
+                                        var elSubmit =
+                                        document.getElementById(_idSubmit);
+                                        elSubmit.className = "foswikiSubmit";
+                                    };
+                                }
+                                var td = document.createElement('td');
+                                tr.appendChild(td);
+                                inp = document.createElement('input');
+                                td.appendChild(inp);
+                                inp.className = "skillsCatTable skillsComment skillsControl";
+                                inp.type = 'text';
+                                inp.name = skid + "-comment";
+                                inp.id = skid + "-comment";
+                                if (skill_data.comment != null) {
+                                    inp.value = skill_data.comment;
+                                }
+                                YAHOO.util.Event.addListener(
+                                    inp.id, "keyup",
+                                    function() {
+                                        var elSubmit =
+                                            document.getElementById(_idSubmit);
+                                        elSubmit.className = "foswikiSubmit";
+                                    }, this, true);
+                                inp.size = 15;
+                            }
+                        });
+                }
+                SkillsPlugin.main.unlockForm();
+            };
+
+            SkillsPlugin.main.lockForm();
+            SkillsPlugin.main.getCategories( fnCallback );
+        },
         
-        var obCallbacks = {
-			success: function(o){
-                _unlock();
-                
-                var arCats = o.responseText.split( "|" ); // JSON?
-                arCats.sort();
-                fnCallback( arCats );
-			},
-			failure: function(o){_connectionFailure(o)}
-		}
-        _lock();
-		var request = YAHOO.util.Connect.asyncRequest('GET', url, obCallbacks); 
-    }
+        // submits the form
+        submit: function() {
+            SkillsPlugin.main.submit(
+                'saveUserChanges', "editall-skills-form",
+                "editall-skills-message");
+        }
+    };
     
-    // gets the skills from the server
-    var _getSkills = function( category, fnCallback ){
-        var url = SkillsPlugin.vars.restUrl + "/SkillsPlugin/getSkills";
-        url += "?category=" + encodeURIComponent(category);
-        
-        var obCallbacks = {
-			success: function(o){
-                _unlock();
-                //_disableRatingSelect();
-                //_disableCommentInput();
-                
-                // TODO: need to check there are some skills!!
-                var arSkills = o.responseText.split( "|" ); // JSON?
-                arSkills.sort();
-                fnCallback( arSkills );
-			},
-			failure: function(o){_connectionFailure(o)}
-		}
-        _lock();
-		var request = YAHOO.util.Connect.asyncRequest('GET', url, obCallbacks);
-    }
-    
-    
-    // clears the skill drop down menu
-    var _resetSkillSelect = function(){
-        var elSkillSelect = document.getElementById(_idSelSkill);
-        elSkillSelect.options.length = 0;
-    }
+}();
+if( SkillsPlugin.vars.editAllSkills ){
+    SkillsPlugin.editAllSkills.init();
+}
+
+SkillsPlugin.searchSkills = function () {
     
     // resets the entire form to its initial state
     var _resetForm = function(){
-        _resetSkillSelect();
+        var elSkillSelect = document.getElementById("search-skill-select");
+        elSkillSelect.options.length = 0;
         SkillsPlugin.searchSkills.populateCategories();
     }
-    
-    // lock form when AJAX in progress
-    var _lock = function(){
-        if( _locked == 1 ){
-            return;
-        }
-        _locked = 1;
-        
-        var elSelCat = document.getElementById(_idSelCategory);
-        elSelCat.disabled = true;
-        var elSelSkill = document.getElementById(_idSelSkill);
-        elSelSkill.disabled = true;
-        var elSubmit = document.getElementById(_idSubmit);
-        elSubmit.disabled = true;
-    }
-    
-    // unlocks the form
-    var _unlock = function(){
-        if( _locked == 0 ){
-            return;
-        }
-        _locked = 0;
-        
-        var elSelCat = document.getElementById(_idSelCategory);
-        elSelCat.disabled = false;
-        var elSelSkill = document.getElementById(_idSelSkill);
-        elSelSkill.disabled = false;
-        var elSubmit = document.getElementById(_idSubmit);
-        elSubmit.disabled = false;
-    }
-    
+  
     var _populateResults = function( results ){
-        var elResults = document.getElementById(_idResults);
+        var elResults = document.getElementById("search-skill-results");
         elResults.innerHTML = results;
     }
     
     return {
         
         init: function(){
+
+            this.locked = false;
+
             // register events
-            YAHOO.util.Event.onAvailable(_idSelCategory, this.populateCategories, this, true);
+            YAHOO.util.Event.onAvailable(
+                "search-category-select", this.populateCategories, this, true);
             
-            YAHOO.util.Event.addListener(_idSelCategory, "change", this.populateSkills, this, true);
+            YAHOO.util.Event.addListener(
+                "search-category-select", "change", this.populateSkills,
+                this, true);
             
-            YAHOO.util.Event.addListener(_idSubmit, "click", this.submit, this, true);
+            YAHOO.util.Event.addListener(
+                "search-skill-submit", "click", this.submit, this, true);
         },
         
         // populates the category select menu
         populateCategories: function(){
-            var elCatSelect = document.getElementById(_idSelCategory);
+            var elCatSelect = document.getElementById(
+                "search-category-select");
             elCatSelect.options.length = 0;
             
             if( SkillsPlugin.vars.loggedIn == 0 ){
-                elCatSelect.options[0] = new Option("Please log in...", "0", true);
-                _lock();
+                elCatSelect.options[0] = new Option(
+                    "Please log in...", "0", true);
+                SkillsPlugin.main.lockForm();
                 return;
             }
             elCatSelect.options[0] = new Option("Loading...", "0", true);
             
             var fnCallback = function( arCats ){
-                elCatSelect.options[0] = new Option("Select a category...", "0", true);
+                elCatSelect.options[0] = new Option(
+                    "Select a category...", "0", true);
                 var count = 1;
                 for( var i in arCats ){
-                    elCatSelect.options[count] = new Option(arCats[i], arCats[i]);
+                    elCatSelect.options[count] =
+                        new Option(arCats[i], arCats[i]);
                     count ++;
                 }
+                SkillsPlugin.main.unlockForm();
             }
-            
-            _getCategories( fnCallback );
+
+            SkillsPlugin.main.lockForm();
+            SkillsPlugin.main.getCategories( fnCallback );
             elCatSelect.selectedIndex = 0;
-            var elSkillSelect = document.getElementById(_idSelSkill);
-            elSkillSelect.options[0] = new Option("Select a category...", "0", true);
+            var elSkillSelect = document.getElementById(
+                "search-skill-select");
+            elSkillSelect.options[0] = new Option(
+                "Select a category...", "0", true);
         },
         
         // populates the skill select menu
         populateSkills: function(){
-            var elSkillSelect = document.getElementById(_idSelSkill);
+            var elSkillSelect = document.getElementById("search-skill-select");
             
             // get selected category (could be stored in global variable)?
-            var elCatSelect = document.getElementById(_idSelCategory);
+            var elCatSelect = document.getElementById(
+                "search-category-select");
             var catSelIndex = elCatSelect.selectedIndex;
             var cat = elCatSelect.options[catSelIndex].value;
             
@@ -637,46 +737,43 @@ SkillsPlugin.searchSkills = function () {
             elSkillSelect.options.length = 0;
             
             if( cat == 0 ){
-                elSkillSelect.options[0] = new Option("Select a category...", "0", true);
+                elSkillSelect.options[0] = new Option(
+                    "Select a category...", "0", true);
                 return;
             }
             
             elSkillSelect.options[0] = new Option("Loading...", "0", true);
             
             var fnCallback = function( arSkills ){
-                elSkillSelect.options[0] = new Option("Select a skill...", "0", true);
+                elSkillSelect.options[0] = new Option(
+                    "Select a skill...", "0", true);
                 var count = 1;
                 for( var i in arSkills ){
                     if(arSkills[i] == ''){
                         continue;
                     }
-                    elSkillSelect.options[count] = new Option(arSkills[i], arSkills[i]);
+                    elSkillSelect.options[count] =
+                        new Option(arSkills[i], arSkills[i]);
                     count ++;
                 }
             }
             
-            _getSkills( cat, fnCallback );
+            SkillsPlugin.main.getSkills( cat, fnCallback );
         },
         
         // submits the form
         submit: function(){
-            var url = SkillsPlugin.vars.restUrl + '/SkillsPlugin/search';
-            
-            var obCallbacks = {
-                success: function(o){
-                    _unlock();
+            SkillsPlugin.main.lockForm();
+            SkillsPlugin.main.submit(
+                'search', "search-skill-form", "search-skills-message",
+                function(o) {
                     _populateResults(o.responseText);
-                },
-                failure: function(o){_connectionFailure(o)}
-            }
-            
-            YAHOO.util.Connect.setForm(_idForm);
-            _lock();
-            YAHOO.util.Connect.asyncRequest('POST', url, obCallbacks);
+                });
         }
     };
     
 }();
+
 if( SkillsPlugin.vars.searchSkills ){
     SkillsPlugin.searchSkills.init();
 }
@@ -686,46 +783,8 @@ SkillsPlugin.browseSkills = function () {
     return {
         
         init: function(){
-            YAHOO.util.Event.onDOMReady(this.initTwisty, this, true);
-        },
-        
-        initTwisty: function(){
-            // sets up the twisty
-            var yuiEl = new YAHOO.util.Element();
-            
-            if ( SkillsPlugin.vars.twistyState == 'off' ){
-                return;
-            }
-            
-            var arEls = yuiEl.getElementsByClassName('SkillsPlugin-twisty-link', 'span');
-            
-            var fnTwistCallback = function(){
-                SkillsPlugin.main.twist( this );
-            };
-            
-            // add event to an array of elements
-            YAHOO.util.Event.addListener(
-                arEls,
-                "click",
-                fnTwistCallback
-                );
-            
-            // loop over all twisty links
-            for ( var i = arEls.length - 1; i >= 0; --i ){
-                var twistyId = arEls[i].id.replace( /_.*$/, '');
-                
-                
-                var elLink = new YAHOO.util.Element( twistyId + '_twistyLink' );
-                elLink.addClass('active');
-                var elImg = new YAHOO.util.Element( twistyId + '_twistyImage' );
-                elImg.addClass('active');
-                
-                // set initial state
-                if( SkillsPlugin.vars.twistyState == 'closed' ){
-                    SkillsPlugin.main.twist( arEls[i] );
-                }
-                //alert(twistyId);
-            }
+            YAHOO.util.Event.onDOMReady(
+                SkillsPlugin.main.initTwisty, this, true);
         }
     }
 }();
