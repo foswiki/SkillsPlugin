@@ -47,13 +47,13 @@ sub _load {
         return 1;
     }
 
-    require Foswiki::LineIterator;
-    my $it = new Foswiki::LineIterator($fh);
+    local $/ = "\n";
 
-    while ( $it->hasNext() ) {
-        my $line = $it->next();
+    while ( my $line = <$fh> ) {
+
         next if $line =~ /^\#.*/;    # skip any comments
 
+        chomp($line);
         $line =~ s/(.*)://g;
         my $cat = $1;
         my @skills = split( ',', $line );
