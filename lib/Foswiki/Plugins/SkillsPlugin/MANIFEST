@@ -30,10 +30,7 @@ templates/skillseditall.tmpl 0644 Add/Edit form template
 templates/skillssearchform.tmpl 0644 Search form template
 templates/skills.tmpl 0644 Base template
 templates/skillsuserview.tmpl 0644 User Skills template
-templates/skillsuserviewrepeated.tmpl 0644 User Skills Repeated template
 templates/skillssearchresults.tmpl 0644 Search results template
-templates/skillssearchresultsrepeated.tmpl 0644 Search Results Repeated template
 templates/skillsbrowseview.tmpl 0644 Browse Skills template
-templates/skillsbrowseviewrepeated.tmpl 0644 Browse Skills Repeated template
 templates/oopsgeneric.skills.tmpl 0644 Skills Comment template
 
