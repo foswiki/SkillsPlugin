@@ -26,11 +26,6 @@ use strict;
 
 use JSON ();
 
-use vars qw(
-  $pluginName
-  $doneHeads
-);
-
 # Plugin Variables
 our $VERSION           = '$Rev$';
 our $RELEASE           = '16 Jul 2009';
@@ -38,7 +33,7 @@ our $NO_PREFS_IN_TOPIC = 1;
 our $SHORTDESCRIPTION =
   'Allows users to list their skills, which can then be searched';
 
-$pluginName = 'SkillsPlugin';
+our $doneHeads = 0;
 
 # ========================= INIT
 sub initPlugin {
@@ -82,6 +77,32 @@ sub initPlugin {
     _Debug("initPlugin is OK");
 
     return 1;
+}
+
+sub _getLevels {
+    my $names = $Foswiki::cfg{SkillsPlugin}{Levels}
+      || "None,Ancient Knowledge,Working Knowledge,Expert,Guru";
+    my @levels = split(/,\s*/, $names);
+    return \@levels;
+}
+
+# Generate the divs that contain the tooltips
+sub _genTooltips {
+    require Foswiki::Plugins::SkillsPlugin::SkillsStore;
+    my $categories =
+      Foswiki::Plugins::SkillsPlugin::SkillsStore->new()->eachCat;
+    my $out = '';
+    while ( $categories->hasNext() ) {
+        my $obj_cat = $categories->next();
+        my $cname = $obj_cat->name();
+        my $desc = $obj_cat->description();
+        $out .= "<div style='display:none' id='$cname'>$desc</div>";
+        foreach my $skill (@{$obj_cat->getSkillNames()}) {
+            $desc = $obj_cat->description($skill);
+            $out .= "<div style='display:none' id='$cname.$skill'>$desc</div>";
+        }
+    }
+    return $out;
 }
 
 # ========================= TAGS
@@ -147,36 +168,31 @@ sub _handleTag {
     return $out;
 }
 
-sub _respaceName {
-    my ($name, $br) = @_;
-    $name =~ s/ /$br/g;
-    return $name;
-}
-
 sub _SKILLRATINGS {
     my ($session, $params) = @_;
 
-    my $skillNames =
-      Foswiki::Func::getPreferencesValue("SKILLSPLUGIN_RATINGS")
-          || "None,Ancient Knowledge,Working Knowledge,Expert,Guru";
-    my @skills = split(/,\s*/, $skillNames);
-
     my $format =
-      defined $params->{format} ? $params->{format} : '$name: $value';
+      defined $params->{_DEFAULT} ? $params->{_DEFAULT}
+          : defined $params->{format} ? $params->{format}
+              : '$name: $value';
     my $marker =
       defined $params->{marker} ? $params->{marker} : 'selected';
     my $separator =
       defined $params->{separator} ? $params->{separator} : '$n()';
     my $selection =
       defined $params->{selection} ? $params->{selection} : -1;
-    $selection = $#skills if $selection eq '$';
+    my $levels = _getLevels();
+    $selection = $#$levels if $selection eq '$';
+    my $from =
+      defined $params->{from} ? ($params->{from} || 0) : 0;
+    my $to =
+      defined $params->{to} ? ($params->{to} || $#$levels) : $#$levels;
 
     my @values = ();
-    foreach my $value (0..$#skills) {
-        my $name = $skills[$value];
+    foreach my $value ($from..$#$levels) {
+        my $name = $levels->[$value];
         my $mark = ($value == $selection) ? $marker : '';
         my $item = $format;
-        $item =~ s/\$name\((.*?)\)/_respaceName($name, $1)/ge;
         $item =~ s/\$name/$name/g;
         $item =~ s/\$value/$value/g;
         $item =~ s/\$marker/$mark/g;
@@ -224,7 +240,7 @@ SkillsPlugin.vars.restUrl = "%SCRIPTURL{"rest"}%";
 JS
     _addHeads($jsVars);
 
-    return $out;
+    return $out._genTooltips();
 }
 
 # creates a form allowing users to edit their skills
@@ -244,7 +260,7 @@ SkillsPlugin.vars.restUrl = "%SCRIPTURL{"rest"}%";
 JS
     _addHeads($jsVars);
 
-    return $out;
+    return $out._genTooltips();
 }
 
 sub _tagUserSkills {
@@ -290,6 +306,7 @@ sub _tagUserSkills {
       ;    # create namespace in JS
 
     my $repeatedLine;
+    my $levels = _getLevels();
 
     my $itCategories = $skills->eachCat;
     while ( $itCategories->hasNext() ) {
@@ -328,7 +345,7 @@ sub _tagUserSkills {
                 $lineOut .= $tmplSkill;
 
                 # rating
-                my $i = 0;
+                my $i = 1;
                 while ( $i < $obj_userSkill->rating ) {
                     my $ratingOut = $tmplRating;
                     $ratingOut =~ s/%RATING%/&nbsp;/g;
@@ -341,7 +358,7 @@ sub _tagUserSkills {
                 $ratingOut =~ s/%RATINGDEF%/class='skillsRating'/g;
                 $lineOut .= $ratingOut;
                 $i++;
-                while ( $i <= 4 ) {
+                while ( $i <= $#$levels ) {
                     my $ratingOut = $tmplRating;
                     $ratingOut =~ s/%RATING%/&nbsp;/g;
                     $ratingOut =~ s/%RATINGDEF%//g;
@@ -421,7 +438,7 @@ sub _tagUserSkills {
     $jsVars .= 'SkillsPlugin.vars.viewUserSkills = 1;';
     _addHeads($jsVars);
 
-    return $out;
+    return $out._genTooltips();
 }
 
 sub _tagSearchForm {
@@ -436,7 +453,7 @@ SkillsPlugin.vars.searchSkills = 1;
 SkillsPlugin.vars.restUrl = "%SCRIPTURL{"rest"}%";
 JS
 
-    return $out;
+    return $out._genTooltips();
 }
 
 sub _tagBrowseSkills {
@@ -522,6 +539,7 @@ sub _tagBrowseSkills {
 #return "hi";
 
     my $allUsers = $userSkills->allUsers();
+    my $levels = _getLevels();
 
     my $itCategories = $skills->eachCat;
     while ( $itCategories->hasNext() ) {
@@ -575,7 +593,7 @@ sub _tagBrowseSkills {
                     $repeatedLine =~ s/%USERICON%/$open/g;
 
                     # rating
-                    my $i = 0;
+                    my $i = 1;
                     while ( $i < $obj_userSkill->rating ) {
                         my $ratingOut = $tmplRating;
                         $ratingOut =~ s/%RATING%/&nbsp;/g;
@@ -588,7 +606,7 @@ sub _tagBrowseSkills {
                     $ratingOut =~ s/%RATINGDEF%/class='skillsRating'/g;
                     $repeatedLine .= $ratingOut;
                     $i++;
-                    while ( $i <= 4 ) {
+                    while ( $i <= $#$levels ) {
                         my $ratingOut = $tmplRating;
                         $ratingOut =~ s/%RATING%/&nbsp;/g;
                         $ratingOut =~ s/%RATINGDEF%//g;
@@ -668,7 +686,7 @@ sub _tagBrowseSkills {
     $jsVars .= 'SkillsPlugin.vars.browseSkills = 1;';
     _addHeads($jsVars);
 
-    return $out;
+    return $out._genTooltips();
 }
 
 # ========================= REST
@@ -678,14 +696,15 @@ sub _restAddNewCategory {
 
     _Debug('REST handler: addNewCategory');
 
+    my $request = Foswiki::Func::getCgiQuery();
     my ( $web, $topic ) =
       Foswiki::Func::normalizeWebTopicName( undef,
-        Foswiki::Func::getCgiQuery()->param('topic') );
+        $request->param('topic') );
 
-    my $newCat = Foswiki::Func::getCgiQuery()->param('newcategory');
+    my $newCat = $request->param('newcategory');
 
     unless ( Foswiki::Func::isAnAdmin() ) {
-        if ( my $pref = Foswiki::Func::getPreferencesValue('ALLOWADDSKILLS') ) {
+        if ( my $pref = Foswiki::Func::getPreferencesValue('SKILLSPLUGIN_ALLOWADDSKILLS') ) {
             my @allowedUsers = split( /,/, $pref );
             my $user = Foswiki::Func::getWikiName();
             return _returnFromRest( $web, $topic,
@@ -694,6 +713,7 @@ sub _restAddNewCategory {
         }
     }
 
+    my $description = 
     require Foswiki::Plugins::SkillsPlugin::SkillsStore;
     my $error =
       Foswiki::Plugins::SkillsPlugin::SkillsStore->new()->addNewCategory($newCat);
@@ -711,17 +731,18 @@ sub _restRenameCategory {
 
     _Debug('REST handler: renameCategory');
 
+    my $request = Foswiki::Func::getCgiQuery();
     my ( $web, $topic ) =
       Foswiki::Func::normalizeWebTopicName( undef,
-        Foswiki::Func::getCgiQuery()->param('topic') );
+        $request->param('topic') );
 
     return _returnFromRest('Error - user is not an admin')
       unless Foswiki::Func::isAnAdmin();    # check admin
 
-    my $oldCat = Foswiki::Func::getCgiQuery()->param('oldcategory')
+    my $oldCat = $request->param('oldcategory')
       || return _returnFromRest( $web, $topic,
         "'oldcategory' parameter is required'" );
-    my $newCat = Foswiki::Func::getCgiQuery()->param('newcategory')
+    my $newCat = $request->param('newcategory')
       || return _returnFromRest( $web, $topic,
         "'newcategory' parameter is required'" );
 
@@ -751,11 +772,12 @@ sub _restRenameCategory {
 sub _restDeleteCategory {
     _Debug('REST handler: deleteCategory');
 
-    my $cat = Foswiki::Func::getCgiQuery()->param('oldcategory');
+    my $request = Foswiki::Func::getCgiQuery();
+    my $cat = $request->param('oldcategory');
 
     my ( $web, $topic ) =
       Foswiki::Func::normalizeWebTopicName( undef,
-        Foswiki::Func::getCgiQuery()->param('topic') );
+        $request->param('topic') );
 
     return _returnFromRest('Error - user is not an admin')
       unless Foswiki::Func::isAnAdmin();    # check admin
@@ -790,15 +812,16 @@ sub _restAddNewSkill {
 
     _Debug('REST handler: addNewCategory');
 
+    my $request = Foswiki::Func::getCgiQuery();
     my ( $web, $topic ) =
       Foswiki::Func::normalizeWebTopicName( undef,
-        Foswiki::Func::getCgiQuery()->param('topic') );
+        $request->param('topic') );
 
-    my $newSkill = Foswiki::Func::getCgiQuery()->param('newskill');
-    my $cat      = Foswiki::Func::getCgiQuery()->param('incategory');
+    my $newSkill = $request->param('newskill');
+    my $cat      = $request->param('incategory');
 
     unless ( Foswiki::Func::isAnAdmin() ) {
-        if ( my $pref = Foswiki::Func::getPreferencesValue('ALLOWADDSKILLS') ) {
+        if ( my $pref = Foswiki::Func::getPreferencesValue('SKILLSPLUGIN_ALLOWADDSKILLS') ) {
             my @allowedUsers = split( /,/, $pref );
             my $user = Foswiki::Func::getWikiName();
             return _returnFromRest( $web, $topic,
@@ -825,17 +848,18 @@ sub _restAddNewSkill {
 sub _restRenameSkill {
     _Debug('REST handler: renameSkill');
 
+    my $request = Foswiki::Func::getCgiQuery();
     my ( $web, $topic ) =
       Foswiki::Func::normalizeWebTopicName( undef,
-        Foswiki::Func::getCgiQuery()->param('topic') );
+        $request->param('topic') );
 
     return _returnFromRest('Error - user is not an admin')
       unless Foswiki::Func::isAnAdmin();    # check admin
 
     my ( $category, $oldSkill ) =
-      split( /\|/, Foswiki::Func::getCgiQuery()->param('oldskill') )
+      split( /\|/, $request->param('oldskill') )
       ;                                   # oldskill looks like Category|Skill
-    my $newSkill = Foswiki::Func::getCgiQuery()->param('newskill');
+    my $newSkill = $request->param('newskill');
 
     # rename in skills.txt
     require Foswiki::Plugins::SkillsPlugin::SkillsStore;
@@ -865,17 +889,18 @@ sub _restRenameSkill {
 sub _restMoveSkill {
     _Debug('REST handler: moveSkill');
 
+    my $request = Foswiki::Func::getCgiQuery();
     my ( $web, $topic ) =
       Foswiki::Func::normalizeWebTopicName( undef,
-        Foswiki::Func::getCgiQuery()->param('topic') );
+        $request->param('topic') );
 
     return _returnFromRest('Error - user is not an admin')
       unless Foswiki::Func::isAnAdmin();    # check admin
 
     my ( $oldCat, $skill ) =
-      split( /\|/, Foswiki::Func::getCgiQuery()->param('movefrom') )
+      split( /\|/, $request->param('movefrom') )
       ;                                   # movefrom looks like Category|Skill
-    my $newCat = Foswiki::Func::getCgiQuery()->param('moveto');
+    my $newCat = $request->param('moveto');
 
     _Debug("$skill, $oldCat, $newCat");
 
@@ -907,15 +932,16 @@ sub _restMoveSkill {
 sub _restDeleteSkill {
     _Debug('REST handler: deleteSkill');
 
+    my $request = Foswiki::Func::getCgiQuery();
     my ( $web, $topic ) =
       Foswiki::Func::normalizeWebTopicName( undef,
-        Foswiki::Func::getCgiQuery()->param('topic') );
+        $request->param('topic') );
 
     return _returnFromRest('Error - user is not an admin')
       unless Foswiki::Func::isAnAdmin();    # check admin
 
     my ( $cat, $oldSkill ) =
-      split( /\|/, Foswiki::Func::getCgiQuery()->param('oldskill') )
+      split( /\|/, $request->param('oldskill') )
       ;                                   # oldskill looks like Category|Skill
 
     # delete in skills.txt
@@ -945,6 +971,7 @@ sub _restDeleteSkill {
 sub _restGetCategories {
     my ( $session, $plugin, $verb, $response ) = @_;
 
+    my $request = Foswiki::Func::getCgiQuery();
     _Debug('REST handler: getCategories');
 
     require Foswiki::Plugins::SkillsPlugin::SkillsStore;
@@ -960,7 +987,8 @@ sub _restGetSkills {
 
     _Debug('REST handler: getSkills');
 
-    my $cat = Foswiki::Func::getCgiQuery()->param('category');
+    my $request = Foswiki::Func::getCgiQuery();
+    my $cat = $request->param('category');
     require Foswiki::Plugins::SkillsPlugin::SkillsStore;
     my $categories = Foswiki::Plugins::SkillsPlugin::SkillsStore->new()
       ->eachCat();
@@ -984,9 +1012,8 @@ sub _restGetSkills {
 sub _restGetSkillsAndDetails {
     my ( $session, $plugin, $verb, $response ) = @_;
 
-    _Debug('REST handler: getSkillsAndDetails');
-
-    my $cat   = Foswiki::Func::getCgiQuery()->param('category');
+    my $request = Foswiki::Func::getCgiQuery();
+    my $cat   = $request->param('category');
 
     my $user = Foswiki::Func::getWikiName();
 
@@ -1030,9 +1057,7 @@ sub _restGetSkillsAndDetails {
 sub _restSaveUserChanges {
     my ( $session, $plugin, $verb, $response ) = @_;
 
-    _Debug('REST handler: getSkillDetails');
-
-    my $query = Foswiki::Func::getCgiQuery();
+    my $request = Foswiki::Func::getCgiQuery();
     my $user = Foswiki::Func::getWikiName();
 
     require Foswiki::Plugins::SkillsPlugin::UserSkills;
@@ -1048,9 +1073,9 @@ sub _restSaveUserChanges {
         my $cat = $obj_cat->name();
         my $skills = $obj_cat->getSkillNames();
         foreach my $skill (@$skills) {
-            my $rating = $query->param(
+            my $rating = $request->param(
                 "editall.$cat.$skill-rating");
-            my $comment = $query->param(
+            my $comment = $request->param(
                 "editall.$cat.$skill-comment");
             if (defined $rating || defined $comment) {
                 $error = $us->addEditUserSkill(
@@ -1077,8 +1102,9 @@ sub _restGetSkillDetails {
 
     _Debug('REST handler: getSkillDetails');
 
-    my $cat   = Foswiki::Func::getCgiQuery()->param('category');
-    my $skill = Foswiki::Func::getCgiQuery()->param('skill');
+    my $request = Foswiki::Func::getCgiQuery();
+    my $cat   = $request->param('category');
+    my $skill = $request->param('skill');
 
     my $user = Foswiki::Func::getWikiName();
 
@@ -1105,10 +1131,11 @@ sub _restAddEditSkill {
 
     _Debug('REST handler: getSkillDetails');
 
-    my $cat     = Foswiki::Func::getCgiQuery()->param('category');
-    my $skill   = Foswiki::Func::getCgiQuery()->param('skill');
-    my $rating  = Foswiki::Func::getCgiQuery()->param('addedit-skill-rating');
-    my $comment = Foswiki::Func::getCgiQuery()->param('comment');
+    my $request = Foswiki::Func::getCgiQuery();
+    my $cat     = $request->param('category');
+    my $skill   = $request->param('skill');
+    my $rating  = $request->param('addedit-skill-rating');
+    my $comment = $request->param('comment');
 
     die unless defined($cat) && defined($skill);
 
@@ -1130,10 +1157,11 @@ sub _restAddEditSkill {
 }
 
 sub _restSearch {
-    my $cat        = Foswiki::Func::getCgiQuery()->param('category');
-    my $skill      = Foswiki::Func::getCgiQuery()->param('skill');
-    my $ratingFrom = Foswiki::Func::getCgiQuery()->param('ratingFrom');
-    my $ratingTo   = Foswiki::Func::getCgiQuery()->param('ratingTo');
+    my $request = Foswiki::Func::getCgiQuery();
+    my $cat        = $request->param('category');
+    my $skill      = $request->param('skill');
+    my $ratingFrom = $request->param('ratingFrom');
+    my $ratingTo   = $request->param('ratingTo');
 
     return 'Error: Category and Skill must be defined'
       unless ( $skill and $cat );
@@ -1402,34 +1430,15 @@ sub _addHeads {
     eval 'use Foswiki::Contrib::YahooUserInterfaceContrib';
     if ( !$@ ) {
         _Debug('YahooUserInterfaceContrib is installed, using local files');
-        $yui =
-'<script type="text/javascript" src="%PUBURL%/%SYSTEMWEB%/YahooUserInterfaceContrib/build/yahoo-dom-event/yahoo-dom-event.js"></script>'
-          . '<script type="text/javascript" src="%PUBURL%/%SYSTEMWEB%/YahooUserInterfaceContrib/build/connection/connection-min.js"></script>'
-          . '<script type="text/javascript" src="%PUBURL%/%SYSTEMWEB%/YahooUserInterfaceContrib/build/element/element-beta-min.js"></script>'
-          . '<script type="text/javascript" src="%PUBURL%/%SYSTEMWEB%/YahooUserInterfaceContrib/build/json/json-min.js"></script>'
-          . '<script type="text/javascript" src="%PUBURL%/%SYSTEMWEB%/YahooUserInterfaceContrib/build/animation/animation-min.js"></script>'
-          . '<script type="text/javascript" src="%PUBURL%/%SYSTEMWEB%/YahooUserInterfaceContrib/build/container/container-min.js"></script>'
-
-          # style
-          . '<link rel="stylesheet" type="text/css" href="%PUBURL%/%SYSTEMWEB%/YahooUserInterfaceContrib/build/container/assets/skins/sam/container.css" />';
-    }
-    else {
+        $yui = "%PUBURL%/%SYSTEMWEB%/YahooUserInterfaceContrib";
+    } else {
         _Debug(
             'YahooUserInterfaceContrib is not installed, using Yahoo servers');
-        $yui =
-'<script type="text/javascript" src="http://yui.yahooapis.com/2.5.2/build/yahoo-dom-event/yahoo-dom-event.js"></script>'
-          . '<script type="text/javascript" src="http://yui.yahooapis.com/2.5.2/build/connection/connection-min.js"></script>'
-          . '<script type="text/javascript" src="http://yui.yahooapis.com/2.5.2/build/element/element-beta-min.js"></script>'
-          . '<script type="text/javascript" src="http://yui.yahooapis.com/2.5.2/build/json/json-min.js"></script>'
-          . '<script type="text/javascript" src="http://yui.yahooapis.com/2.5.2/build/animation/animation-min.js"></script>'
-          . '<script type="text/javascript" src="http://yui.yahooapis.com/2.5.2/build/container/container-min.js"></script>'
-
-          # style
-          . '<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.5.2/build/container/assets/skins/sam/container.css" />';
+        $yui = "http://yui.yahooapis.com/2.5.2";
     }
 
-    # css
-    my $urlPath = Foswiki::Func::getPubUrlPath() . '/' . $Foswiki::cfg{SystemWebName} . '/' . $pluginName;
+    my $urlPath = '%PUBURLPATH%/%SYSTEMWEB%/SkillsPlugin';
+    my $restPath = '%SCRIPTURL{"rest"}%/SkillsPlugin';
 
     # add to head
     # FIXME: use the 'requires' parameter? for YUI?
@@ -1437,7 +1446,13 @@ sub _addHeads {
 <style type="text/css" media="all">
  \@import url("$urlPath/style.css");
 </style>
-$yui
+<script type="text/javascript" src="$yui/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="$yui/build/connection/connection-min.js"></script>
+<script type="text/javascript" src="$yui/build/element/element-beta-min.js"></script>
+<script type="text/javascript" src="$yui/build/json/json-min.js"></script>
+<script type="text/javascript" src="$yui/build/animation/animation-min.js"></script>
+<script type="text/javascript" src="$yui/build/container/container-min.js"></script>
+<link rel="stylesheet" type="text/css" href="$yui/build/container/assets/skins/sam/container.css" />
 <style>
 .skillsSpinner {
  width: 16px;
@@ -1516,13 +1531,13 @@ sub _returnFromRest {
 # =========================
 sub _Debug {
     my $text = shift;
-    my $debug = $Foswiki::cfg{Plugins}{$pluginName}{Debug} || 0;
-    Foswiki::Func::writeDebug("- Foswiki::Plugins::${pluginName}: $text") if $debug;
+    my $debug = $Foswiki::cfg{Plugins}{SkillsPlugin}{Debug} || 0;
+    Foswiki::Func::writeDebug("- SkillsPlugin: $text") if $debug;
 }
 
 sub _Warn {
     my $text = shift;
-    Foswiki::Func::writeWarning("- Foswiki::Plugins::${pluginName}: $text");
+    Foswiki::Func::writeWarning("- SkillsPlugin: $text");
 }
 
 # logs actions
@@ -1531,7 +1546,7 @@ sub _Log {
     return;
     my ($message) = @_;
 
-    my $logAction = $Foswiki::cfg{Plugins}{$pluginName}{Log} || 1;
+    my $logAction = $Foswiki::cfg{Plugins}{SkillsPlugin}{Log} || 1;
     return unless $logAction;
 
     my $user = Foswiki::Func::getWikiName();

@@ -23,7 +23,7 @@ require Foswiki::Plugins::SkillsPlugin::Skill;
 my $totalCategories;
 
 sub new {
-    my ( $class, $name, $skills ) = @_;
+    my ( $class, $name, $skills, $desc, $skilldescs ) = @_;
 
     my $self = {};
 
@@ -35,6 +35,8 @@ sub new {
 
     $self->name($name);
     $self->populateSkills($skills);
+    $self->{description} = $desc;
+    $self->{skills_descs} = $skilldescs;
 
     ++${ $self->{"_TOTAL"} };
 
@@ -46,6 +48,17 @@ sub name {
     my $self = shift;
     if (@_) { $self->{NAME} = shift }
     return $self->{NAME};
+}
+
+sub description {
+    my ($self, $skill) = @_;
+    if( defined $skill ) {
+        return "'$skill' has no description" unless $self->{skill_descs};
+        return $self->{skill_descs}->{$skill};;
+    } else {
+        return $self->{description}
+          || "$self->{NAME} has no description";
+    }
 }
 
 # return SKILLS array

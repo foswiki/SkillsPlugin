@@ -36,6 +36,11 @@ Create a new category.
 <div class="foswikiFormStep">
 Name of new category: %BR% <input name="newcategory" type="text" class="twikiInputField" size="20" value="%URLPARAM{"createcategory"}%" />
 </div>
+<div class="foswikiFormStep">
+<strong>Description</strong><br />
+<textarea name="description" class="foswikiTextarea" cols=80 rows=5>
+</textarea>
+</div>
 <div class="foswikiFormStep foswikiLast">
 <input name="createcategory" type="submit" class="foswikiSubmit" value="%MAKETEXT{"Create"}%" />
 <input type="hidden" name="topic" value="%WEB%.%TOPIC%" />

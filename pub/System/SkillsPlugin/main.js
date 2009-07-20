@@ -4,7 +4,9 @@ if( !SkillsPlugin )
 SkillsPlugin.main = function() {
     
     return {
-        
+        tt_map: {},
+        tt_els: [],
+
         init: function() {
 
         },
@@ -131,7 +133,7 @@ SkillsPlugin.main = function() {
         
             var obCallbacks = {
                 success: function(o){
-                    obData = YAHOO.lang.JSON.parse(o.responseText);
+                    var obData = YAHOO.lang.JSON.parse(o.responseText);
                     fnCallback( obData, category );
                 },
                 failure: function(o){_connectionFailure(o)}
@@ -150,13 +152,40 @@ SkillsPlugin.main = function() {
         
             var obCallbacks = {
                 success: function(o){
-                    obSkillDetails = YAHOO.lang.JSON.parse(o.responseText);
+                    var obSkillDetails = YAHOO.lang.JSON.parse(o.responseText);
                     fnCallback( obSkillDetails );
                 },
                 failure: function(o){_connectionFailure(o)}
             }
             var request = YAHOO.util.Connect.asyncRequest(
                 'GET', url, obCallbacks);
+        },
+
+        tipify: function(el, cat, skill) {
+            var id = cat;
+            if (skill != null)
+                id += '.' + skill;
+            if (this.tt_map[id] == null)
+                this.tt_map[id] = new Array();
+            this.tt_map[id].push(el.id);
+        },
+
+        genTips: function() {
+            var el = document.getElementsByTagName('BODY');
+            el[0].className = 'yui-skin-sam';
+            this.tooltips = new Array();
+            for (var ttid in this.tt_map) {
+                var div = document.getElementById(ttid);
+                if (div == null) {
+                    continue;
+                }
+                var text = div.innerHTML;
+                var ids = this.tt_map[ttid].join(',');
+                var ttel = new YAHOO.widget.Tooltip(
+                    ttid + "Tooltip",
+                    { context: this.tt_map[ttid], text: text } );
+                delete this.tt_map[ttid];
+            }
         },
 
         submit: function(rest, formid, messid, fnCallback) {
@@ -254,6 +283,14 @@ SkillsPlugin.main = function() {
                 10
                 );
             obAnim.animate();
+        },
+
+        createTooltips: function() {
+            var yuiEl = new YAHOO.util.Element();
+            var els = yuiEl.getElementsByClassName('skillsTipped');
+            for (var i = 0; i < els.length; i++) {
+                this._setTooltip(els[i]); 
+            }
         }
     }
 }();
@@ -529,6 +566,7 @@ SkillsPlugin.editAllSkills = function () {
                 var tr = document.createElement('tr');
                 tr.className = 'skillsCatTable_category';
                 var td = document.createElement('td');
+                td.className = "foswikiAlert";
                 td.appendChild(
                     document.createTextNode("Please log in..."));
                 tr.appendChild(td);
@@ -558,6 +596,7 @@ SkillsPlugin.editAllSkills = function () {
 
                     var id = 'editall.' + arCats[i];
                     tr.id = id;
+                    SkillsPlugin.main.tipify(tr, arCats[i]);
 
                     var img = document.createElement('div');
                     img.className = 'skillsSpinner';
@@ -592,11 +631,14 @@ SkillsPlugin.editAllSkills = function () {
                                 tr.appendChild(th);
                                 th.appendChild(
                                     document.createTextNode(skill));
+                                th.id = skid + 'th';
+                                SkillsPlugin.main.tipify(th, cat, skill);
                                 // Radio buttons for the priority
                                 var prios = [ 1, 2, 3, 4, 0 ];
                                 for (var k in prios) {
                                     var td = document.createElement('td');
                                     tr.appendChild(td);
+                                    td.className = "skillsCatTable";
                                     var inp = document.createElement('input');
                                     inp.className = "skillsCatTable skillsRating skillsControl";
                                     td.appendChild(inp);
@@ -634,6 +676,7 @@ SkillsPlugin.editAllSkills = function () {
                                     }, this, true);
                                 inp.size = 15;
                             }
+                            SkillsPlugin.main.genTips();
                         });
                 }
                 SkillsPlugin.main.unlockForm();

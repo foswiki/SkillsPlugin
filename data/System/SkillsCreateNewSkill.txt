@@ -43,12 +43,19 @@ In category: %BR%
 %SKILLS{action="showcategories" format="<option value='$category'>$category</option>" }%
 </select>
 </div>
+<div class="foswikiFormStep">
+<strong>Description</strong><br />
+<textarea name="description" class="foswikiTextarea" cols=80 rows=5>
+</textarea>
+</div>
 <div class="foswikiFormStep foswikiLast">
 <input name="createskill" type="submit" class="foswikiSubmit" value="%MAKETEXT{"Create"}%" />
 </div>
 </div>
 </form>
 %ENDSECTION{"createskill"}%
+
+%IF{"$ SKILLSPLUGIN_SKILLSTOPIC" then="Note: You can modify existing skills by manually editing the skills topic %SKILLSPLUGIN_SKILLSTOPIC%"}%
 
 %STARTSECTION{"existingskills"}%
 Existing skills:

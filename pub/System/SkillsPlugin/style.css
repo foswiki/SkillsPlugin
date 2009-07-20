@@ -207,3 +207,7 @@ table.skillsCatTable { }
 
 /* A radio button in the skills table */
 input.skillsCatTable { }
+
+td.skillsCatTable {
+  text-align: center;
+}

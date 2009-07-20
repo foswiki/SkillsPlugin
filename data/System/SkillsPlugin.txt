@@ -63,33 +63,54 @@ The Plugin handles a =%<nop>SKILLS{}%= variable that performs different actions.
    | =prefix= | Prefix before each category. Tokens =$category=, =$n=. | none |
    | =suffix= | Suffix after each category. Tokens =$category=, =$n=. | none |
 
+---
+
+   * =%<nop>SKILLRATINGS{ ... }%= - shows a list of the skill levels, as set by %<nop>SKILLSPLUGIN_RATINGS% (see below). Parameters are:
+      * =format="..."= - set the format of each skill name, where "..." is a string that may contain the following placeholders:
+         * =$name= - the skill name. You can replace whitespace in the string by providing a replacement in brackets e.g =$name(&nbsp;)= will expand to the level name with all whitespace replaced by =&amp;nbsp=.
+         * =$value= - the numeric value of the skill level
+         * =$marker= - the selection marker
+         * Standard placeholders as described in FormatTokens
+      * =separator="$n"= - output list separator
+      * =selection="..."= - Entry to be selected in list (integer). If one of the skills matches this selection, then =$marker= in the =format= will be expanded.
+      * =marker="selected" - Text for =$marker= if the item matches =selection=
+   * Example: (if plugin is enabled)
+   =%<nop>SKILLRATINGS{"$name(+)=$value$marker" separator="; " selection="3" marker=" (selected)"}%= expands to %SKILLRATINGS{"$name(+)=$value$marker" separator="; " selection="3" marker=" (selected)"}%
+
 ---++ Plugin Settings
 
-Plugin settings are stored as preferences variables in %LOCALSITEPREFS%.
+Plugin settings are stored as preferences variables in %LOCALSITEPREFS% (or in Web<nop>Preferences, or in individual topics).
 
-   * By default, anyone can add new skills/categories. To limit this to a list of people/groups, add the following to %LOCALSITEPREFS%:
-      * Set ALLOWADDSKILLS = Main.UnknownUser
+   * By default, skills are taken from / added to an external file. You
+     can use a standard Foswiki topic instead, by defining the
+     =SKILLSPLUGIN_SKILLSTOPIC= preference to be a fully qualified topic
+     name e.g.
+      * =S<nop>et SKILLSPLUGIN_SKILLSTOPIC = My<nop>Web.My<nop>SkillSet=
+     Normal Foswiki protections on this topic are respected.
 
-   * You can override the default skill levels by setting the global
-     preference =SKILLSPLUGIN_RATINGS  to a comma-separated list of
-     level names e.g.
-      * Set SKILLSPLUGIN_RATINGS = None,Child,Adolescent,Adult,Crusty
-
-   * By default, the styles using in the plugins forms are found in the =style.css=, attached to this topic. To define your own style sheet, add the following to %LOCALSITEPREFS%:
-      * Set STYLEURL = %PUBURL%/%SYSTEMWEB%/SkillsPlugin/style.css
-
+   * You can override the default skill levels by setting the preference
+     =SKILLSPLUGIN_RATINGS= to a comma-separated list of level names e.g.
+      * =S<nop>et SKILLSPLUGIN_RATINGS = None,Child,Adolescent,Adult,Crusty=
+     The default is =None,Ancient Knowledge,Working Knowledge,Expert,Guru=
+<!--
    * Short description of plugin
       * Set SHORTDESCRIPTION = Allows users to list their skills, which can then be searched
+-->
 
 ---++ Installation Instructions
 
 %$INSTALL_INSTRUCTIONS%
 
 Next:
-   * If needed, customise the styles by creating a new style sheet and adding the setting above to %LOCALSITEPREFS%
+
    * Start adding some categories and skills
       * SkillsCreateNewCategory
       * SkillsCreateNewSkill
+
+IMPORTANT! If you used the ALLOWADDSKILLS preference with a prior version,
+please note that the name of this preference has changed to
+SKILLSPLUGIN_ALLOWADDSKILLS. This is to avoid possible conflicts with names
+defined by other Foswiki extensions.
 
 ---++ Plugin Info
 

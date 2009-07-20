@@ -26,7 +26,10 @@
     <a href='%SCRIPTURL{view}%/%SYSTEMWEB%/SkillsPlugin'>Browse All Skills</a>
    </th>
   </tr>
-  %TMPL:P{"skills:std-rating-heads"}%
+  <tr>
+   <td style="padding-left:120px;"></td>
+   %SKILLRATINGS{format="<td class='skillsRatingHeader'>$name</td>" from="1"}%
+  </tr>
  </thead>
  <tbody>
   <noautolink>

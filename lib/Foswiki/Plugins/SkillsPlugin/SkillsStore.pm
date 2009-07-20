@@ -32,14 +32,12 @@ sub new {
     return bless( $self, $class );
 }
 
-# loads the categories and skills from the file
-sub _load {
-    my $self = shift;
-
+# Deprecated: read skills from file in work area
+sub _getSkillsFromWorking {
     my $file = Foswiki::Func::getWorkArea('SkillsPlugin') . '/skills.txt';
-    
+
     _Debug('reading skills.txt - ' . $file);
-    
+
     my $fh;
     unless( open( $fh, '<', $file ) ) {
         # file could not be opened
@@ -62,8 +60,69 @@ sub _load {
           Foswiki::Plugins::SkillsPlugin::Category->new( $cat, \@skills );
         push @_categories, $obj_cat;
     }
-    
+
     close( $fh );
+}
+
+# loads the categories and skills from the topic (or file)
+sub _load {
+    my $self = shift;
+
+    my $topic = Foswiki::Func::getPreferencesValue('SKILLSPLUGIN_SKILLSTOPIC');
+
+    if (!$topic) {
+        _getSkillsFromWorking();
+    } else {
+
+        (my $web, $topic) = Foswiki::Func::normalizeWebTopicName(
+            undef, $topic);
+
+        if (!Foswiki::Func::topicExists($web, $topic)) {
+            print STDERR "Cannot find SKILLSPLUGIN_SKILLSTOPIC $web.$topic";
+            _getSkillsFromWorking();
+        }
+        my ($meta, $text) = Foswiki::Func::readTopic( $web, $topic );
+        unless (Foswiki::Func::checkAccessPermission(
+            'VIEW', Foswiki::Func::getWikiName(),
+            $text, $topic, $web, $meta )) {
+            die "Cannot view SKILLSPLUGIN_SKILLSTOPIC $web.$topic";
+        }
+
+        my (@cats, %skills, %catdescs, %skilldescs);
+        my ($cat, $skill);
+
+        foreach my $line (split(/\r?\n/, $text)) {
+
+            #   * Category
+            #     Description
+            #      * Skill
+            #        Description
+            if ($cat && $line =~ /^---\+\+\s*(.*)$/) {
+                $skill = $1;
+                push(@{$skills{$cat}}, $skill)
+                  unless defined $skilldescs{$cat}->{$skill};
+                $skilldescs{$cat}->{$skill} = '';
+            } elsif ($line =~ /^---\+\s*(.*)$/) {
+                $cat = $1;
+                push(@cats, $cat) unless defined $catdescs{$cat};
+                $skill = '';
+                $catdescs{$cat} = '';
+                $skilldescs{$cat} = {};
+            } elsif ($cat && $skill && $line =~ /^\s*(\S+.*)\s*$/) {
+                $skilldescs{$cat}->{$skill} .= " $1";
+            }
+            elsif ($cat && $line =~ /^\s*(\S+.*)$/) {
+                $catdescs{$cat} .= " $1";
+            }
+        }
+
+        foreach $cat (@cats) {
+            my $obj_cat =
+              Foswiki::Plugins::SkillsPlugin::Category->new(
+                  $cat, $skills{$cat}, $catdescs{$cat}, $skilldescs{$cat});
+            push @_categories, $obj_cat;
+        }
+    }
 
     $_loaded = 1;
 
@@ -99,13 +158,13 @@ sub eachCat {
 }
 
 # saves the skills to file
-sub save {
+sub _saveSkillsToWorking {
     my $self = shift;
 
     _Debug('Saving skills.txt');
 
     my $out =
-"# This file is generated. Do NOT edit unless you are sure what your doing!\n";
+"# This file is generated. Do NOT edit unless you are sure what you're doing!\n";
 
     my $it = $self->eachCat;
     while ( $it->hasNext() ) {
@@ -117,6 +176,56 @@ sub save {
     my $workArea = Foswiki::Func::getWorkArea('SkillsPlugin');
 
     Foswiki::Func::saveFile( $workArea . '/skills.txt', $out );
+}
+
+sub save {
+    my $self = shift;
+
+    my $topic = Foswiki::Func::getPreferencesValue('SKILLSPLUGIN_SKILLSTOPIC');
+
+    if (!$topic) {
+        _saveSkillsToWorking();
+    } else {
+        (my $web, $topic) = Foswiki::Func::normalizeWebTopicName(
+            undef, $topic);
+
+        unless (Foswiki::Func::checkAccessPermission(
+            'CHANGE', Foswiki::Func::getWikiName(),
+            undef, $topic, $web )) {
+            die "Cannot change SKILLSPLUGIN_SKILLSTOPIC $web.$topic";
+        }
+
+        my ($meta, $text);
+        if (Foswiki::Func::topicExists($web, $topic)) {
+            ($meta, $text) = Foswiki::Func::readTopic($web, $topic);
+            # Hack off the old categories
+            $text =~ s/(\n|^)---\+.*$//s;
+        } else {
+            $text = <<HERE;
+This topic is maintained by the %SYSTEMWEB%.SkillsPlugin, and will be
+rewritten by the plugin if the set of skills changes.
+
+Each category is defined by a top-level heading, followed by any number of
+skills in second-level headings. Both categories and skills can be followed
+by a block of text that describes the category/skill.
+
+HERE
+        }
+
+        my $it = $self->eachCat;
+        while ( $it->hasNext() ) {
+            my $obj_cat = $it->next();
+            $text .= "---+ ".$obj_cat->name()."\n";
+            $text .= $obj_cat->description()."\n";
+            foreach my $skill (@{ $obj_cat->getSkillNames() } ) {
+                $text .= "---++ $skill\n";
+                $text .= $obj_cat->description($skill)."\n";
+            }
+        }
+
+        Foswiki::Func::saveTopic( $web, $topic, $meta, $text);
+    }
+    return 1;
 }
 
 # adds new skill to category
