@@ -81,17 +81,43 @@ The Plugin handles a =%<nop>SKILLS{}%= variable that performs different actions.
 
 Plugin settings are stored as preferences variables in %LOCALSITEPREFS% (or in Web<nop>Preferences, or in individual topics).
 
-   * By default, skills are taken from / added to an external file. You
-     can use a standard Foswiki topic instead, by defining the
-     =SKILLSPLUGIN_SKILLSTOPIC= preference to be a fully qualified topic
-     name e.g.
+   * __RECOMMENDED:__ By default, skills are taken from / added to an
+     external file. You can use a standard Foswiki topic instead, by
+     defining the =SKILLSPLUGIN_SKILLSTOPIC= preference to be a fully
+     qualified topic name e.g.
       * =S<nop>et SKILLSPLUGIN_SKILLSTOPIC = My<nop>Web.My<nop>SkillSet=
-     Normal Foswiki protections on this topic are respected.
+     Normal Foswiki protections on this topic are respected. You *must*
+     use a skills topic if you want skill descriptions to appear as tooltips.
 
    * You can override the default skill levels by setting the preference
      =SKILLSPLUGIN_RATINGS= to a comma-separated list of level names e.g.
       * =S<nop>et SKILLSPLUGIN_RATINGS = None,Child,Adolescent,Adult,Crusty=
      The default is =None,Ancient Knowledge,Working Knowledge,Expert,Guru=
+
+%X% __IMPORTANT!__ If you used the ALLOWADDSKILLS preference with a prior version,
+please note that this preference has been removed. Define
+SKILLSPLUGIN_SKILLSTOPIC instead, and use standard Foswiki permissions to
+control access to it.
+
+---+++ Format of the SKILLSPLUGIN_SKILLSTOPIC
+Each category is defined as a first-level heading, using ---+, and skills in that category as second level (---++) headings. Category and skill descriptions
+should follow immediately after the relevant heading. For example:
+<verbatim>
+All text up to the first heading will be ignored
+---+ Air Transport
+Travelling in the air
+---++ Flying a Helicopter
+Anything with a big propellor on the top
+---++ Hot Air Ballooning
+Politician-powered travel
+---+ Land Transport
+Giving in to gravity
+---++ Walking
+Good for you
+---++ Driving
+Bad for everyone else
+</verbatim>
+
 <!--
    * Short description of plugin
       * Set SHORTDESCRIPTION = Allows users to list their skills, which can then be searched
@@ -107,11 +133,6 @@ Next:
       * SkillsCreateNewCategory
       * SkillsCreateNewSkill
 
-IMPORTANT! If you used the ALLOWADDSKILLS preference with a prior version,
-please note that the name of this preference has changed to
-SKILLSPLUGIN_ALLOWADDSKILLS. This is to avoid possible conflicts with names
-defined by other Foswiki extensions.
-
 ---++ Plugin Info
 
 |  Plugin Author: | Foswiki:Main.AndrewJones |
@@ -120,7 +141,7 @@ defined by other Foswiki extensions.
 |  Plugin Release: | %$RELEASE% |
 |  Plugin Version: | %$VERSION% |
 |  Change History: | <!-- versions below in reverse order -->&nbsp; |
-|  17 Jul 2009 | Foswiki:Tasks.Item8217: add support for flat display of skills for bulk editing, added override for the hard-coded skill levels using a preference - Foswiki:Main.CrawfordCurrie |
+|  17 Jul 2009 | Foswiki:Tasks.Item8217: add support for flat display of skills for bulk editing, added override for the hard-coded skill levels using a preference. *REMOVED* =ALLOWADDSKILLS=. Foswiki:Tasks.Item8219: add descriptions of the skills and categories to easy navigation - Foswiki:Main.CrawfordCurrie |
 |  20 Mar 2009 | Foswiki:Tasks.Item1260 - Ported to Foswiki as version 1.0; Small code improvements; Update docs & screenshots |
 |  05 Feb 2009 | Complete rewrite; more scaleable; better performace; can use special characters in skill names; can use templates to change output; tested on Foswiki |
 |  14032 | Initial release |
