@@ -1,6 +1,37 @@
 %TMPL:INCLUDE{"skills"}%
+<!-- SKILLSPLUGIN - SEARCH SKILLS RESULTS
+%TMPL:DEF{"skills:searchresults:repeated:userstart"}%
+<tr>
+%TMPL:END%
 
-<!-- SKILLSPLUGIN - SEARCH SKILLS RESULTS -->
+%TMPL:DEF{"skills:searchresults:repeated:user"}%
+<td>%SKILLUSER%</td>
+%TMPL:END%
+
+%TMPL:DEF{"skills:searchresults:repeated:prerating"}%
+<td>&nbsp;</td>
+%TMPL:END%
+
+%TMPL:DEF{"skills:searchresults:repeated:postrating"}%
+<td>&nbsp;</td>
+%TMPL:END%
+
+%TMPL:DEF{"skills:searchresults:repeated:rating"}%
+<td class='skillsRating'>%ICON{stargold}%</td>
+%TMPL:END%
+
+%TMPL:DEF{"skills:searchresults:repeated:commentlink"}%
+%COMMENTLINK%
+%TMPL:END%
+
+%TMPL:DEF{"skills:searchresults:repeated:comment"}%
+<td>%TMPL:P{"skills:searchresults:repeated:commentlink"}%</td>
+%TMPL:END%
+
+%TMPL:DEF{"skills:searchresults:repeated:userend"}%
+</tr>
+%TMPL:END%
+-->
 <table id='skillsTable' class='skillsTable' cellpadding="2px" syle="margin:7px 0;">
  <thead>
   <tr>
@@ -25,7 +56,7 @@
   <tr>
    <td colspan='6'>
     <span id="search-skills-message-container" style="display:none;">
-     %SKILLMESSAGEPIC% <span id='search-skills-message'></span>
+     %ICON{info}% <span id='search-skills-message'></span>
     </span>
    </td>
   </tr>

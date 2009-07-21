@@ -98,24 +98,35 @@ sub _load {
             #      * Skill
             #        Description
             if ($cat && $line =~ /^---\+\+\s*(.*)$/) {
+                # Skill in a cat
                 $skill = $1;
                 push(@{$skills{$cat}}, $skill)
                   unless defined $skilldescs{$cat}->{$skill};
                 $skilldescs{$cat}->{$skill} = '';
             } elsif ($line =~ /^---\+\s*(.*)$/) {
+                # Top level skill
                 $cat = $1;
                 push(@cats, $cat) unless defined $catdescs{$cat};
                 $skill = '';
                 $catdescs{$cat} = '';
                 $skilldescs{$cat} = {};
             } elsif ($cat && $skill && $line =~ /^\s*(\S+.*)\s*$/) {
-                $skilldescs{$cat}->{$skill} .= " $1";
+                # Add text to the current skill
+                if ($skilldescs{$cat}->{$skill}) {
+                    $skilldescs{$cat}->{$skill} .= " $1";
+                } else {
+                    $skilldescs{$cat}->{$skill} = $1;
+                }
             }
             elsif ($cat && $line =~ /^\s*(\S+.*)$/) {
-                $catdescs{$cat} .= " $1";
+                # Add text to the current cat
+                if ($catdescs{$cat}) {
+                    $catdescs{$cat} .= " $1";
+                } else {
+                    $catdescs{$cat} = $1;
+                }
             }
         }
-
         foreach $cat (@cats) {
             my $obj_cat =
               Foswiki::Plugins::SkillsPlugin::Category->new(

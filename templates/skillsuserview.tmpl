@@ -1,23 +1,38 @@
 %TMPL:INCLUDE{"skills"}%
-
+<!-- SKILLSPLUGIN - USER SKILLS TABLE
 %TMPL:DEF{"skills:userview:head"}%<a href='%SCRIPTURL{view}%/%USERSWEB%/%SKILLUSER%'>%SKILLUSER%'s Skills</a>%TMPL:END%
+
 %TMPL:DEF{"skills:userview:footer"}%
 [[%SYSTEMWEB%.SkillsBrowseAll][Browse Skills]] | [[%SYSTEMWEB%.SkillsEditMySkills][Edit Your Skills]] | [[%SYSTEMWEB%.SkillsSearch][SearchSkills]]
 %TMPL:END%
-%TMPL:DEF{"skills:userview:head"}%<a href='%SCRIPTURL{view}%/%USERSWEB%/%WIKINAME%'>%WIKINAME%'s Skills</a>%TMPL:END%
-%TMPL:DEF{"skills:userview:repeated:category"}%<tr class='skillsContent'><th colspan='6'>
-%SKILLTWISTY% %CATEGORY%</th></tr>%TMPL:END%
-%TMPL:DEF{"skills:userview:repeated:skillcontainerstart"}%<tbody %SKILLCONTDEF%>%TMPL:END%
-%TMPL:DEF{"skills:userview:repeated:skillstart"}%<tr>%TMPL:END%
-%TMPL:DEF{"skills:userview:repeated:skill"}%<td>%SKILLICON% %SKILL%</td>%TMPL:END%
-%TMPL:DEF{"skills:userview:repeated:rating"}%<td %RATINGDEF%>%RATING%</td>%TMPL:END%
-%TMPL:DEF{"skills:userview:repeated:commentlink"}%%COMMENTLINK%%TMPL:END%
-%TMPL:DEF{"skills:userview:repeated:comment"}%<td>
-%TMPL:P{"skills:userview:repeated:commentlink"}%</td>%TMPL:END%
-%TMPL:DEF{"skills:userview:repeated:skillend"}%</tr>%TMPL:END%
-%TMPL:DEF{"skills:userview:repeated:skillcontainerend"}%</tbody>%TMPL:END%
 
-<!-- SKILLSPLUGIN - USER SKILLS TABLE -->
+%TMPL:DEF{"skills:userview:head"}%<a href='%SCRIPTURL{view}%/%USERSWEB%/%WIKINAME%'>%WIKINAME%'s Skills</a>%TMPL:END%
+
+%TMPL:DEF{"skills:userview:repeated:category"}%<tr class='skillsContent'><th colspan='6'>
+<span id="%CATEGORYID%_twistyImage" class="SkillsPlugin-twisty-image">%ICON{toggleclose}%</span>
+<span id="%CATEGORYID%_twistyLink" class="SkillsPlugin-twisty-link">
+%CATEGORYNAME%</span></th></tr>%TMPL:END%
+
+%TMPL:DEF{"skills:userview:repeated:skillcontainerstart"}%<tbody class="%CATEGORYID%_twist">%TMPL:END%
+
+%TMPL:DEF{"skills:userview:repeated:skillstart"}%<tr>%TMPL:END%
+
+%TMPL:DEF{"skills:userview:repeated:skill"}%<td>%ICON{dot_ur}% %SKILLNAME%
+</td>%TMPL:END%
+
+%TMPL:DEF{"skills:userview:repeated:prerating"}%<td>&nbsp;</td>%TMPL:END%
+%TMPL:DEF{"skills:userview:repeated:rating"}%<td class="skillsRating">
+%ICON{stargold}%</td>%TMPL:END%
+%TMPL:DEF{"skills:userview:repeated:postrating"}%<td>&nbsp;</td>%TMPL:END%
+
+%TMPL:DEF{"skills:userview:repeated:comment"}%<td>
+<a id='comment|%CATEGORYID%|%SKILLID%' class='%COMMENTLINKCLASS%' href="%COMMENTLINKURL%" target='_blank' >
+%ICON{note}%</a></td>%TMPL:END%
+
+%TMPL:DEF{"skills:userview:repeated:skillend"}%</tr>%TMPL:END%
+
+%TMPL:DEF{"skills:userview:repeated:skillcontainerend"}%</tbody>%TMPL:END%
+-->
 <table id='skillsTable' class='skillsTable' cellpadding="2px" syle="margin:7px 0;">
  <thead>
   <tr>

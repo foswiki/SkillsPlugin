@@ -161,33 +161,6 @@ SkillsPlugin.main = function() {
                 'GET', url, obCallbacks);
         },
 
-        tipify: function(el, cat, skill) {
-            var id = cat;
-            if (skill != null)
-                id += '.' + skill;
-            if (this.tt_map[id] == null)
-                this.tt_map[id] = new Array();
-            this.tt_map[id].push(el.id);
-        },
-
-        genTips: function() {
-            var el = document.getElementsByTagName('BODY');
-            el[0].className = 'yui-skin-sam';
-            this.tooltips = new Array();
-            for (var ttid in this.tt_map) {
-                var div = document.getElementById(ttid);
-                if (div == null) {
-                    continue;
-                }
-                var text = div.innerHTML;
-                var ids = this.tt_map[ttid].join(',');
-                var ttel = new YAHOO.widget.Tooltip(
-                    ttid + "Tooltip",
-                    { context: this.tt_map[ttid], text: text } );
-                delete this.tt_map[ttid];
-            }
-        },
-
         submit: function(rest, formid, messid, fnCallback) {
             var url = SkillsPlugin.vars.restUrl + '/SkillsPlugin/' + rest;
             var obForm = document.getElementById(formid);
@@ -285,11 +258,43 @@ SkillsPlugin.main = function() {
             obAnim.animate();
         },
 
+        // Add the relevant cat/skill as a tooltip on an element
+        tipify: function(el, cat, skill) {
+            var id = escape(cat);
+            if (skill != null)
+                id += '.' + escape(skill);
+            el.title = id;
+            var yel = new YAHOO.util.Element(el);
+            yel.addClass('skillsTipped');
+        },
+
+        // Attach tooltips to all elements of class skillsTipped. On the
+        // face of it, this is inefficient because it creates a new
+        // tooltip for every link. But that's OK, because we know that
+        // 99% of the time, there will only be one use of a tooltip
+        // in any given page.
         createTooltips: function() {
-            var yuiEl = new YAHOO.util.Element();
-            var els = yuiEl.getElementsByClassName('skillsTipped');
+            var el = document.getElementsByTagName('BODY');
+            var yuiEl = new YAHOO.util.Element(el[0]);
+            yuiEl.addClass('yui-skin-sam');
+            var els = document.getElementsByClassName('skillsTipped');
+            var map = {};
             for (var i = 0; i < els.length; i++) {
-                this._setTooltip(els[i]); 
+                // Get the tooltip div id from the title
+                var ttid = els[i].title;
+                var div = document.getElementById(ttid);
+                if (div == null) {
+                    continue;
+                }
+                var text = div.innerHTML;
+                map[els[i].id] = text;
+            }
+            for (var id in map) {
+                var ttel = new YAHOO.widget.Tooltip(
+                    ttid + "Tooltip",
+                    { context: id, text: map[id] } );
+                var yel = new YAHOO.util.Element(id);
+                yel.removeClass('skillsTipped');
             }
         }
     }
@@ -557,28 +562,28 @@ SkillsPlugin.editAllSkills = function () {
         },
         
         populateTable: function(){
-            var elCatTableTBody = document.getElementById(
-                "editall-tbody");
-            if (elCatTableTBody == null)
-                return;
-
+            var catTableTBody = document.getElementById("editall-tbody");
             if( SkillsPlugin.vars.loggedIn == 0 ){
-                var tr = document.createElement('tr');
-                tr.className = 'skillsCatTable_category';
-                var td = document.createElement('td');
-                td.className = "foswikiAlert";
+                var tr =
+                    document.createElement('tr');
+                var ytr = new YAHOO.util.Element(tr);
+                ytr.addClass('skillsCatTable_category');
+                var td =
+                    document.createElement('td');
+                var ytd = new YAHOO.util.Element(td);
+                ytd.addClass(td, "foswikiAlert");
                 td.appendChild(
                     document.createTextNode("Please log in..."));
                 tr.appendChild(td);
-                elCatTableTBody.appendChild(tr);
+                catTableTBody.appendChild(tr);
                 SkillsPlugin.main.lockForm();
                 return;
             }
             
             // Clean out the category table. The ID points to the tbody,
             // so we can just vacuum that.
-            while (elCatTableTBody.firstChild != null) {
-                elCatTableTBody.removeChild(elCatTableTBody.firstChild);
+            while (catTableTBody.firstChild != null) {
+                catTableTBody.removeChild(catTableTBody.firstChild);
             }
             
             var fnCallback = function( arCats ){
@@ -586,39 +591,43 @@ SkillsPlugin.editAllSkills = function () {
                     // Create a table row to contain the category and
                     // act as an anchor for the added entries
                     var tr = document.createElement('tr');
-                    tr.className = 'skillsCatTable_category';
-                    elCatTableTBody.appendChild(tr);
-                    var th = document.createElement('th');
-                    th.className = 'skillsCatTable_category';
-                    th.colSpan = 8;
-                    tr.appendChild(th);
-                    th.appendChild(document.createTextNode(arCats[i]));
-
-                    var id = 'editall.' + arCats[i];
+                    var id = 'editall.' + escape(arCats[i]);
                     tr.id = id;
+                    var ytr = new YAHOO.util.Element(tr);
+                    ytr.addClass('skillsCatTable_category');
                     SkillsPlugin.main.tipify(tr, arCats[i]);
+                    catTableTBody.appendChild(tr);
+
+                    var th = document.createElement('th');
+                    th.colSpan = 8;
+                    var yth = new YAHOO.util.Element(th);
+                    yth.addClass('skillsCatTable_category');
+                    th.appendChild(document.createTextNode(arCats[i]));
+                    tr.appendChild(th);
 
                     var img = document.createElement('div');
-                    img.className = 'skillsSpinner';
                     img.id = id + '_spinner';
+                    var yimg = new YAHOO.util.Element(img);
+                    yimg.addClass('skillsSpinner');
                     th.appendChild(img);
 
                     // Now get the skills and add each as a row
                     SkillsPlugin.main.getSkillsAndDetails(
                         arCats[i],
                         function( data, cat ) {
-                            var catid = 'editall.' + cat;
-                            var reltotr = document.getElementById(catid);
+                            var catid = 'editall.' + escape(cat);
                             var spinner = document.getElementById(
                                 catid + "_spinner");
                             if (spinner != null)
                                 spinner.parentNode.removeChild(spinner);
+                            var reltotr = document.getElementById(catid);
                             var skills = data[cat];
                             for( var skill in skills ) {
                                 var skill_data = skills[skill];
-                                var skid = catid + '.' + skill;
+                                var skid = catid + '.' + escape(skill);
                                 var tr = document.createElement('tr');
-                                tr.className = "skillsCatTable_skill";
+                                var ytr = new YAHOO.util.Element(tr);
+                                ytr.addClass("skillsCatTable_skill");
                                 if (reltotr.nextSibling == null) {
                                     reltotr.parentNode.appendChild(tr);
                                 } else {
@@ -627,20 +636,26 @@ SkillsPlugin.editAllSkills = function () {
                                 }
                                 tr.appendChild(document.createElement('td'));
                                 var th = document.createElement('th');
-                                th.className = "skillsCatTable_skill";
+                                var yth = new YAHOO.util.Element(th);
+                                yth.addClass("skillsCatTable_skill");
                                 tr.appendChild(th);
-                                th.appendChild(
-                                    document.createTextNode(skill));
+                                th.appendChild(document.createTextNode(skill));
                                 th.id = skid + 'th';
                                 SkillsPlugin.main.tipify(th, cat, skill);
                                 // Radio buttons for the priority
                                 var prios = [ 1, 2, 3, 4, 0 ];
                                 for (var k in prios) {
-                                    var td = document.createElement('td');
+                                    var td =
+                                        document.createElement('td');
+                                    var ytd = new YAHOO.util.Element(td);
                                     tr.appendChild(td);
-                                    td.className = "skillsCatTable";
-                                    var inp = document.createElement('input');
-                                    inp.className = "skillsCatTable skillsRating skillsControl";
+                                    ytd.addClass("skillsCatTable");
+                                    var inp =
+                                        document.createElement('input');
+                                    var yinp = new YAHOO.util.Element(inp);
+                                    yinp.addClass("skillsCatTable");
+                                    yinp.addClass("skillsRating");
+                                    yinp.addClass("skillsControl");
                                     td.appendChild(inp);
                                     inp.type = 'radio';
                                     inp.name = skid + "-rating";
@@ -651,16 +666,22 @@ SkillsPlugin.editAllSkills = function () {
                                         inp.checked = "checked";
                                     }
                                     inp.onclick = function() {
-                                        var elSubmit =
-                                        document.getElementById(_idSubmit);
-                                        elSubmit.className = "foswikiSubmit";
+                                        var elSubmit = document.getElementById(
+                                            _idSubmit);
+                                        var yelSubmit =
+                                        new YAHOO.util.Element(elSubmit);
+                                        yelSubmit.addClass("foswikiSubmit");
                                     };
                                 }
                                 var td = document.createElement('td');
+                                var ytd = new YAHOO.util.Element(td);
                                 tr.appendChild(td);
                                 inp = document.createElement('input');
+                                yinp = new YAHOO.util.Element(inp);
                                 td.appendChild(inp);
-                                inp.className = "skillsCatTable skillsComment skillsControl";
+                                yinp.addClass("skillsCatTable");
+                                yinp.addClass("skillsComment");
+                                yinp.addClass("skillsControl");
                                 inp.type = 'text';
                                 inp.name = skid + "-comment";
                                 inp.id = skid + "-comment";
@@ -672,11 +693,11 @@ SkillsPlugin.editAllSkills = function () {
                                     function() {
                                         var elSubmit =
                                             document.getElementById(_idSubmit);
-                                        elSubmit.className = "foswikiSubmit";
+                                        elSubmit.addClass("foswikiSubmit");
                                     }, this, true);
                                 inp.size = 15;
                             }
-                            SkillsPlugin.main.genTips();
+                            SkillsPlugin.main.createTooltips();
                         });
                 }
                 SkillsPlugin.main.unlockForm();
@@ -827,7 +848,10 @@ SkillsPlugin.browseSkills = function () {
         
         init: function(){
             YAHOO.util.Event.onDOMReady(
-                SkillsPlugin.main.initTwisty, this, true);
+                function() {
+                    SkillsPlugin.main.initTwisty();
+                    SkillsPlugin.main.createTooltips();
+                }, this, true);
         }
     }
 }();

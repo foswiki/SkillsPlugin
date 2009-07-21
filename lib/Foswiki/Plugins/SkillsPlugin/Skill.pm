@@ -19,11 +19,12 @@ package Foswiki::Plugins::SkillsPlugin::Skill;
 use strict;
 
 sub new {
-    my ( $class, $name ) = @_;
+    my ( $class, $name, $desc ) = @_;
 
     my $self = bless( {}, $class );
 
     $self->name($name);
+    $self->{description} = $desc;
 
     return $self;
 }
@@ -32,6 +33,11 @@ sub name {
     my $self = shift;
     if (@_) { $self->{NAME} = shift }
     return $self->{NAME};
+}
+
+sub description {
+    my $self = shift;
+    return $self->{description};
 }
 
 1;

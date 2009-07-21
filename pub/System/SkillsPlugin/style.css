@@ -211,3 +211,8 @@ input.skillsCatTable { }
 td.skillsCatTable {
   text-align: center;
 }
+
+/* Hidden tooltip text */
+.skillsTooltip {
+  display:none;
+}

@@ -94,12 +94,13 @@ sub _genTooltips {
     my $out = '';
     while ( $categories->hasNext() ) {
         my $obj_cat = $categories->next();
-        my $cname = $obj_cat->name();
-        my $desc = $obj_cat->description();
-        $out .= "<div style='display:none' id='$cname'>$desc</div>";
-        foreach my $skill (@{$obj_cat->getSkillNames()}) {
-            $desc = $obj_cat->description($skill);
-            $out .= "<div style='display:none' id='$cname.$skill'>$desc</div>";
+        my $catid = _urlEncode($obj_cat->name());
+        my $desc = Foswiki::Func::renderText($obj_cat->description());
+        $out .= "<div class='skillsTooltip' id='$catid'>$desc</div>";
+        foreach my $skill (@{$obj_cat->{SKILLS}}) {
+            $desc = Foswiki::Func::renderText($skill->description($skill));
+            my $skid = _urlEncode($skill->name());
+            $out .= "<div class='skillsTooltip' id='$catid.$skid'>$desc</div>";
         }
     }
     return $out;
@@ -126,7 +127,7 @@ sub _handleTag {
           $start . Foswiki::Plugins::SkillsPlugin::_tagUserSkills( $_[1] ) . $end,
           last;
 
-#    /group/ and $out = $start . Foswiki::Plugins::SkillsPlugin::Tag::_tagGroupSkills($_[1]) . $end, last; # shows skills for a particular group
+        #    /group/ and $out = $start . Foswiki::Plugins::SkillsPlugin::Tag::_tagGroupSkills($_[1]) . $end, last; # shows skills for a particular group
         /browse/
           and $out =
             $start
@@ -226,14 +227,6 @@ sub _tagEditSkills {
 
     my $out = Foswiki::Func::readTemplate('skillsedit'.$style);
 
-    # expand our variables in template
-    my $messagePic = _getImages()->{info};
-    $out =~ s/%SKILLMESSAGEPIC%/$messagePic/g;
-
-    # to clear textbox
-    my $clearPic = _getImages()->{clear};
-    $out =~ s/%SKILLCOMMENTCLEARPIC%/$clearPic/g;
-
     my $jsVars = <<JS;
 SkillsPlugin.vars.addEditSkills = 1;
 SkillsPlugin.vars.restUrl = "%SCRIPTURL{"rest"}%";
@@ -249,10 +242,6 @@ sub _tagEditAllSkills {
     my $user = Foswiki::Func::getWikiName();
 
     my $out = Foswiki::Func::readTemplate('skillseditall');
-
-    # expand our variables in template
-    my $messagePic = _getImages()->{info};
-    $out =~ s/%SKILLMESSAGEPIC%/$messagePic/g;
 
     my $jsVars = <<JS;
 SkillsPlugin.vars.editAllSkills = 1;
@@ -280,8 +269,12 @@ sub _tagUserSkills {
         "skills:userview:repeated:skillstart");
     my $tmplSkill = Foswiki::Func::expandTemplate(
         "skills:userview:repeated:skill");
+    my $tmplPreRating = Foswiki::Func::expandTemplate(
+        "skills:userview:repeated:prerating");
     my $tmplRating = Foswiki::Func::expandTemplate(
         "skills:userview:repeated:rating");
+    my $tmplPostRating = Foswiki::Func::expandTemplate(
+        "skills:userview:repeated:postrating");
     my $tmplComment = Foswiki::Func::expandTemplate(
         "skills:userview:repeated:comment");
     my $tmplSkillEnd = Foswiki::Func::expandTemplate(
@@ -295,25 +288,21 @@ sub _tagUserSkills {
       ;    # FIXME: dont need to go here!
     my $userSkills = Foswiki::Plugins::SkillsPlugin::UserSkills->new();
 
-    # get image paths
-    my $ratingPic      = _getImages()->{star};
-    my $skillPic       = _getImages()->{open};
-    my $commentPic     = _getImages()->{comment};
-    my $twistyCloseImg = _getImages()->{twistyclose};
-
     my $jsVars =
       "if( !SkillsPlugin ) var SkillsPlugin = {}; SkillsPlugin.vars = {}; "
       ;    # create namespace in JS
 
-    my $repeatedLine;
     my $levels = _getLevels();
+
+    my $body = '';
 
     my $itCategories = $skills->eachCat;
     while ( $itCategories->hasNext() ) {
         my $cat = $itCategories->next();
 
         my $catDone  = 0;
-        my $skillOut = 0;
+        my $categoryOut = '';
+        my $skillDone = 0;
 
         # iterator over skills
         my $itSkills = $cat->eachSkill;
@@ -326,116 +315,81 @@ sub _tagUserSkills {
               )
             {
 
-                # produce output line
-                # add to array/string which will be output in %REPEAT%
-                my $lineOut;
-
-                $skillOut = 1;
+                $skillDone = 1;
 
                 # category
                 unless ( $catDone == 1 ) {
-                    $lineOut .= $tmplCat;
-                    $lineOut .= $tmplCatContStart;
+                    $categoryOut .= $tmplCat;
+                    $categoryOut .= $tmplCatContStart;
+                    $catDone = 1;
                 }
-                $catDone = 1;
 
-                $lineOut .= $tmplSkillStart;
-
-                # skill
-                $lineOut .= $tmplSkill;
+                my $skillOut .= $tmplSkillStart . $tmplSkill;
 
                 # rating
                 my $i = 1;
                 while ( $i < $obj_userSkill->rating ) {
-                    my $ratingOut = $tmplRating;
-                    $ratingOut =~ s/%RATING%/&nbsp;/g;
-                    $ratingOut =~ s/%RATINGDEF%//g;
-                    $lineOut .= $ratingOut;
+                    $skillOut .= $tmplPreRating;
                     $i++;
                 }
-                my $ratingOut = $tmplRating;
-                $ratingOut =~ s/%RATING%/$ratingPic/g;
-                $ratingOut =~ s/%RATINGDEF%/class='skillsRating'/g;
-                $lineOut .= $ratingOut;
+                $skillOut .= $tmplRating;
                 $i++;
                 while ( $i <= $#$levels ) {
-                    my $ratingOut = $tmplRating;
-                    $ratingOut =~ s/%RATING%/&nbsp;/g;
-                    $ratingOut =~ s/%RATINGDEF%//g;
-                    $lineOut .= $ratingOut;
+                    $skillOut .= $tmplPostRating;
                     $i++;
                 }
 
                 # comment
-                $lineOut .= $tmplComment;
+                $skillOut .= $tmplComment;
 
-                $lineOut .= $tmplSkillEnd;
+                $skillOut .= $tmplSkillEnd;
 
-                # subsitutions
-                my $skillName = $skill->name;
-                $lineOut =~ s/%SKILL%/$skillName/g;
-                $lineOut =~ s/%SKILLICON%/$skillPic/g;
-                if ( $obj_userSkill->comment ) {
-                    my $url = Foswiki::Func::getScriptUrl(
-                        'Main', 'WebHome', 'oops',
-                        template => 'oopsgeneric',
-                        param1   => 'Skills Plugin Comment',
-                        param2   => "Comment for skill '"
-                          . $skill->name
-                          . "' by $user",
-                        param3 =>
-"$user has logged the following comment next to skill '"
-                          . $skill->name . "'.",
-                        param4 => $obj_userSkill->comment
-                    );
-                    $url .= ';cover=skills';
-                    my $commentLink =
-                        "<a id='comment|"
-                      . $cat->name . "|"
+                my $url = Foswiki::Func::getScriptUrl(
+                    'Main', 'WebHome', 'oops',
+                    template => 'oopsgeneric',
+                    param1   => 'Skills Plugin Comment',
+                    param2   => "Comment for skill '"
                       . $skill->name
-                      . "' class='SkillsPluginComments' href=\"$url\" target='_blank' >$commentPic</a>";
-                    $lineOut =~ s/%COMMENTLINK%/$commentLink/g;
-                }
-                else {
-                    $lineOut =~ s/%COMMENTLINK%//g;
-                    $lineOut =~ s/%COMMENTOUT%//g;
+                        . "' by $user",
+                    param3 =>
+                      "$user has logged the following comment next to skill '"
+                        . $skill->name . "'.",
+                    param4 => $obj_userSkill->comment
+                   );
+                $url .= ';cover=skills';
+                $skillOut =~ s/%COMMENTLINKURL%/$url/g;
+
+                if ( $obj_userSkill->comment ) {
+                    $skillOut =~ s/%COMMENTLINKCLASS%/SkillsPluginComments/g;
+                } else {
+                    $skillOut =~ s/%COMMENTLINKCLASS%/foswikiHidden/g;
                 }
 
-                $repeatedLine .= $lineOut;
+                $skillOut =~ s/%SKILLID%/_urlEncode($skill->name())/ge;
+                $skillOut =~ s/%SKILLNAME%/$skill->name()/ge;
+
+                $categoryOut .= $skillOut;
             }
         }
 
         # subsitutions
-        my $catTwist =
-            '<span id="'
-          . _urlEncode( $cat->name )
-          . '_twistyImage" class="SkillsPlugin-twisty-image"> '
-          . $twistyCloseImg
-          . '</span>';
-        $repeatedLine =~ s!%SKILLTWISTY%!$catTwist!g;
-        my $catLink =
-            '<span id="'
-          . _urlEncode( $cat->name )
-          . '_twistyLink" class="SkillsPlugin-twisty-link">'
-          . $cat->name
-          . '</span>';
-        $repeatedLine =~ s/%CATEGORY%/$catLink/g;
-        my $skillContDef = 'class="' . _urlEncode( $cat->name ) . '_twist"';
-        $repeatedLine =~ s/%SKILLCONTDEF%/$skillContDef/g;
+        $categoryOut =~ s/%CATEGORYID%/_urlEncode( $cat->name() )/ge;
+        $categoryOut =~ s/%CATEGORYNAME%/$cat->name()/ge;
 
-        $repeatedLine .= $tmplCatContEnd unless ( $skillOut == 0 );
+        $categoryOut .= $tmplCatContEnd if ( $skillDone );
+
+        $body .= $categoryOut;
     }
 
-    $out =~ s/%REPEAT%/$repeatedLine/g;
+    $out =~ s/%REPEAT%/$body/g;
     $out =~ s/%SKILLUSER%/$user/g;
 
-    my $twistyOpenImgSrc = _getImagesSrc()->{twistyopen};
-    my $twistyCloseImgSrc = _getImagesSrc()->{twistyclose};
-
-    $jsVars .= "SkillsPlugin.vars.twistyState = '$twisty';";
-    $jsVars .= "SkillsPlugin.vars.twistyOpenImgSrc = \"$twistyOpenImgSrc\";";
-    $jsVars .= "SkillsPlugin.vars.twistyCloseImgSrc = \"$twistyCloseImgSrc\";";
-    $jsVars .= 'SkillsPlugin.vars.viewUserSkills = 1;';
+    $jsVars .= <<JS;
+SkillsPlugin.vars.twistyState = '$twisty';
+SkillsPlugin.vars.twistyOpenImgSrc = '%ICONURL{toggleopen}%';
+SkillsPlugin.vars.twistyCloseImgSrc = '%ICONURL{toggleclose}%';
+SkillsPlugin.vars.viewUserSkills = 1;
+JS
     _addHeads($jsVars);
 
     return $out._genTooltips();
@@ -443,10 +397,6 @@ sub _tagUserSkills {
 
 sub _tagSearchForm {
     my $out = Foswiki::Func::readTemplate('skillssearchform');
-
-    # expand our variables in template
-    my $messagePic = _getImages()->{info};
-    $out =~ s/%SKILLMESSAGEPIC%/$messagePic/g;
 
     _addHeads(<<JS);
 SkillsPlugin.vars.searchSkills = 1;
@@ -478,8 +428,12 @@ sub _tagBrowseSkills {
         "skills:browseview:repeated:user");
     my $tmplUserEnd = Foswiki::Func::expandTemplate(
         "skills:browseview:repeated:userend");
+    my $tmplPreRating = Foswiki::Func::expandTemplate(
+        "skills:browseview:repeated:prerating");
     my $tmplRating = Foswiki::Func::expandTemplate(
         "skills:browseview:repeated:rating");
+    my $tmplPostRating = Foswiki::Func::expandTemplate(
+        "skills:browseview:repeated:postrating");
     my $tmplComment = Foswiki::Func::expandTemplate(
         "skills:browseview:repeated:comment");
     my $tmplSkillEnd = Foswiki::Func::expandTemplate(
@@ -496,47 +450,41 @@ sub _tagBrowseSkills {
       ;    # FIXME: dont need to go here!
     my $userSkills = Foswiki::Plugins::SkillsPlugin::UserSkills->new();
 
-    # get image paths
-    my $ratingPic      = _getImages()->{star};
-    my $open           = _getImages()->{open};
-    my $commentPic     = _getImages()->{comment};
-    my $twistyCloseImg = _getImages()->{twistyclose};
-
-    my $repeatedLine = '';
+    my $body = '';
 
     # loop over all users that have skills
     # if they do, store in hash/array ## CANT cos C++, etc
     # loop over array and do the output
 
-# my $allUserSkills = $userSkills->allUsers();
-#
-# my $outSkills;
-#
-# # each user with skills
-# for my $user( sort keys %{ $allUserSkills } ){
-#
-# # loop over all this users skills
-# for my $user_obj( @{ $allUserSkills->{ $user } } ){
-#
-# next unless( $skills->categoryExists( $user_obj->category ) );
-# next unless( $skills->getCategoryByName( $user_obj->category )->skillExists( $user_obj->name ) );
-#
-# # category
-# $outSkills->{ $user_obj->category } = {} unless $outSkills->{ $user_obj->category };
-# # skill
-# $outSkills->{ $user_obj->category }->{ $user_obj->name } unless $outSkills->{ $user_obj->category }->{ $user_obj->name };
-#
-# #%outSkills->{ $user_obj->category }->{ $user_obj->name }->{ $user } = $user_obj;
-#
-# # check the category and skill is defined
-# # add to hash
-# }
-#
-# return $user;
-# }
-#
-# return "hi" . $allUserSkills->{'AndrewJones'}[0]->name;
-#return "hi";
+    # my $allUserSkills = $userSkills->allUsers();
+    #
+    # my $outSkills;
+    #
+    # # each user with skills
+    # for my $user( sort keys %{ $allUserSkills } ){
+    #
+    # # loop over all this users skills
+    # for my $user_obj( @{ $allUserSkills->{ $user } } ){
+    #
+    # next unless( $skills->categoryExists( $user_obj->category ) );
+    # next unless( $skills->getCategoryByName( $user_obj->category )->skillExists( $user_obj->name ) );
+    #
+    # # category
+    # $outSkills->{ $user_obj->category } = {} unless $outSkills->{ $user_obj->category };
+    # # skill
+    # $outSkills->{ $user_obj->category }->{ $user_obj->name } unless $outSkills->{ $user_obj->category }->{ $user_obj->name };
+    #
+    # #%outSkills->{ $user_obj->category }->{ $user_obj->name }->{ $user } = $user_obj;
+    #
+    # # check the category and skill is defined
+    # # add to hash
+    # }
+    #
+    # return $user;
+    # }
+    #
+    # return "hi" . $allUserSkills->{'AndrewJones'}[0]->name;
+    #return "hi";
 
     my $allUsers = $userSkills->allUsers();
     my $levels = _getLevels();
@@ -547,11 +495,7 @@ sub _tagBrowseSkills {
 
         my $catName = $cat->name;
 
-        $repeatedLine .= $tmplCat;
-
-        $repeatedLine .= $tmplCatContStart;
-        my $contId = _urlEncode($catName) . '_twist';
-        $repeatedLine =~ s/%CATEGORYCONTCLASS%/$contId/g;
+        my $categoryOut = $tmplCat . $tmplCatContStart;
 
         # iterator over skills
         my $itSkills = $cat->eachSkill;
@@ -560,18 +504,17 @@ sub _tagBrowseSkills {
 
             my $skillName = $skill->name;
 
-            $repeatedLine .= $tmplSkillStart;
-            $repeatedLine .= $tmplSkill;
-            $repeatedLine .= $tmplSkillEnd;
+            my $skillOut = $tmplSkillStart . $tmplSkill . $tmplSkillEnd;
 
-# now need to iterate over users and find out if they have this skill
-# if so, output
-# users should only be loaded the first time, the rest is in memory
-# if this was an iterator of each user with skills
-#my $users = Foswiki::Plugins::SkillsPlugin::UserSkills->new()->getUsersForSkill( $skillName, $catName );
-
+            # now need to iterate over users and find out if they have
+            # this skill.
+            # users should only be loaded the first time, the rest is in
+            # memory if this was an iterator of each user with skills
+            # my $users = Foswiki::Plugins::SkillsPlugin::UserSkills->new()
+            #  ->getUsersForSkill( $skillName, $catName );
             #for my $user ( sort keys %{ $users } ) {
             #my $obj_userSkill = $allUsers->{ $user };
+
             for my $user ( sort keys %{$allUsers} ) {
                 for my $obj_userSkill ( @{ $allUsers->{$user} } ) {
 
@@ -579,111 +522,74 @@ sub _tagBrowseSkills {
                       unless ( $obj_userSkill->category eq $catName
                         and $obj_userSkill->name eq $skillName );
 
-                    $repeatedLine .= $tmplUserStart;
-                    $repeatedLine .= $tmplUser;
-
-                    my $skillTwist =
-                        'class="'
-                      . _urlEncode($catName)
-                      . _urlEncode($skillName)
-                      . '_twist"';
-                    $repeatedLine =~ s/%SKILLTWISTDEF%/$skillTwist/g;
-                    $repeatedLine =~ s/%USERROWDEF%/class="userRow"/g;
-                    $repeatedLine =~ s/%SKILLUSER%/$user/g;
-                    $repeatedLine =~ s/%USERICON%/$open/g;
+                    $skillOut .= $tmplUserStart;
+                    $skillOut .= $tmplUser;
 
                     # rating
                     my $i = 1;
                     while ( $i < $obj_userSkill->rating ) {
-                        my $ratingOut = $tmplRating;
-                        $ratingOut =~ s/%RATING%/&nbsp;/g;
-                        $ratingOut =~ s/%RATINGDEF%//g;
-                        $repeatedLine .= $ratingOut;
+                        $skillOut .= $tmplPreRating;
                         $i++;
                     }
-                    my $ratingOut = $tmplRating;
-                    $ratingOut =~ s/%RATING%/$ratingPic/g;
-                    $ratingOut =~ s/%RATINGDEF%/class='skillsRating'/g;
-                    $repeatedLine .= $ratingOut;
+                    $skillOut .= $tmplRating;
                     $i++;
                     while ( $i <= $#$levels ) {
-                        my $ratingOut = $tmplRating;
-                        $ratingOut =~ s/%RATING%/&nbsp;/g;
-                        $ratingOut =~ s/%RATINGDEF%//g;
-                        $repeatedLine .= $ratingOut;
+                        $skillOut .= $tmplPostRating;
                         $i++;
                     }
 
                     # comment
-                    $repeatedLine .= $tmplComment;
+                    $skillOut .= $tmplComment;
 
                     # comment link
-                    if ( $obj_userSkill->comment ) {
-                        my $url = Foswiki::Func::getScriptUrl(
-                            'Main', 'WebHome', 'oops',
-                            template => 'oopsgeneric',
-                            param1   => 'Skills Plugin Comment',
-                            param2   => "Comment for skill '"
-                              . $obj_userSkill->name
-                              . "' by $user",
-                            param3 =>
-"$user has logged the following comment next to skill '"
-                              . $obj_userSkill->name . "'.",
-                            param4 => $obj_userSkill->comment
-                        );
-                        $url .= ';cover=skills';
-                        my $commentLink =
-                            "<a id='comment|"
-                          . $obj_userSkill->category . "|"
+                    # SMELL: do this using a tooltip
+                    my $url = Foswiki::Func::getScriptUrl(
+                        'Main', 'WebHome', 'oops',
+                        template => 'oopsgeneric',
+                        param1   => 'Skills Plugin Comment',
+                        param2   => "Comment for skill '"
                           . $obj_userSkill->name
-                          . "' class='SkillsPluginComments' href=\"$url\" target='_blank' >$commentPic</a>";
-                        $repeatedLine =~ s/%COMMENTLINK%/$commentLink/g;
+                            . "' by $user",
+                        param3 =>
+                          "$user has logged the following comment next to skill '"
+                            . $obj_userSkill->name . "'.",
+                        param4 => $obj_userSkill->comment
+                       );
+                    $url .= ';cover=skills';
+                    if ( $obj_userSkill->comment() ) {
+                        $skillOut =~ s/%COMMENTLINKCLASS%/foswikiHidden/g;
+                    } else {
+                        $skillOut =~ s/%COMMENTLINKCLASS%/SkillsPluginComments/g;
                     }
-                    else {
-                        $repeatedLine =~ s/%COMMENTLINK%//g;
-                        $repeatedLine =~ s/%COMMENTOUT%//g;
-                    }
-
-                    $repeatedLine .= $tmplUserEnd;
+                    $skillOut =~ s/%COMMENTLINKURL%/$url/g;
+                    $skillOut =~ s/%SKILLUSER%/$user/g;
+                    $skillOut .= $tmplUserEnd;
                 }
             }
 
-            $repeatedLine =~ s/%SKILLICON%/$open/g;
-            my $skillLink =
-                '<span id="'
-              . _urlEncode($catName)
-              . _urlEncode($skillName)
-              . '_twistyLink" class="SkillsPlugin-twisty-link">'
-              . $skillName
-              . '</span>';
-            $repeatedLine =~ s/%SKILL%/$skillLink/g;
+            $skillOut =~ s/%SKILLID%/_urlEncode($skillName)/ge;
+            $skillOut =~ s/%SKILLNAME%/$skillName/ge;
+
+            $categoryOut .= $skillOut;
         }
 
-        my $catTwist =
-            '<span id="'
-          . _urlEncode($catName)
-          . '_twistyImage" class="SkillsPlugin-twisty-image"> '
-          . $twistyCloseImg
-          . '</span>';
-        $repeatedLine =~ s/%CATEGORYICON%/$catTwist/g;
-        my $catLink =
-            '<span id="'
-          . _urlEncode($catName)
-          . '_twistyLink" class="SkillsPlugin-twisty-link">'
-          . $catName
-          . '</span>';
-        $repeatedLine =~ s/%CATEGORY%/$catLink/g;
-        $repeatedLine .= $tmplCatContEnd;
+        # subsitutions
+        $categoryOut =~ s/%CATEGORYID%/_urlEncode( $cat->name() )/ge;
+        $categoryOut =~ s/%CATEGORYNAME%/$cat->name()/ge;
+
+        $categoryOut .= $tmplCatContEnd;
+
+        $body .= $categoryOut;
     }
 
-    $out =~ s/%REPEAT%/$repeatedLine/g;
+    $out =~ s/%REPEAT%/$body/g;
 
-    my $twistyOpenImgSrc = _getImagesSrc()->{twistyopen};
-    my $twistyCloseImgSrc = _getImagesSrc()->{twistyclose};
-    my $jsVars           = "SkillsPlugin.vars.twistyState = '$twisty';";
-    $jsVars .= "SkillsPlugin.vars.twistyOpenImgSrc = \"$twistyOpenImgSrc\";";
-    $jsVars .= "SkillsPlugin.vars.twistyCloseImgSrc = \"$twistyCloseImgSrc\";";
-    $jsVars .= 'SkillsPlugin.vars.browseSkills = 1;';
+    my $jsVars = <<JS;
+SkillsPlugin.vars.twistyState = '$twisty';
+SkillsPlugin.vars.twistyOpenImgSrc = '%ICONURL{toggleopen}%';
+SkillsPlugin.vars.twistyCloseImgSrc = '%ICONURL{toggleclose}%';
+SkillsPlugin.vars.browseSkills = 1;
+JS
     _addHeads($jsVars);
 
     return $out._genTooltips();
@@ -713,7 +619,6 @@ sub _restAddNewCategory {
         }
     }
 
-    my $description = 
     require Foswiki::Plugins::SkillsPlugin::SkillsStore;
     my $error =
       Foswiki::Plugins::SkillsPlugin::SkillsStore->new()->addNewCategory($newCat);
@@ -1168,22 +1073,28 @@ sub _restSearch {
 
     my $out = Foswiki::Func::readTemplate('skillssearchresults');
 
-    my $tmplRepeat = Foswiki::Func::readTemplate('skillssearchresultsrepeated');
+    my $tmplRepeat =
+      Foswiki::Func::readTemplate('skillssearchresultsrepeated');
 
-    my ( undef, $tmplUserStart, $tmplUser, $tmplRating, $tmplComment,
-        $tmplUserEnd )
-      = split( /%SPLIT%/, $tmplRepeat );
+    my $tmplUserStart = Foswiki::Func::expandTemplate(
+        'skills:searchresults:repeated:userstart');
+    my $tmplUser = Foswiki::Func::expandTemplate(
+        'skills:searchresults:repeated:user');
+    my $tmplRating = Foswiki::Func::expandTemplate(
+        'skills:searchresults:repeated:rating');
+    my $tmplPreRating = Foswiki::Func::expandTemplate(
+        'skills:searchresults:repeated:prerating');
+    my $tmplPostRating = Foswiki::Func::expandTemplate(
+        'skills:searchresults:repeated:postrating');
+    my $tmplComment = Foswiki::Func::expandTemplate(
+        'skills:searchresults:repeated:comment');
+    my $tmplUserEnd = Foswiki::Func::expandTemplate(
+        'skills:searchresults:repeated:userend');
 
     require Foswiki::Plugins::SkillsPlugin::SkillsStore;
     require Foswiki::Plugins::SkillsPlugin::UserSkills;
     my $skills     = Foswiki::Plugins::SkillsPlugin::SkillsStore->new();
     my $userSkills = Foswiki::Plugins::SkillsPlugin::UserSkills->new();
-
-    # get image paths
-    my $ratingPic      = _getImages()->{star};
-    my $skillPic       = _getImages()->{open};
-    my $commentPic     = _getImages()->{comment};
-    my $twistyCloseImg = _getImages()->{twistyclose};
 
     my $repeatedLine;
 
@@ -1204,22 +1115,13 @@ sub _restSearch {
         # rating
         my $i = 1;
         while ( $i < $obj_userSkill->rating ) {
-            my $ratingOut = $tmplRating;
-            $ratingOut =~ s/%RATING%/&nbsp;/g;
-            $ratingOut =~ s/%RATINGDEF%//g;
-            $lineOut .= $ratingOut;
+            $lineOut .= $tmplPreRating;
             $i++;
         }
-        my $ratingOut = $tmplRating;
-        $ratingOut =~ s/%RATING%/$ratingPic/g;
-        $ratingOut =~ s/%RATINGDEF%/class='skillsRating'/g;
-        $lineOut .= $ratingOut;
+        $lineOut .= $tmplRating;
         $i++;
         while ( $i <= 4 ) {
-            my $ratingOut = $tmplRating;
-            $ratingOut =~ s/%RATING%/&nbsp;/g;
-            $ratingOut =~ s/%RATINGDEF%//g;
-            $lineOut .= $ratingOut;
+            $lineOut .= $tmplPostRating;
             $i++;
         }
 
@@ -1232,6 +1134,7 @@ sub _restSearch {
         $lineOut =~ s/%SKILLUSER%/$user/g;
 
         # comment link
+        my $commentLink = '';
         if ( $obj_userSkill->comment ) {
             my $url = Foswiki::Func::getScriptUrl(
                 'Main', 'WebHome', 'oops',
@@ -1246,17 +1149,13 @@ sub _restSearch {
                 param4 => $obj_userSkill->comment
             );
             $url .= ';cover=skills';
-            my $commentLink =
+            $commentLink =
                 "<a id='comment|"
               . $obj_userSkill->category . "|"
               . $obj_userSkill->name
-              . "' class='SkillsPluginComments' href=\"$url\" target='_blank' >$commentPic</a>";
-            $lineOut =~ s/%COMMENTLINK%/$commentLink/g;
+              . "' class='SkillsPluginComments' href=\"$url\" target='_blank' >%ICON{note}%</a>";
         }
-        else {
-            $lineOut =~ s/%COMMENTLINK%//g;
-            $lineOut =~ s/%COMMENTOUT%//g;
-        }
+        $lineOut =~ s/%COMMENTLINK%/$commentLink/g;
 
         $repeatedLine .= $lineOut;
     }
@@ -1421,11 +1320,11 @@ sub _addHeads {
         $jsVars .= 'SkillsPlugin.vars.loggedIn = 1;';
     }
 
-# yui
-# adds the YUI Javascript files from header
-# these are from the YahooUserInterfaceContrib, if installed
-# or directly from the internet (See http://developer.yahoo.com/yui/articles/hosting/)
-# TODO: Could be configurable?
+    # yui
+    # adds the YUI Javascript files from header
+    # these are from the YahooUserInterfaceContrib, if installed
+    # or directly from the internet (See http://developer.yahoo.com/yui/articles/hosting/)
+    # TODO: Could be configurable?
     my $yui;
     eval 'use Foswiki::Contrib::YahooUserInterfaceContrib';
     if ( !$@ ) {
@@ -1471,48 +1370,8 @@ THIS
 # Taken from TagMePlugin (http://twiki.org/cgi-bin/view/Plugins/TagMePlugin)
 sub _urlEncode {
     my $text = shift;
-    $text =~ s/([^0-9a-zA-Z-_.:~!*'()\/%])/'%'.sprintf('%02x',ord($1))/ge;
+    $text =~ s/([^0-9a-zA-Z-_.:~!*()\/%])/'%'.sprintf('%02x',ord($1))/ge;
     return $text;
-}
-
-# returns a hash of image html elements
-sub _getImages {
-
-    my $docpath = Foswiki::Func::getPubUrlPath() . '/' .    # /pub/
-      $Foswiki::cfg{SystemWebName} . '/' .              # System/
-      'DocumentGraphics';                                 # doc topic
-
-    my %images = (
-        "twistyopen" =>
-"<img width='16' alt='twisty open' align='top' src='$docpath/toggleopen.gif' height='16' border='0' />",
-        "twistyclose" =>
-"<img width='16' alt='twisty close' align='top' src='$docpath/toggleclose.gif' height='16' border='0' />",
-        "star" =>
-"<img width='16' alt='*' align='top' src='$docpath/stargold.gif' height='16' border='0' />",
-        "open" =>
-"<img width='16' alt='-' align='top' src='$docpath/dot_ur.gif' height='16' border='0' />",
-        "comment" =>
-"<img width='16' alt='+' class='SkillsPlugins-comment-img' align='top' src='$docpath/note.gif' height='16' border='0' />",
-        "clear" =>
-"<img width='16' alt='Clear' align='top' src='$docpath/choice-cancel.gif' height='16' border='0' />",
-        "info" =>
-"<img width='16' alt='Info' align='top' src='$docpath/info.gif' height='16' border='0' />"
-    );
-    return \%images;
-}
-
-# returns a hash of image paths
-sub _getImagesSrc {
-
-    my $docpath = Foswiki::Func::getPubUrlPath() . '/' .    # /pub/
-      $Foswiki::cfg{SystemWebName} . '/' .              # System/
-      'DocumentGraphics';                                 # doc topic
-
-    my %images = (
-        "twistyopen"  => "$docpath/toggleopen.gif",
-        "twistyclose" => "$docpath/toggleclose.gif"
-    );
-    return \%images;
 }
 
 # formats a suitible return message from rest functions

@@ -25,20 +25,14 @@ my $totalCategories;
 sub new {
     my ( $class, $name, $skills, $desc, $skilldescs ) = @_;
 
-    my $self = {};
+    my $self = bless({}, $class);
 
-    #$self->{NAME} = undef;
-    #$self->{SKILLS} = [];
-    $self->{"_TOTAL"} = \$totalCategories;
-
-    bless( $self, $class );
-
-    $self->name($name);
-    $self->populateSkills($skills);
+    $self->{NAME} = $name;
+    $self->{_TOTAL} = \$totalCategories;
     $self->{description} = $desc;
-    $self->{skills_descs} = $skilldescs;
+    $self->populateSkills($skills, $skilldescs);
 
-    ++${ $self->{"_TOTAL"} };
+    ++${ $self->{_TOTAL} };
 
     return $self;
 }
@@ -53,8 +47,11 @@ sub name {
 sub description {
     my ($self, $skill) = @_;
     if( defined $skill ) {
-        return "'$skill' has no description" unless $self->{skill_descs};
-        return $self->{skill_descs}->{$skill};;
+        foreach my $so ( @{$self->{SKILLS}} ) {
+            if ($so->name() eq $skill) {
+                return $so->description();
+            }
+        }
     } else {
         return $self->{description}
           || "$self->{NAME} has no description";
@@ -84,11 +81,12 @@ sub eachSkill {
 
 # populate SKILLS array
 sub populateSkills {
-    my ( $self, $skills ) = @_;
+    my ( $self, $skills, $descs ) = @_;
 
     if ($skills) {
         for my $skill ( sort @$skills ) {
-            my $obj_skill = Foswiki::Plugins::SkillsPlugin::Skill->new($skill);
+            my $obj_skill = Foswiki::Plugins::SkillsPlugin::Skill->new(
+                $skill, $descs->{$skill});
 
             #$obj_skill->name( $skill );
             push @{ $self->{SKILLS} }, $obj_skill;
