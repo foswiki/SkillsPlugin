@@ -28,24 +28,24 @@
 %STARTSECTION{"renamecategory"}%
 
 %IF{ "{Plugins}{SkillsPlugin}{Enabled}" then="%URLPARAM{"skillsmessage"}%" else="<table border='0' cellpadding='3' cellspacing='0' width='100%'><tr><td bgcolor='yellow'><font color='red'><strong>The Skills Plugin is not enabled on this site. The forms below are disabled.</strong></font></td></tr></table>" }%
-<form name="renamecategory" action="%SCRIPTURL{rest}%/SkillsPlugin/renameCategory" method="post">
+<form name="renamecategory" action="%SCRIPTURL{rest}%/SkillsPlugin/renameNode" method="post">
 
 Rename an existing category.
 
 <div class="foswikiFormSteps">
 <div class="foswikiFormStep">
 Category to rename: %BR%
-<select name="oldcategory">
-<option>%URLPARAM{renamecategoryfrom}%</option>
+<select name="path">
+<option>%URLPARAM{path}%</option>
 %SKILLS{action="showcategories" format="<option value='$category'>$category</option>" }%
 </select>
 </div>
 <div class="foswikiFormStep">
 New name for this category: %BR%
-<input type="text" value="%URLPARAM{"renamecategoryto"}%" name="newcategory" class="foswikiInputField" size="20" />
+<input type="text" value="%URLPARAM{"newname"}%" name="newname" class="foswikiInputField" size="20" />
 </div>
 <div class="foswikiFormStep foswikiLast">
-<input type="hidden" name="topic" value="%WEB%.%TOPIC%" />
+<input type="hidden" name="endPoint" value="%WEB%.%TOPIC%" />
 <input name="renamecategory" type="submit" class="foswikiSubmit" value="%MAKETEXT{"Rename"}%" /> _Note: May take a while, as it searches though all users. Do not cancel._
 </div>
 </div>
@@ -54,5 +54,5 @@ New name for this category: %BR%
 %ENDSECTION{"renamecategory"}%
 %STOPINCLUDE%
 
-%BR%
-<span class="foswikiGrayText">Other skill options: [[SkillsBrowseAll][Browse All Skills]], [[SkillsEditMySkills][Edit My Skills]], [[SkillsSearch][Search Skills]]</span>
+%INCLUDE{"SkillsAdminIntroduction" section="existingskills"}%
+

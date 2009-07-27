@@ -31,10 +31,17 @@
 
 Create a new category.
 
-<form name="createcategory" action="%SCRIPTURL{rest}%/SkillsPlugin/addNewCategory" method="post">
+<form name="createcategory" action="%SCRIPTURL{rest}%/SkillsPlugin/createNode" method="post">
 <div class="foswikiFormSteps">
 <div class="foswikiFormStep">
-Name of new category: %BR% <input name="newcategory" type="text" class="twikiInputField" size="20" value="%URLPARAM{"createcategory"}%" />
+Name of new category: %BR% <input name="name" type="text" class="twikiInputField" size="20" value="%URLPARAM{"name"}%" />
+</div>
+<div class="foswikiFormStep">
+In category: %BR%
+<select name="path">
+<option>%URLPARAM{path}%</option>
+%SKILLS{action="showcategories" format="<option value='$category'>$category</option>" }%
+</select>
 </div>
 <div class="foswikiFormStep">
 <strong>Description</strong><br />
@@ -43,16 +50,11 @@ Name of new category: %BR% <input name="newcategory" type="text" class="twikiInp
 </div>
 <div class="foswikiFormStep foswikiLast">
 <input name="createcategory" type="submit" class="foswikiSubmit" value="%MAKETEXT{"Create"}%" />
-<input type="hidden" name="topic" value="%WEB%.%TOPIC%" />
+<input type="hidden" name="endPoint" value="%WEB%.%TOPIC%" />
 </div>
 </div>
 </form>
 %ENDSECTION{"createcategory"}%
-
-%STARTSECTION{"existingcategories"}%
-Existing categories: %SKILLS{action="showcategories"}%
-%ENDSECTION{"existingcategories"}%
 %STOPINCLUDE%
 
-%BR%
-<span class="foswikiGrayText">Other skills options: [[SkillsBrowseAll][Browse All Skills]], [[SkillsEditMySkills][Edit My Skills]], [[SkillsSearch][Search Skills]]</span>
+%INCLUDE{"SkillsAdminIntroduction" section="existingskills"}%

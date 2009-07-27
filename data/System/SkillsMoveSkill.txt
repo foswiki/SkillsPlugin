@@ -28,32 +28,32 @@
 %STARTSECTION{"moveskill"}%
 
 %IF{ "{Plugins}{SkillsPlugin}{Enabled}" then="%URLPARAM{"skillsmessage"}%" else="<table border='0' cellpadding='3' cellspacing='0' width='100%'><tr><td bgcolor='yellow'><font color='red'><strong>The Skills Plugin is not enabled on this site. The forms below are disabled.</strong></font></td></tr></table>" }%
-<form name="moveskill" action="%SCRIPTURL{rest}%/SkillsPlugin/moveSkill" method="post">
+<form name="moveskill" action="%SCRIPTURL{rest}%/SkillsPlugin/moveNode" method="post">
 
 Move an existing skill to a different category.
 
 <div class="foswikiFormSteps">
 <div class="foswikiFormStep">
 Skill to move: %BR%
-<select name="movefrom">
-%SKILLS{action="showskills" format="<option value='$category|$skill'>$skill</option>" prefix="<optgroup label='$category'>" suffix="</optgroup>"}%
+<select name="path">
+%SKILLS{action="showskills" format="<option value='$category/$skill'>$skill</option>" prefix="<optgroup label='$category'>" suffix="</optgroup>"}%
 </select>
 </div>
 <div class="foswikiFormStep">
 New category: %BR%
-<select name="moveto">
+<select name="newparent">
 %SKILLS{action="showcategories" format="<option value='$category'>$category</option>" }%
 </select>
 </div>
 <div class="foswikiFormStep foswikiLast">
-<input type="hidden" name="topic" value="%WEB%.%TOPIC%" />
+<input type="hidden" name="endPoint" value="%WEB%.%TOPIC%" />
 <input name="moveskill" type="submit" class="foswikiSubmit" value="%MAKETEXT{"Move"}%" /> _Note: May take a while, as it searches though all users. Do not cancel._
 </div>
 </div>
 </form>
 </noautolink>
 %ENDSECTION{"moveskill"}%
+
 %STOPINCLUDE%
 
-%BR%
-<span class="foswikiGrayText">Other skill options: [[SkillsBrowseAll][Browse All Skills]], [[SkillsEditMySkills][Edit My Skills]], [[SkillsSearch][Search Skills]]</span>
+%INCLUDE{"SkillsAdminIntroduction" section="existingskills"}%

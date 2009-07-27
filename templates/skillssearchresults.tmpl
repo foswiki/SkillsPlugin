@@ -1,55 +1,46 @@
-%TMPL:INCLUDE{"skills"}%
+%TMPL:INCLUDE{"skillsbrowseview"}%
 <!-- SKILLSPLUGIN - SEARCH SKILLS RESULTS
 %TMPL:DEF{"skills:searchresults:repeated:userstart"}%
-<tr>
+<tr><td>%USER%</td>
 %TMPL:END%
 
-%TMPL:DEF{"skills:searchresults:repeated:user"}%
-<td>%SKILLUSER%</td>
-%TMPL:END%
+%TMPL:DEF{"skills:searchresults:repeated:prerating"}%<td>
+%ICON{empty}%
+</td>%TMPL:END%
 
-%TMPL:DEF{"skills:searchresults:repeated:prerating"}%
-<td>&nbsp;</td>
-%TMPL:END%
+%TMPL:DEF{"skills:searchresults:repeated:postrating"}%<td>
+%ICON{empty}%
+</td>%TMPL:END%
 
-%TMPL:DEF{"skills:searchresults:repeated:postrating"}%
-<td>&nbsp;</td>
-%TMPL:END%
+%TMPL:DEF{"skills:searchresults:repeated:rating"}%<td>
+%ICON{stargold}%
+</td>%TMPL:END%
 
-%TMPL:DEF{"skills:searchresults:repeated:rating"}%
-<td class='skillsRating'>%ICON{stargold}%</td>
-%TMPL:END%
-
-%TMPL:DEF{"skills:searchresults:repeated:commentlink"}%
-%COMMENTLINK%
-%TMPL:END%
-
-%TMPL:DEF{"skills:searchresults:repeated:comment"}%
-<td>%TMPL:P{"skills:searchresults:repeated:commentlink"}%</td>
-%TMPL:END%
-
-%TMPL:DEF{"skills:searchresults:repeated:userend"}%
-</tr>
-%TMPL:END%
+%TMPL:DEF{"skills:searchresults:repeated:userend"}%<td>%TMPL:P{"skills:searchresults:repeated:commentlink"}%</td></tr>%TMPL:END%
 -->
-<table id='skillsTable' class='skillsTable' cellpadding="2px" syle="margin:7px 0;">
+%TMPL:DEF{"skills:searchresults:start"}%
+<table id='skillsTable' class='skillsTable' cellpadding="2px">
  <thead>
   <tr>
    <th class='skillsHeading' colspan='6'>
     <a href="%SCRIPTURL{view}%/%SYSTEMWEB%/SkillsPlugin">Search Skills</a>
    </th>
   </tr>
-  %TMPL:P{"skills:std-rating-heads"}%
   <tr>
    <th colspan="6">
-    Search Results... (Category: <em>%SEARCHCATEGORY%</em>;
-    Skill: <em>%SEARCHSKILL%</em>; Matches: <em>%SEARCHMATCHES%</em>)
+    Search Results... (Search: <em>%SEARCHPATH%</em>; Matches: <em>%SEARCHMATCHES%</em>)
    </th>
+  </tr>
+  <tr>
+   <td style="padding-left:120px;"></td>
+   %SKILLRATINGS{format="<td class='skillsRatingHeader'>$name</td>" from="1"}%
   </tr>
  </thead>
  <tbody>
   <noautolink>
-  %REPEAT%
+%TMPL:END%
+
+%TMPL:DEF{"skills:searchresults:end"}%
   </noautolink>
  </tbody>
  <tfoot>

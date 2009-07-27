@@ -23,5 +23,4 @@
 </div>
 %ENDSECTION{"selectskills"}%
 
-%BR%
-<span class="foswikiGrayText">Skills admin options: [[SkillsAdminIntroduction][Manage Skills]]</span>
+%INCLUDE{"SkillsAdminIntroduction" section="adminoptions"}%

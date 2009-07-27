@@ -29,17 +29,17 @@
 
 Create a new skill.
 
-<form name="createskill" action="%SCRIPTURL{rest}%/SkillsPlugin/addNewSkill" method="post">
+<form name="createskill" action="%SCRIPTURL{rest}%/SkillsPlugin/createNode" method="post">
 <div class="foswikiFormSteps">
 <div class="foswikiFormStep">
 Name of new skill: %BR%
-<input name="newskill" type="text" class="foswikiInputField" size="20" value="%URLPARAM{"createskill"}%" />
-<input type="hidden" name="topic" value="%WEB%.%TOPIC%" />
+<input name="name" type="text" class="foswikiInputField" size="20" value="%URLPARAM{"name"}%" />
+<input type="hidden" name="endPoint" value="%WEB%.%TOPIC%" />
 </div>
 <div class="foswikiFormStep">
 In category: %BR%
-<select name="incategory">
-<option>%URLPARAM{incategory}%</option>
+<select name="path">
+<option>%URLPARAM{path}%</option>
 %SKILLS{action="showcategories" format="<option value='$category'>$category</option>" }%
 </select>
 </div>
@@ -55,13 +55,4 @@ In category: %BR%
 </form>
 %ENDSECTION{"createskill"}%
 
-%IF{"$ SKILLSPLUGIN_SKILLSTOPIC" then="Note: You can modify existing skills by manually editing the skills topic %SKILLSPLUGIN_SKILLSTOPIC%"}%
-
-%STARTSECTION{"existingskills"}%
-Existing skills:
-%SKILLS{action="showskills" prefix="   * *$category:* " format="$skill" separator=", "}%
-%ENDSECTION{"existingskills"}%
-%STOPINCLUDE%
-
-%BR%
-<span class="foswikiGrayText">Other skills options: [[SkillsBrowseAll][Browse All Skills]], [[SkillsEditMySkills][Edit My Skills]], [[SkillsSearch][Search Skills]]</span>
+%INCLUDE{"SkillsAdminIntroduction" section="existingskills"}%

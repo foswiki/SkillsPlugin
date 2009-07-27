@@ -1,36 +1,39 @@
 # Release manifest for SkillsPlugin
-data/System/SkillsAdminIntroduction.txt 0664 UI Topic
-data/System/SkillsPlugin.txt 0664 Plugin Topic
-data/System/SkillsBrowseAll.txt 0664 UI Topic
-data/System/SkillsCreateNewCategory.txt 0664 UI Topic
-data/System/SkillsCreateNewSkill.txt 0664 UI Topic
-data/System/SkillsDeleteCategory.txt 0664 UI Topic
-data/System/SkillsDeleteSkill.txt 0664 UI Topic
-data/System/SkillsDisplayOnHomePage.txt 0664 Supplemental Documentation
-data/System/SkillsEditMySkills.txt 0664 UI Topic
-data/System/SkillsMoveSkill.txt 0664 UI Topic
-data/System/SkillsRenameCategory.txt 0664 UI Topic
-data/System/SkillsRenameSkill.txt 0664 UI Topic
-data/System/SkillsSearch.txt 0664 UI Topic
-data/System/SkillsSelectMySkills.txt 0664 UI Topic
-lib/Foswiki/Plugins/SkillsPlugin.pm 0644 Plugin Module
-lib/Foswiki/Plugins/SkillsPlugin/Category.pm 0644 Plugin Module
-lib/Foswiki/Plugins/SkillsPlugin/Skill.pm 0644 Plugin Module
-lib/Foswiki/Plugins/SkillsPlugin/SkillsStore.pm 0644 Plugin Module
-lib/Foswiki/Plugins/SkillsPlugin/UserSkill.pm 0644 Plugin Module
-lib/Foswiki/Plugins/SkillsPlugin/UserSkills.pm 0644 Plugin Module
-pub/System/SkillsPlugin/skills_screenshot_full.png 0644 Screenshot
-pub/System/SkillsPlugin/skills_screenshot_search.png 0644 Screenshot
-pub/System/SkillsPlugin/skills_screenshot_thumb.png 0644 Screenshot
-pub/System/SkillsPlugin/style.css 0644 Default Style Sheet
-pub/System/SkillsPlugin/spinner.gif 0644 Graphic image
-pub/System/SkillsPlugin/main.js 0644 JS File
-templates/skillsedit.tmpl 0644 Add/Edit form template
-templates/skillseditall.tmpl 0644 Add/Edit form template
-templates/skillssearchform.tmpl 0644 Search form template
-templates/skills.tmpl 0644 Base template
-templates/skillsuserview.tmpl 0644 User Skills template
-templates/skillssearchresults.tmpl 0644 Search results template
-templates/skillsbrowseview.tmpl 0644 Browse Skills template
-templates/oopsgeneric.skills.tmpl 0644 Skills Comment template
-
+!noci
+data/System/SkillsAdminIntroduction.txt 0644
+data/System/SkillsAdvancedSearch.txt 0644
+data/System/SkillsBrowseAll.txt 0644
+data/System/SkillsCreateNewCategory.txt 0644
+data/System/SkillsCreateNewSkill.txt 0644
+data/System/SkillsDeleteCategory.txt 0644
+data/System/SkillsDeleteSkill.txt 0644
+data/System/SkillsDisplayOnHomePage.txt 0644
+data/System/SkillsEditMySkills.txt 0644
+data/System/SkillsMoveSkill.txt 0644
+data/System/SkillsRenameCategory.txt 0644
+data/System/SkillsRenameSkill.txt 0644
+data/System/SkillsSearch.txt 0644
+data/System/SkillsSelectMySkills.txt 0777
+lib/Foswiki/Plugins/SkillsPlugin.pm 0644
+lib/Foswiki/Plugins/SkillsPlugin/NamedNode.pm 0644
+lib/Foswiki/Plugins/SkillsPlugin/SkillNode.pm 0644
+lib/Foswiki/Plugins/SkillsPlugin/Skills.pm 0644
+lib/Foswiki/Plugins/SkillsPlugin/UserSkill.pm 0644
+lib/Foswiki/Plugins/SkillsPlugin/UserSkills.pm 0644
+pub/System/SkillsPlugin/addEditSkills.js 0644
+pub/System/SkillsPlugin/browseSkills.js 0644
+pub/System/SkillsPlugin/editAllSkills.js 0644
+pub/System/SkillsPlugin/main.js 0644
+pub/System/SkillsPlugin/searchSkills.js 0644
+pub/System/SkillsPlugin/skills_screenshot_full.png 0644
+pub/System/SkillsPlugin/skills_screenshot_search.png 0644
+pub/System/SkillsPlugin/skills_screenshot_thumb.png 0644
+pub/System/SkillsPlugin/style.css 0644
+pub/System/SkillsPlugin/viewUserSkills.js 0644
+templates/skills.tmpl 0644
+templates/skillsbrowseview.tmpl 0644
+templates/skillsedit.tmpl 0644
+templates/skillseditall.tmpl 0644
+templates/skillssearchform.tmpl 0644
+templates/skillssearchresults.tmpl 0644
+templates/skillsuserview.tmpl 0644

@@ -15,46 +15,80 @@
 # For licensing info read LICENSE file in the Foswiki root.
 
 package Foswiki::Plugins::SkillsPlugin::UserSkill;
-
 use strict;
+
+use Foswiki::Plugins::SkillsPlugin::SkillNode ();
+our @ISA = ( 'Foswiki::Plugins::SkillsPlugin::SkillNode' );
 
 # Object to represent the skill as stored in users meta data
 sub new {
 
-    my ( $class, $name, $cat, $rating, $comment ) = @_;
+    my ( $class, $name, $rating ) = @_;
 
-    my $self = bless( {}, $class );
+    my $self = $class->SUPER::new($name);
 
-    $self->name($name);
-    $self->category($cat);
-    $self->rating($rating);
-    $self->comment($comment);
-
+    $self->{rating} = $rating;
     return $self;
 }
 
-sub name {
-    my $self = shift;
-    if (@_) { $self->{NAME} = shift }
-    return $self->{NAME};
+sub serializable {
+    my ($this, $field) = @_;
+    return 1 if $field eq 'rating';
+    return $this->SUPER::serializable($field);
 }
 
-sub category {
-    my $self = shift;
-    if (@_) { $self->{CATEGORY} = shift }
-    return $self->{CATEGORY};
+# Debug
+sub toMeta {
+    my $this = shift;
+    my $out;
+
+    if ($this->hasChildren()) {
+        $out = '';
+        foreach my $kid (@{$this->{childNodes}}) {
+            $out .= $kid->toMeta();
+        }
+    } else {
+        $out = "%META:USERSKILL{name=\"$this->{name}\"";
+        $out .= ' rating="'.(defined $this->{rating}?$this->{rating}:'').'"';
+        $out .= ' path="'.$this->{parent}->getPath().'"';
+        $out .= " comment=\"$this->{text}\"" if $this->{text};
+        $out .= "}%\n";
+    }
+    return $out;
 }
 
-sub rating {
-    my $self = shift;
-    if (@_) { $self->{RATING} = shift }
-    return $self->{RATING} || 0;
+# Add leaf skill nodes to Foswiki::Meta
+sub saveToMeta {
+    my ($this, $meta) = @_;
+    my $out;
+
+    if ($this->hasChildren()) {
+        $out = '';
+        foreach my $kid (@{$this->{childNodes}}) {
+            $out .= $kid->saveToMeta($meta);
+        }
+    } else {
+        my @path = $this->getPathArray();
+        pop(@path); # get rid of the skill off the path
+        $meta->putKeyed(
+            'SKILLS',
+            {
+                name     => $this->{name},
+                category => join('/', @path),
+                rating   => $this->{rating},
+                comment  => $this->{text}
+            }
+        );
+    }
 }
 
-sub comment {
-    my $self = shift;
-    if (@_) { $self->{COMMENT} = shift }
-    return $self->{COMMENT};
+sub stringify {
+    my $this = shift;
+    if (!$this->hasChildren()) {
+        return $this->toMeta();
+    } else {
+        return $this->SUPER::stringify();
+    }
 }
 
 1;

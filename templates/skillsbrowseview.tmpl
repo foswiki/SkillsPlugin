@@ -1,52 +1,38 @@
+<!--
 %TMPL:INCLUDE{"skills"}%
-<!-- SKILLSPLUGIN - BROWSE SKILLS TABLE
-%TMPL:DEF{"skills:browseview:repeated:category"}%<tr class='skillsContent'>
-<th colspan='6'><span id="%CATEGORYID%_twistyImage" class="SkillsPlugin-twisty-image">%ICON{toggleclose}%</span>
-<span id="%CATEGORYID%_twistyLink" class="SkillsPlugin-twisty-link skillsTipped" title="%CATEGORYID%">
-%CATEGORYNAME%</span></th></tr>%TMPL:END%
 
-%TMPL:DEF{"skills:browseview:repeated:categorycontainerstart"}%<tbody class="%CATEGORYID%_twist">%TMPL:END%
+%TMPL:DEF{"skills:browseview:repeated:categorystart"}%<div class='skillsContent'>
+ <span id="%ID%_twistyLink" class="SkillsPlugin-twisty-link skillsTipped skillsplugin_category" title="%ID%">
+  <span id="%ID%_twistyImage" class="SkillsPlugin-twisty-image">
+   %ICON{toggleclose}%
+  </span>
+  %NAME%
+ </span>
+ <div class="%ID%_twist browseview_indented">%TMPL:END%
 
-%TMPL:DEF{"skills:browseview:repeated:categorycontainerend"}%</tbody>%TMPL:END%
+%TMPL:DEF{"skills:browseview:repeated:categoryend"}%</div></div>%TMPL:END%
 
-%TMPL:DEF{"skills:browseview:repeated:skillstart"}%<tr>%TMPL:END%
+%TMPL:DEF{"skills:browseview:repeated:indent"}%X%TMPL:END%
 
-%TMPL:DEF{"skills:browseview:repeated:skill"}%<td class="head2" colspan="6">
-%ICON{dot_ur}% <span id="%CATEGORYID%%SKILLID%_twistyLink" class="SkillsPlugin-twisty-link skillsTipped" title="%CATEGORYID%.%SKILLID%">%SKILLNAME%</span></td>%TMPL:END%
+%TMPL:DEF{"skills:browseview:repeated:skillstart"}%
+%ICON{dot_ur}% <span id="%ID%_twistyLink" class="SkillsPlugin-twisty-link skillsTipped skillsplugin_skill" title="%ID%">%NAME%</span><div id="%ID%_twist browseview_indented">%TMPL:END%
 
-%TMPL:DEF{"skills:browseview:repeated:skillend"}%</tr>%TMPL:END%
+%TMPL:DEF{"skills:browseview:repeated:skillend"}%</div>%TMPL:END%
 
-%TMPL:DEF{"skills:browseview:repeated:userstart"}%<tr class="%CATEGORYID%%SKILLID%_twist">%TMPL:END%
+%TMPL:DEF{"skills:browseview:repeated:userstart"}% <div class="browseview_indented">%ICON{dot_ur}% %TMPL:END%
 
-%TMPL:DEF{"skills:browseview:repeated:user"}%<td class="userRow">
-%ICON{dot_ur}% [[%USERSWEB%.%SKILLUSER%][%SKILLUSER%]] (%FORMFIELD{"Location" topic="%USERSWEB%.%SKILLUSER%"}%)
-</td>%TMPL:END%
+%TMPL:DEF{"skills:browseview:repeated:userend"}% [[%USERSWEB%.%USER%][%USER%]] (%FORMFIELD{"Location" topic="%USERSWEB%.%USER%"}%) %COMMENTTIP% </div>%TMPL:END%
 
-%TMPL:DEF{"skills:browseview:repeated:userend"}%</tr>%TMPL:END%
+%TMPL:DEF{"skills:browseview:repeated:prerating"}%%ICON{stargold}%%TMPL:END%
+%TMPL:DEF{"skills:browseview:repeated:rating"}%%ICON{stargold}%%TMPL:END%
+%TMPL:DEF{"skills:browseview:repeated:postrating"}%%ICON{empty}%%TMPL:END%
 
-%TMPL:DEF{"skills:browseview:repeated:prerating"}%<td>&nbsp;</td>%TMPL:END%
-%TMPL:DEF{"skills:browseview:repeated:rating"}%<td class="skillsRating">
-%ICON{stargold}%</td>%TMPL:END%
-%TMPL:DEF{"skills:browseview:repeated:postrating"}%<td>&nbsp;</td>%TMPL:END%
+%TMPL:DEF{"skills:browseview:start"}%
+<a href='%SCRIPTURL{view}%/%SYSTEMWEB%/SkillsPlugin'>Browse All Skills</a>
 
-%TMPL:DEF{"skills:browseview:repeated:comment"}%<td>
-<a id='comment|%CATEGORYID%|%SKILLID%' class='%COMMENTLINKCLASS%' href=\"%COMMENTLINKURL%\" target='_blank' >%ICON{note}%</a></td>%TMPL:END%
+%SKILLRATINGS{format=" $name " from="1"}%
+
+<noautolink>%TMPL:END%
+
+%TMPL:DEF{"skills:browseview:end"}%</noautolink>%TMPL:END%
 -->
-<table id='skillsTable' class='skillsTable' cellpadding="2px" syle="margin:7px 0;">
- <thead>
-  <tr>
-   <th class='skillsHeading' colspan='6'>
-    <a href='%SCRIPTURL{view}%/%SYSTEMWEB%/SkillsPlugin'>Browse All Skills</a>
-   </th>
-  </tr>
-  <tr>
-   <td style="padding-left:120px;"></td>
-   %SKILLRATINGS{format="<td class='skillsRatingHeader'>$name</td>" from="1"}%
-  </tr>
- </thead>
- <tbody>
-  <noautolink>
-  %REPEAT%
-  </noautolink>
- </tbody>
-</table>

@@ -33,8 +33,34 @@ For more information:
 
 %ENDSECTION{"adminintro"}%
 
-
 %STOPINCLUDE%
 
-%BR%
-<span class="foswikiGrayText">Other skills options: [[SkillsBrowseAll][Browse All Skills]], [[SkillsEditMySkills][Edit My Skills]], [[SkillsSearch][Search Skills]]</span>
+%STARTSECTION{"existingskills"}%
+%IF{"$SKILLSPLUGIN_SKILLSTOPIC" then="Note: you can modify existing skills by editing the topic %SKILLSPLUGIN_SKILLSTOPIC%%BR%"}%
+Existing Skills:
+%SKILLS{action="showskills" format="   * $category/$skill"}%
+
+<span class="foswikiGrayText">Other skill options: [[SkillsBrowseAll][Browse All Skills]], [[SkillsEditMySkills][Edit My Skills]], [[SkillsSearch][Search Skills]]</span>
+%ENDSECTION{"existingskills"}%
+
+<!--
+%STARTSECTION{"adminoptions"}%
+<span class="foswikiGrayText">Skills admin options: [[SkillsAdminIntroduction][Manage Skills]]</span>
+%ENDSECTION{"adminoptions"}%
+%STARTSECTION{"tabs"}%
+<table class="skillNavigation" border="0" cellpadding="0" cellspacing="0" width="100%">
+ <tr>
+  <td class="%IF{"$INCLUDINGTOPIC='SkillsBrowseAll'" then="current" else="other"}%">
+   [[SkillsBrowseAll][Browse Skills]]
+  </td>
+  <td class="%IF{"$INCLUDINGTOPIC=SkillsEditMySkills" then="current" else="other"}%">
+   [[SkillsEditMySkills][Edit My Skills]]
+  </td>
+  <td class="%IF{"$INCLUDINGTOPIC=SkillsSearch" then="current" else="other"}%">
+   [[SkillsSearch][Search Skills]]
+  </td>
+ </tr>
+ <tr><td colspan="1000" class="bottom"></td></tr>
+</table>
+%ENDSECTION{"tabs"}%
+-->

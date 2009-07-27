@@ -1,57 +1,39 @@
+<!--
 %TMPL:INCLUDE{"skills"}%
-<!-- SKILLSPLUGIN - USER SKILLS TABLE
-%TMPL:DEF{"skills:userview:head"}%<a href='%SCRIPTURL{view}%/%USERSWEB%/%SKILLUSER%'>%SKILLUSER%'s Skills</a>%TMPL:END%
 
-%TMPL:DEF{"skills:userview:footer"}%
-[[%SYSTEMWEB%.SkillsBrowseAll][Browse Skills]] | [[%SYSTEMWEB%.SkillsEditMySkills][Edit Your Skills]] | [[%SYSTEMWEB%.SkillsSearch][SearchSkills]]
+%TMPL:DEF{"skills:userview:start"}%
+<div id='skillsTable' class='skillsTable'>
+ [[%USERSWEB%.%WIKINAME%][%WIKINAME%]]'s Skills</a>
+</noautolink>%TMPL:END%
+
+%TMPL:DEF{"skills:userview:end"}%</noautolink>
+</div><!--/skillsTable-->
+<div style='float:left'>
+ [[%SYSTEMWEB%.SkillsBrowseAll][Browse Skills]] |
+ [[%SYSTEMWEB%.SkillsEditMySkills][Edit Your Skills]] |
+ [[%SYSTEMWEB%.SkillsSearch][SearchSkills]]
+</div>
 %TMPL:END%
 
-%TMPL:DEF{"skills:userview:head"}%<a href='%SCRIPTURL{view}%/%USERSWEB%/%WIKINAME%'>%WIKINAME%'s Skills</a>%TMPL:END%
+%TMPL:DEF{"skills:userview:repeated:categorystart"}%<div class='skillsContent'>
+ <span id="%ID%_twistyLink" class="SkillsPlugin-twisty-link skillsplugin_category">
+  <span id="%ID%_twistyImage" class="SkillsPlugin-twisty-image">
+   %ICON{toggleclose}%
+  </span>
+  %NAME%
+ </span>
+ <div class="%ID%_twist browseview_indented">%TMPL:END%
 
-%TMPL:DEF{"skills:userview:repeated:category"}%<tr class='skillsContent'><th colspan='6'>
-<span id="%CATEGORYID%_twistyImage" class="SkillsPlugin-twisty-image">%ICON{toggleclose}%</span>
-<span id="%CATEGORYID%_twistyLink" class="SkillsPlugin-twisty-link">
-%CATEGORYNAME%</span></th></tr>%TMPL:END%
+%TMPL:DEF{"skills:userview:repeated:categoryend"}%</div><!--/%ID%_twist-->
+</div><!--/skillsContent-->%TMPL:END%
 
-%TMPL:DEF{"skills:userview:repeated:skillcontainerstart"}%<tbody class="%CATEGORYID%_twist">%TMPL:END%
+%TMPL:DEF{"skills:userview:repeated:skillstart"}%<div>%ICON{dot_ur}%
+<span class="skillsplugin_category">%NAME%</span>%TMPL:END%
+%TMPL:DEF{"skills:userview:repeated:skillend"}%</div>%TMPL:END%
 
-%TMPL:DEF{"skills:userview:repeated:skillstart"}%<tr>%TMPL:END%
-
-%TMPL:DEF{"skills:userview:repeated:skill"}%<td>%ICON{dot_ur}% %SKILLNAME%
-</td>%TMPL:END%
-
-%TMPL:DEF{"skills:userview:repeated:prerating"}%<td>&nbsp;</td>%TMPL:END%
-%TMPL:DEF{"skills:userview:repeated:rating"}%<td class="skillsRating">
-%ICON{stargold}%</td>%TMPL:END%
-%TMPL:DEF{"skills:userview:repeated:postrating"}%<td>&nbsp;</td>%TMPL:END%
-
-%TMPL:DEF{"skills:userview:repeated:comment"}%<td>
-<a id='comment|%CATEGORYID%|%SKILLID%' class='%COMMENTLINKCLASS%' href="%COMMENTLINKURL%" target='_blank' >
-%ICON{note}%</a></td>%TMPL:END%
-
-%TMPL:DEF{"skills:userview:repeated:skillend"}%</tr>%TMPL:END%
-
-%TMPL:DEF{"skills:userview:repeated:skillcontainerend"}%</tbody>%TMPL:END%
+%TMPL:DEF{"skills:userview:repeated:userstart"}% %TMPL:END%
+%TMPL:DEF{"skills:userview:repeated:prerating"}%%ICON{stargold}%%TMPL:END%
+%TMPL:DEF{"skills:userview:repeated:rating"}%%ICON{stargold}%%TMPL:END%
+%TMPL:DEF{"skills:userview:repeated:postrating"}%%ICON{empty}%%TMPL:END%
+%TMPL:DEF{"skills:userview:repeated:userend"}% %COMMENTTIP% %TMPL:END%
 -->
-<table id='skillsTable' class='skillsTable' cellpadding="2px" syle="margin:7px 0;">
- <thead>
-  <tr>
-   <th class='skillsHeading' colspan='6'>
-    %TMPL:P{"skills:userview:head"}%
-   </th>
-  </tr>
-  %TMPL:P{skills:std-rating-heads}%
- </thead>
- <tbody>
-  <noautolink>
-  %REPEAT%
-  </noautolink>
- </tbody>
- <tfoot>
-  <tr>
-   <td colspan='6' class='skillsFooter'>
-    <span style='float:left;'>%TMPL:P{"skills:userview:footer"}%</span>
-   </td>
-  </tr>
- </tfoot>
-</table>

@@ -1,20 +1,28 @@
 %TMPL:INCLUDE{"skills"}%
+%TMPL:DEF{"addedit-subcategory-tr"}%<tr>
+ <th class="skillsplugin_category">Subcategory</th>
+ <td colspan="5">
+  <select name="path2" class="skillsControl" id="addedit-subcategory-select">
+  </select>
+ </td>
+</tr>%TMPL:END%
 
 <!-- SKILLSPLUGIN - EDIT SKILLS -->
 <form name="addedit-skill-form" id="addedit-skill-form">
 <table class="skillsForm">
 <tr><th colspan="6"><a href="%SCRIPTURL{view}%/%SYSTEMWEB%/SkillsPlugin">Edit Your Skills (%WIKINAME%)</a></th></tr>
 <tr>
- <th>Category</th>
+ <th class="skillsplugin_category">Category</th>
  <td colspan="5">
-  <select name="category" class="skillsControl" id="addedit-category-select">
+  <select name="path1" class="skillsControl" id="addedit-category-select">
   </select>
  </td>
 </tr>
+%TMPL:P{context="skillsplugin_subcategories" then="addedit-subcategory-tr"}%
 <tr>
- <th>Skill</th>
+ <th class="skillsplugin_skill">Skill</th>
  <td colspan="5">
-  <select name="skill" id="addedit-skill-select" class="skillsControl">
+  <select name="path3" id="addedit-skill-select" class="skillsControl">
   </select>
  </td>
 </tr>

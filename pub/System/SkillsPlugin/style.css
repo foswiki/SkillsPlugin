@@ -3,8 +3,47 @@
 #FDFAF1 - orange
 */
 
+.skillsplugin_category { 
+  color:#06c;
+  font-weight: bold;
+  text-align: left;
+}
+.skillsplugin_skill { 
+  color:#0b6;
+  font-weight: bold;
+  text-align: right;
+}
+
+th.editall_category0 { 
+}
+
+th.editall_category1 { 
+  padding-left: 2em; /* indent */
+}
+
+th.editall_category2 { 
+  padding-left: 4em; /* indent */
+}
+
+th.editall_skill { 
+}
+
+td.editall_radio { 
+  text-align: center;
+}
+
+div.browseview_indented { 
+  margin-left: 16pt;
+}
+
+span.browseview_category { 
+}
+
+span.browseview_skill { 
+}
 
 /**** Table ****/
+
 table.skillsTable {
         border-color:#ccc;
         background-color:#fff;
@@ -60,7 +99,7 @@ table.skillsTable td {
 	margin:0px;
 	border-collapse:collapse;
 	height:1.4em;
-	text-align:left;
+	text-align:center;
 }
 
 table.skillsTable td.head2{
@@ -143,16 +182,45 @@ table.skillsForm td.skillsFormRating {
 
 /**** UI ****/
 /* stolen from TagMePlugin */
-.skillNavigation a {
-	text-decoration:none;
+table.skillNavigation a {
+  text-decoration: none;
+  font-weight: bold;
 }
-.skillNavigation a:link,
-.skillNavigation a:visited {
-	color:#666;
+
+table.skillNavigation a:link,
+table.skillNavigation a:visited {
+  color: #666;
 }
-.skillNavigation a:hover {
-	background-color:transparent;
-	border-bottom:1px solid #666;
+
+table.skillNavigation a:hover {
+  background-color:transparent;
+  border-bottom: 1px solid #666;
+}
+
+table.skillNavigation td {
+  border-top: none;
+  margin: 0em 4em;
+  padding: 0.5em;
+  text-align: center;
+}
+
+table.skillNavigation td.current {
+  border-left: 6em solid white;
+  border-right: 6em solid white;
+  border-bottom: none;
+  background-color: #EAE9DE;
+}
+
+table.skillNavigation td.other {
+  border-left: 6em solid white;
+  border-right: 6em solid white;
+  border-bottom: 1em white;
+  background-color: #F6F4EB;
+}
+
+table.skillNavigation td.bottom { 
+  background-color: #EAE9DE;
+  height: 1em;
 }
 
 .skillNotification {

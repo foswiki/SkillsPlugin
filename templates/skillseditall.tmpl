@@ -2,8 +2,8 @@
  <table width="100%" cols="8" class="skillsCatTable" name="category">
   <thead>
    <tr class="skillsCatTable_banner">
-    <th>Category</th>
-    <th>Skill</th>
+    <th class="editall_category0">Category</th>
+    <th class="editall_skill">Skill</th>
     %SKILLRATINGS{format="<td class='skillsCatTable'>$name</td>"}%
     <th>Comment</th>
    </tr>
@@ -13,12 +13,12 @@
   <tfoot>
    <tr>
     <td colspan="8" class="skillsCatTable_footer">
-     <input name="editall-skills-submit" id="editall-skills-submit" type="button" value="Save Changes" class="foswikiHidden"></td>
+     <input name="editall-skills-submit" id="editall-skills-submit" type="button" value="Save Changes" class="foswikiSubmit"></td>
    </tr>
    <tr>
     <td colspan='8'>
      <span id="editall-skills-message-container" style="display:none;">
-      ICON{info}%<span id='editall-skills-message'></span>
+      %ICON{info}% <span id='editall-skills-message'></span>
      </span>
     </td>
    </tr>

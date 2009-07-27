@@ -94,13 +94,14 @@ Plugin settings are stored as preferences variables in %LOCALSITEPREFS% (or in W
       * =S<nop>et SKILLSPLUGIN_RATINGS = None,Child,Adolescent,Adult,Crusty=
      The default is =None,Ancient Knowledge,Working Knowledge,Expert,Guru=
 
-%X% __IMPORTANT!__ If you used the ALLOWADDSKILLS preference with a prior version,
-please note that this preference has been removed. Define
-SKILLSPLUGIN_SKILLSTOPIC instead, and use standard Foswiki permissions to
-control access to it.
+%X% __IMPORTANT!__ If you used the ALLOWADDSKILLS preference with a prior
+version, please note that this preference was inherently insecure and has
+been removed. Define SKILLSPLUGIN_SKILLSTOPIC instead, and use standard
+Foswiki permissions to control access to it.
 
 ---+++ Format of the SKILLSPLUGIN_SKILLSTOPIC
-Each category is defined as a first-level heading, using ---+, and skills in that category as second level (---++) headings. Category and skill descriptions
+Each category is defined as a first-level heading, using ---+, subcategories
+using ---++, and skills in that category as lowest level headings. You can have as many levels of headings as you need. Category and skill descriptions
 should follow immediately after the relevant heading. For example:
 <verbatim>
 All text up to the first heading will be ignored
@@ -149,5 +150,5 @@ Next:
 |  Plugin Home: | http://Foswiki.org/Extensions/%TOPIC% |
 |  Support: | http://Foswiki.org/Support/%TOPIC% |
 
-%META:FILEATTACHMENT{name="skills_screenshot_thumb.png" attr="" autoattached="1" comment="" date="1171248289" path="skills_screenshot_thumb.png" size="48997" user="Main.ProjectContributor" version="2"}%
-%META:FILEATTACHMENT{name="skills_screenshot_full.png" attr="" autoattached="1" comment="" date="1171248281" path="skills_screenshot_full.png" size="131655" user="Main.ProjectContributor" version="1"}%
+%META:FILEATTACHMENT{name="skills_screenshot_thumb.png" attr="h" autoattached="1" comment="" date="1171248289" path="skills_screenshot_thumb.png" size="48997" user="Main.ProjectContributor" version="2"}%
+%META:FILEATTACHMENT{name="skills_screenshot_full.png" attr="h" autoattached="1" comment="" date="1171248281" path="skills_screenshot_full.png" size="131655" user="Main.ProjectContributor" version="1"}%
