@@ -12,28 +12,25 @@
 %ICON{empty}%
 </td>%TMPL:END%
 
-%TMPL:DEF{"skills:searchresults:repeated:rating"}%<td>
-%ICON{stargold}%
+%TMPL:DEF{"skills:searchresults:repeated:rating"}%<td class="skillsFormRatingCell">
+%TMPL:P{star}%
 </td>%TMPL:END%
 
 %TMPL:DEF{"skills:searchresults:repeated:userend"}%<td>%TMPL:P{"skills:searchresults:repeated:commentlink"}%</td></tr>%TMPL:END%
 -->
 %TMPL:DEF{"skills:searchresults:start"}%
-<table id='skillsTable' class='skillsTable' cellpadding="2px">
+<table class='skillsTable'>
  <thead>
   <tr>
-   <th class='skillsHeading' colspan='6'>
+   <th class='skillsFormHeadRow' colspan='6'>
     <a href="%SCRIPTURL{view}%/%SYSTEMWEB%/SkillsPlugin">Search Skills</a>
-   </th>
-  </tr>
-  <tr>
-   <th colspan="6">
+    <br />
     Search Results... (Search: <em>%SEARCHPATH%</em>; Matches: <em>%SEARCHMATCHES%</em>)
    </th>
   </tr>
   <tr>
    <td style="padding-left:120px;"></td>
-   %SKILLRATINGS{format="<td class='skillsRatingHeader'>$name</td>" from="1"}%
+   %SKILLRATINGS{format="<td class='skillsplugin_ratingname'>$name</td>" from="1"}%
   </tr>
  </thead>
  <tbody>

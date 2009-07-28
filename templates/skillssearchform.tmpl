@@ -1,37 +1,29 @@
-<!-- SKILLSPLUGIN - SEARCH SKILLS
-%TMPL:INCLUDE{"skills"}%
-
-%TMPL:DEF{"search-subcategory-tr"}%<tr>
-   <th class="skillsplugin_category">Subcategory</th>
-   <td>
-    <select name="path2" class="skillsCategorySelect" id="search-subcategory-select">
-    </select>
-   </td>
-</tr>%TMPL:END%
-
--->
 <form name="search-skill-form" id="search-skill-form">
  <table class="skillsForm">
   <tr>
-   <th colspan="4">
-    <a href="%SCRIPTURL{view}%/%SYSTEMWEB%/SkillsPlugin">Search Skills</a>
+   <th colspan="4" class="skillsFormHeadRow">
+    <a href="%SCRIPTURL{view}%/%SYSTEMWEB%/SkillsPlugin">
+     Search Skills
+    </a>
    </th>
   </tr>
   <tr>
-   <th class="skillsplugin_category">Category</th>
-   <td>
-    <select name="path1" class="skillsCategorySelect" id="search-category-select">
+   <th class="skillsplugin_category skillsFormFirstCol">Category</th>
+   <td class="skillsForm">
+    <select name="path1" id="search-category-select">
+     %SKILLS{action="showcategories" format="<option value='$category'>$category</option>" }%
     </select>
    </td>
   </tr>
-  %TMPL:P{context="skillsplugin_subcategories" then="search-subcategory-tr"}%
   <tr>
-   <th class="skillsplugin_skill">Skill</th>
-   <td><select name="path3" id="search-skill-select"></select></td>
+   <th class="skillsplugin_skill skillsFormFirstCol">Skill</th>
+   <td class="skillsForm">
+    <select name="path2" id="search-skill-select"></select>
+   </td>
   </tr>
   <tr>
-   <th>Rating</th>
-   <td colspan="3">
+   <th class="skillsFormFirstCol">Rating</th>
+   <td colspan="3" class="skillsForm">
     Between
     <select name="ratingFrom">
      %SKILLRATINGS{format="<option value='$value' $marker>$name</option>" selection="1"}%
@@ -43,8 +35,8 @@
    </td>
   </tr>
   <tr>
-   <td colspan="6" class="skillsFormRating">
-    <input name="skill-submit" id="search-skill-submit" type="button" value="Search" class="foswikiSubmit skillsSubmit skillsControl" />
+   <td colspan="6" class="skillsFormSubmit">
+    <input name="skill-submit" id="search-skill-submit" type="button" value="Search" class="foswikiSubmit skillsSubmit skillsFormControl" />
    </td>
   </tr>
  </table>

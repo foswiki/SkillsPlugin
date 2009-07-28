@@ -56,6 +56,9 @@ Existing Skills:
   <td class="%IF{"$INCLUDINGTOPIC=SkillsEditMySkills" then="current" else="other"}%">
    [[SkillsEditMySkills][Edit My Skills]]
   </td>
+  <td class="%IF{"$INCLUDINGTOPIC=SkillsSelectMySkills" then="current" else="other"}%">
+   [[SkillsSelectMySkills][Select My Skills]]
+  </td>
   <td class="%IF{"$INCLUDINGTOPIC=SkillsSearch" then="current" else="other"}%">
    [[SkillsSearch][Search Skills]]
   </td>

@@ -1,56 +1,55 @@
+<!--
 %TMPL:INCLUDE{"skills"}%
-%TMPL:DEF{"addedit-subcategory-tr"}%<tr>
- <th class="skillsplugin_category">Subcategory</th>
- <td colspan="5">
-  <select name="path2" class="skillsControl" id="addedit-subcategory-select">
-  </select>
- </td>
-</tr>%TMPL:END%
-
-<!-- SKILLSPLUGIN - EDIT SKILLS -->
+-->
 <form name="addedit-skill-form" id="addedit-skill-form">
-<table class="skillsForm">
-<tr><th colspan="6"><a href="%SCRIPTURL{view}%/%SYSTEMWEB%/SkillsPlugin">Edit Your Skills (%WIKINAME%)</a></th></tr>
-<tr>
- <th class="skillsplugin_category">Category</th>
- <td colspan="5">
-  <select name="path1" class="skillsControl" id="addedit-category-select">
-  </select>
- </td>
-</tr>
-%TMPL:P{context="skillsplugin_subcategories" then="addedit-subcategory-tr"}%
-<tr>
- <th class="skillsplugin_skill">Skill</th>
- <td colspan="5">
-  <select name="path3" id="addedit-skill-select" class="skillsControl">
-  </select>
- </td>
-</tr>
-<tr>
- <th>Rating</th>
- %SKILLRATINGS{format="<td class='skillsFormRating'>$name</td>"}%
-</tr>
-<tr>
- <td></td>
- %SKILLRATINGS{format="<td><input type='radio' class='skillsRating skillsControl' name='addedit-skill-rating' value='$value' /></td>"}%
-</tr>
-<tr>
- <th>Comment</th>
- <td colspan="5">
-  <input size="35" class="skillsComment skillsControl" id="addedit-skill-comment" type="text" name="comment" />
-   &nbsp;&nbsp;<span id='addedit-skill-comment-clear' style='display:none;'>%ICON{clear}%</span>&nbsp;&nbsp;<em>Optional</em>
- </td>
-</tr>
-<tr>
- <td colspan="6" class="skillsFormRating">
-  <input name="skill-submit" id="addedit-skill-submit" type="button" value="Add/Edit" class="foswikiSubmit skillsControl" />
- </td>
-</tr>
-<tr>
- <td colspan='6'>
-  <span id="addedit-skills-message-container" style="display:none;">
-   %ICON{info}% <span id='addedit-skills-message'></span>
-  </span>
- </td>
-</tr>
-</table></form>
+ <table class="skillsForm">
+  <tr>
+   <th colspan="100" class="skillsFormHeadRow">
+    <a href="%SCRIPTURL{view}%/%SYSTEMWEB%/SkillsPlugin">
+     Edit Your Skills (%WIKINAME%)
+    </a>
+   </th>
+  </tr>
+  <tr>
+   <th class="skillsplugin_category skillsFormFirstCol">Category</th>
+   <td colspan="100" class="skillsForm">
+    <select name="path1" class="skillsFormControl" id="addedit-category-select">
+     %SKILLS{action="showcategories" format="<option value='$category'>$category</option>" }%
+    </select>
+   </td>
+  </tr>
+  <tr>
+   <th class="skillsplugin_skill skillsFormFirstCol">Skill</th>
+   <td colspan="100" class="skillsForm">
+    <select name="path2" id="addedit-skill-select" class="skillsFormControl">
+    </select>
+   </td>
+  </tr>
+  <tr>
+   <th class="skillsFormFirstCol">Rating</th>
+   %SKILLRATINGS{format="<td class='skillsForm skillsFormRatingCell'>$name<br /><input type='radio' class='skillsFormRatingControl skillsFormControl' name='addedit-skill-rating' value='$value' /></td>"}%
+  </tr>
+  <tr>
+   <th class="skillsFormFirstCol">Comment</th>
+   <td colspan="100" class="skillsForm">
+    <input size="35" class="skillsFormCommentControl skillsFormControl" id="addedit-skill-comment" type="text" name="comment" />
+     &nbsp;&nbsp;
+     <span id='addedit-skill-comment-clear' style='display:none;'>
+      %ICON{clear}%</span>
+     &nbsp;&nbsp;<em>Optional</em>
+   </td>
+  </tr>
+  <tr>
+   <td colspan="100" class="skillsFormSubmit">
+    <input name="skill-submit" id="addedit-skill-submit" type="button" value="Add/Edit" class="foswikiSubmit skillsFormControl" />
+   </td>
+  </tr>
+  <tr>
+   <td colspan='100'>
+    <span id="addedit-skills-message-container" style="display:none;">
+     %ICON{info}% <span id='addedit-skills-message'></span>
+    </span>
+   </td>
+  </tr>
+ </table>
+</form>

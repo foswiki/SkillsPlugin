@@ -1,38 +1,25 @@
 <!--
 %TMPL:INCLUDE{"skills"}%
 
-%TMPL:DEF{"skills:browseview:repeated:categorystart"}%<div class='skillsContent'>
- <span id="%ID%_twistyLink" class="SkillsPlugin-twisty-link skillsTipped skillsplugin_category" title="%ID%">
-  <span id="%ID%_twistyImage" class="SkillsPlugin-twisty-image">
-   %ICON{toggleclose}%
-  </span>
-  %NAME%
- </span>
- <div class="%ID%_twist browseview_indented">%TMPL:END%
+%TMPL:DEF{"skills:browseview:repeated:categorystart"}%%TMPL:P{skills:std:repeated:categorystart}%%TMPL:END%
 
-%TMPL:DEF{"skills:browseview:repeated:categoryend"}%</div></div>%TMPL:END%
+%TMPL:DEF{"skills:browseview:repeated:categoryend"}%%TMPL:P{skills:std:repeated:categoryend}%%TMPL:END%
 
 %TMPL:DEF{"skills:browseview:repeated:indent"}%X%TMPL:END%
 
-%TMPL:DEF{"skills:browseview:repeated:skillstart"}%
-%ICON{dot_ur}% <span id="%ID%_twistyLink" class="SkillsPlugin-twisty-link skillsTipped skillsplugin_skill" title="%ID%">%NAME%</span><div id="%ID%_twist browseview_indented">%TMPL:END%
+%TMPL:DEF{"skills:browseview:repeated:skillstart"}%%TMPL:P{"skills:std:repeated:skillstart"}%%TMPL:END%
 
-%TMPL:DEF{"skills:browseview:repeated:skillend"}%</div>%TMPL:END%
+%TMPL:DEF{"skills:browseview:repeated:skillend"}%%TMPL:P{"skills:std:repeated:skillend"}%%TMPL:END%
 
-%TMPL:DEF{"skills:browseview:repeated:userstart"}% <div class="browseview_indented">%ICON{dot_ur}% %TMPL:END%
+%TMPL:DEF{"skills:browseview:repeated:userstart"}% <div class="indent-cascade">%ICON{dot_ur}% %TMPL:END%
 
 %TMPL:DEF{"skills:browseview:repeated:userend"}% [[%USERSWEB%.%USER%][%USER%]] (%FORMFIELD{"Location" topic="%USERSWEB%.%USER%"}%) %COMMENTTIP% </div>%TMPL:END%
 
-%TMPL:DEF{"skills:browseview:repeated:prerating"}%%ICON{stargold}%%TMPL:END%
-%TMPL:DEF{"skills:browseview:repeated:rating"}%%ICON{stargold}%%TMPL:END%
+%TMPL:DEF{"skills:browseview:repeated:prerating"}%%TMPL:P{star}%%TMPL:END%
+%TMPL:DEF{"skills:browseview:repeated:rating"}%%TMPL:P{star}%%TMPL:END%
 %TMPL:DEF{"skills:browseview:repeated:postrating"}%%ICON{empty}%%TMPL:END%
 
-%TMPL:DEF{"skills:browseview:start"}%
-<a href='%SCRIPTURL{view}%/%SYSTEMWEB%/SkillsPlugin'>Browse All Skills</a>
-
-%SKILLRATINGS{format=" $name " from="1"}%
-
-<noautolink>%TMPL:END%
+%TMPL:DEF{"skills:browseview:start"}%<noautolink>%TMPL:END%
 
 %TMPL:DEF{"skills:browseview:end"}%</noautolink>%TMPL:END%
 -->

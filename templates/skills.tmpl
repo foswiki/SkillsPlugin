@@ -1,6 +1,25 @@
-%TMPL:DEF{skills:std-rating-heads}%
-<tr>
- <td style="padding-left:120px;"></td>
- %SKILLRATINGS{format="<td class='skillsRatingHeader'>$name</td>"}%
-</tr>
-%TMPL:END%
+%TMPL:DEF{star}%<img src="%PUBURLPATH%/%SYSTEMWEB%/SkillsPlugin/star.gif" alt="*"/>%TMPL:END%
+
+%TMPL:DEF{skills:std:repeated:categorystart}%<div class='skillsContent'>
+ <span id="%ID%_twistyLink" class="skillsplugin-twisty-link skillsplugin_category">
+  <span id="%ID%" class="skillsTipped">
+   <span id="%ID%_twistyImage">
+    %ICON{toggleclose}%
+   </span>
+   %NAME%
+  </span>
+ </span>
+ <div class="%ID%_twist indent-cascade">%TMPL:END%
+
+%TMPL:DEF{"skills:std:repeated:categoryend"}%</div><!--/%ID%_twist-->
+</div><!--/skillsContent-->%TMPL:END%
+
+%TMPL:DEF{"skills:std:repeated:skillstart"}%%ICON{dot_ur}%
+<span id="%ID%_twistyLink" class="skillsplugin-twisty-link skillsplugin_skill">
+ <span id="%ID%" class="skillsTipped">
+  %NAME%
+ </span>
+</span>
+<div id="%ID%_twist" class="indent-cascade">%TMPL:END%
+
+%TMPL:DEF{"skills:std:repeated:skillend"}%</div>%TMPL:END%

@@ -28,6 +28,7 @@ pub/System/SkillsPlugin/searchSkills.js 0644
 pub/System/SkillsPlugin/skills_screenshot_full.png 0644
 pub/System/SkillsPlugin/skills_screenshot_search.png 0644
 pub/System/SkillsPlugin/skills_screenshot_thumb.png 0644
+pub/System/SkillsPlugin/star.gif 0644
 pub/System/SkillsPlugin/style.css 0644
 pub/System/SkillsPlugin/viewUserSkills.js 0644
 templates/skills.tmpl 0644

@@ -26,7 +26,7 @@ use Foswiki::Plugins::SkillsPlugin::SkillNode ();
 
 # Plugin Variables
 our $VERSION           = '$Rev$';
-our $RELEASE           = '16 Jul 2009';
+our $RELEASE           = '28 Jul 2009';
 our $NO_PREFS_IN_TOPIC = 1;
 our $SHORTDESCRIPTION =
   'Allows users to list their skills, which can then be searched';
@@ -35,10 +35,11 @@ our $recursionBlock;
 # ========================= INIT
 sub initPlugin {
 
+    # Set a context that defined how many levels of 
     Foswiki::Func::getContext()->{skillsplugin_subcategories} = 1;
-    # Register tag %SKILLS%
+
     Foswiki::Func::registerTagHandler( 'SKILLS', \&_handleTag );
-    # Register tag %SKILLRATINGS%
+
     Foswiki::Func::registerTagHandler( 'SKILLRATINGS', \&_SKILLRATINGS );
 
     # Register REST handlers
@@ -84,7 +85,10 @@ sub _genTooltips {
             my ($node, $out) = @_;
             my $id = $node->getID();
             my $desc = Foswiki::Func::renderText($node->{text});
-            $$out .= "<div class='skillsTooltip' id='tip$id'>$desc</div>";
+            if ($desc && length($desc) > 0) {
+                $$out .= "<div class='skillsplugin_tooltip' id='tip$id'>"
+                  . "$desc</div>";
+            }
         },
         \$out
     );
@@ -294,15 +298,15 @@ sub _tagEditAllSkills {
 }
 
 sub _addCommentTip {
-    my $userSkill = shift;
-    if ( !$userSkill->{comment} ) {
+    my ($user, $skill) = @_;
+    if ( !$skill->{text} ) {
         return ( '', '');
     }
-    my $id = $userSkill->getID();
-    my $tipDiv = "<div style='display:none' id='${id}_comment'>"
-      .$userSkill->{comment}."</div>";
+    my $id = 'comment:'.$user->{name}.':'.$skill->getID();
+    my $tipDiv = "<div style='display:none' id='tip$id'>"
+      .$skill->{text}."</div>";
     my $tipIcon =
-      "<span id='$id' title='${id}_comment' class='skillsTipped'>%ICON{note}%</span>";
+      "<span id='$id' class='skillsTipped'>%ICON{note}%</span>";
     return ( $tipIcon, $tipDiv );
 }
 
@@ -522,7 +526,7 @@ sub _compileAllUserSkills {
         next unless $user;
         my $skill = $user->getByPath(@$path);
         next unless $skill; # User does not have this skill
-
+        next unless $skill->{rating} > 0;
         $out .= _compileUserSkill(
             $user, $skill, $templates, $commentTips, $matches);
     }
@@ -558,7 +562,7 @@ sub _compileUserSkill {
     $out .= Foswiki::Func::expandTemplate($templates.':repeated:userend');
 
     # comment
-    my ($tipIcon, $tipDiv) = _addCommentTip($user);
+    my ($tipIcon, $tipDiv) = _addCommentTip($user, $skill);
     $$commentTips .= $tipDiv;
     $out =~ s/%COMMENTTIP%/$tipIcon/g;
     $out =~ s/%USER%/$user->{name}/g;
@@ -580,7 +584,7 @@ sub _getPathFromCGI {
     } else {
         for (my $i = 1; $i < 10; $i++) {
             if (defined($request->param("path$i"))) {
-                push(@path, $request->param("path$i"));
+                push(@path, split('/', $request->param("path$i")));
             }
         }
     }
@@ -711,12 +715,15 @@ sub _rest_getChildNodes {
 
     my $request = Foswiki::Func::getCgiQuery();
     my @path = _getPathFromCGI();
+    my $leafonly = $request->param('leafonly');
 
     my $skills = new Foswiki::Plugins::SkillsPlugin::Skills();
     my $node = $skills->getByPath(@path);
     return returnRESTResult($response, 500,
         join('/', @path)." is not in the skills database") unless $node;
-    my @kids = map { $_->{name} } @{$node->{childNodes}};
+    my @kids = map { $_->{name} }
+      grep { !($leafonly && $_->hasChildren) }
+        @{$node->{childNodes}};
     return JSON::to_json(\@kids);
 }
 
@@ -822,7 +829,7 @@ sub _rest_saveUserChanges {
         sub {
             my $node = shift;
             return if $node->hasChildren();
-            my $key = "editall:2f".$node->getID();
+            my $key = $node->getID();
             my $rating = $request->param("$key-rating");
             my $comment = $request->param("$key-comment");
             if (defined $rating || defined $comment) {
@@ -835,12 +842,16 @@ sub _rest_saveUserChanges {
                     $known->{rating} = $rating;
                     $known->{text} = $comment;
                     $added++;
-                    print STDERR "Add ".$known->getPath()."\n";
+                    print STDERR $known->getPath()." added\n";
                 } else {
                     my $changes = 0;
                     if (defined $rating &&
                           (!defined $known->{rating} ||
-                             $rating ne $known->{rating})) {
+                             ($rating||0) != ($known->{rating}||0))) {
+                        print STDERR "Rating ".
+                          (defined $known->{rating}?
+                             $known->{rating}:'undef')." -> ".
+                               "$rating\n";
                         $known->{rating} = $rating;
                         $changes++;
                     }
@@ -848,6 +859,10 @@ sub _rest_saveUserChanges {
                           (!defined $known->{text} ||
                              $comment ne $known->{text})) {
                         $known->{text} = $comment;
+                        print STDERR "Comment ".
+                          (defined $known->{text}?
+                             $known->{text}:'undef')." -> ".
+                               "$comment\n";
                         $changes++;
                     }
                     if ( $changes ) {

@@ -29,6 +29,12 @@ sub new {
     return $this;
 }
 
+# Children are of a different type
+sub newChild {
+    my $this = shift;
+    return new Foswiki::Plugins::SkillsPlugin::SkillNode(@_);
+}
+
 # Deprecated: read skills from file in work area
 sub _getSkillsFromWorking {
     my $this = shift;

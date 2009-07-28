@@ -45,7 +45,7 @@ SkillsPlugin.main = {
             'GET', url, obCallbacks); 
     },
     
-    submit: function(rest, formid, messid, fnCallback) {
+    submit: function(rest, formid, fnCallback) {
         var url = SkillsPlugin.vars.restUrl + '/SkillsPlugin/' + rest;
         var obForm = document.getElementById(formid);
         YAHOO.util.Connect.setForm(obForm);
@@ -54,11 +54,6 @@ SkillsPlugin.main = {
                 SkillsPlugin.main.unlockForm();
                 if (fnCallback)
                     fnCallback(o);
-                // If there's an id for a message field given, use it
-                // to display the response text
-                if (messid)
-                    SkillsPlugin.main.displayMessage(
-                        o.responseText, messid);
             },
             failure: function(o){
                 SkillsPlugin.main.unlockForm();
@@ -66,7 +61,7 @@ SkillsPlugin.main = {
             }
         }
 
-        SkillsPlugin.main.lockForm();
+        this.lockForm();
         YAHOO.util.Connect.asyncRequest('POST', url, obCallbacks);
     },
 
@@ -114,24 +109,26 @@ SkillsPlugin.main = {
         var el = document.getElementsByTagName('BODY');
         var yuiEl = new YAHOO.util.Element(el[0]);
         yuiEl.addClass('yui-skin-sam');
-        var els = document.getElementsByClassName('skillsTipped');
+        var els = yuiEl.getElementsByClassName('skillsTipped');
         var map = {};
-        for (var i = 0; i < els.length; i++) {
+
+        for (i = 0; i < els.length; i++) {
+            var el = els[i];
+            map[el.id] = '';
+
             // Get the tooltip div id from the title
-            var ttid = "tip" + els[i].id;
-            var div = document.getElementById(ttid);
-            if (div == null) {
-                continue;
-            }
-            var text = div.innerHTML;
-            map[els[i].id] = text;
+            var div = document.getElementById("tip" + el.id);
+            if (div != null)
+                map[el.id] = div.innerHTML;
         }
         for (var id in map) {
-            var ttel = new YAHOO.widget.Tooltip(
-                ttid + "Tooltip",
-                { context: id, text: map[id] } );
             var yel = new YAHOO.util.Element(id);
             yel.removeClass('skillsTipped');
+            if (map[id].length > 0) {
+                var tt = new YAHOO.widget.Tooltip(
+                    id + "Tooltip",
+                    { context: id, text: map[id] } );
+            }
         }
     },
 
@@ -146,7 +143,7 @@ SkillsPlugin.main = {
         }
         
         var arEls = yuiEl.getElementsByClassName(
-            'SkillsPlugin-twisty-link', 'span');
+            'skillsplugin-twisty-link', 'span');
         
         var fnTwistCallback = function(){
             SkillsPlugin.main.twist( this );
@@ -158,60 +155,55 @@ SkillsPlugin.main = {
             "click",
             fnTwistCallback
             );
-        
+
         // loop over all twisty links
-        for ( var i = arEls.length - 1; i >= 0; --i ){
-            var twistyId = arEls[i].id.replace( /_.*$/, '');
-            
-            var elLink = new YAHOO.util.Element(
-                twistyId + '_twistyLink' );
-            elLink.addClass('active');
-            var elImg = new YAHOO.util.Element(
-                twistyId + '_twistyImage' );
-            elImg.addClass('active');
+        for ( var i in arEls ) {
+            var el = arEls[i];
+            var yel = new YAHOO.util.Element(el);
+            yel.addClass('active');
+            var imgId = el.id.replace( /Link$/, 'Image');
+            var yel = new YAHOO.util.Element(imgId);
+            if (!yel)
+                console.debug("No image for "+imgId);
+            yel.addClass('active');
             
             // set initial state
             if( SkillsPlugin.vars.twistyState == 'closed' ){
-                SkillsPlugin.main.twist( arEls[i] );
+                SkillsPlugin.main.twist( el );
             }
         }
     },
 
-    twist: function( elTwistyLink ) {
+    twist: function( el ) {       
+        var twistyId = el.id.replace( /yLink$/, '');
+
         var yuiEl = new YAHOO.util.Element();
+        var elsToTwist = yuiEl.getElementsByClassName(twistyId);
         
-        var twistyId = elTwistyLink.id.replace( /_.*$/, '');
-        
-        var elsToTwist = yuiEl.getElementsByClassName(
-            twistyId + '_twist' );
-        
-        var elTwistyImgCont  = document.getElementById(
-            twistyId + '_twistyImage' );
-        var elTwistyImg;
-        if( elTwistyImgCont ){
-            elTwistyImg = document.getElementById(
-                twistyId + '_twistyImage' ).childNodes[1];
+        var elImgCont = document.getElementById(twistyId + 'yImage' );
+        var elImg = null;
+        if( elImgCont ) {
+            elImg = elImgCont.childNodes[0];
+            elImg.src = elImg.src;
         }
         
         // are we open or close?
-        var elTwistyLink = new YAHOO.util.Element(elTwistyLink);
-        if( elTwistyLink.hasClass( 'twistyopen' ) ){
-            elTwistyLink.replaceClass( 'twistyopen', 'twistyclosed' );
+        var yel = new YAHOO.util.Element(el);
+        if( yel.hasClass( 'twistyopen' ) ){
+            yel.replaceClass( 'twistyopen', 'twistyclosed' );
             for( var i in elsToTwist ){
-                this.closeTwist( elsToTwist[i], elTwistyImg );
+                this.closeTwist( elsToTwist[i], elImg );
             }
         }
-        else if( elTwistyLink.hasClass( 'twistyclosed' ) ){
-            elTwistyLink.replaceClass( 'twistyclosed', 'twistyopen' );
-            var i;
-            for( i in elsToTwist ){
-                this.openTwist( elsToTwist[i], elTwistyImg );
+        else if( yel.hasClass( 'twistyclosed' ) ){
+            yel.replaceClass( 'twistyclosed', 'twistyopen' );
+            for( var i in elsToTwist ){
+                this.openTwist( elsToTwist[i], elImg );
             }
         } else {
-            elTwistyLink.addClass( 'twistyclosed' );
-            var i;
-            for( i in elsToTwist ){
-                this.closeTwist( elsToTwist[i], elTwistyImg );
+            yel.addClass( 'twistyclosed' );
+            for( var i in elsToTwist ){
+                this.closeTwist( elsToTwist[i], elImg );
             }
         }
     },
@@ -238,12 +230,12 @@ SkillsPlugin.main = {
 
     // lock form when AJAX in progress
     lockForm: function(){
-        SkillsPlugin.main.enableByClassName('skillsControl', false);
+        SkillsPlugin.main.enableByClassName('skillsFormControl', false);
     },
     
     // unlocks the form
     unlockForm: function(){
-        SkillsPlugin.main.enableByClassName('skillsControl', true);
+        SkillsPlugin.main.enableByClassName('skillsFormControl', true);
     },
 
     resetSelect: function(elSelect, message) {
@@ -321,25 +313,16 @@ SkillsPlugin.main = {
             screen + "-category-select");
         var cat = elSelect.options[elSelect.selectedIndex].value;
 
-        var subcat = -1;
-        elSelect = document.getElementById(screen + "-subcategory-select");
-        if (elSelect) {
-            subcat =
-                elSelect.options[elSelect.selectedIndex].value;
-        }
-
         elSelect = document.getElementById(
             screen + "-skill-select");
         this.resetSelect(elSelect, "Select a category...");
 
-        if( cat == 0 || subcat == 0){
+        if (cat == 0)
             return;
-        }
+
         this.populateSelect(
             screen, "skill",
-            "getChildNodes?path1=" + encodeURIComponent(cat)
-            + ((subcat < 0) ? ''
-               : ';path2='+ encodeURIComponent(subcat)));
+            "getChildNodes?leafonly=1;path=" + encodeURIComponent(cat));
     },
 
     createLineImg: function(name, el) {

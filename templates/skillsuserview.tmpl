@@ -15,25 +15,16 @@
 </div>
 %TMPL:END%
 
-%TMPL:DEF{"skills:userview:repeated:categorystart"}%<div class='skillsContent'>
- <span id="%ID%_twistyLink" class="SkillsPlugin-twisty-link skillsplugin_category">
-  <span id="%ID%_twistyImage" class="SkillsPlugin-twisty-image">
-   %ICON{toggleclose}%
-  </span>
-  %NAME%
- </span>
- <div class="%ID%_twist browseview_indented">%TMPL:END%
+%TMPL:DEF{"skills:userview:repeated:categorystart"}%%TMPL:P{skills:std:repeated:categorystart}%%TMPL:END%
 
-%TMPL:DEF{"skills:userview:repeated:categoryend"}%</div><!--/%ID%_twist-->
-</div><!--/skillsContent-->%TMPL:END%
+%TMPL:DEF{"skills:userview:repeated:categoryend"}%%TMPL:P{skills:std:repeated:categoryend}%%TMPL:END%
 
-%TMPL:DEF{"skills:userview:repeated:skillstart"}%<div>%ICON{dot_ur}%
-<span class="skillsplugin_category">%NAME%</span>%TMPL:END%
-%TMPL:DEF{"skills:userview:repeated:skillend"}%</div>%TMPL:END%
+%TMPL:DEF{"skills:userview:repeated:skillstart"}%%TMPL:P{"skills:std:repeated:skillstart"}%%TMPL:END%
+%TMPL:DEF{"skills:userview:repeated:skillend"}%%TMPL:P{"skills:std:repeated:skillend"}%%TMPL:END%
 
 %TMPL:DEF{"skills:userview:repeated:userstart"}% %TMPL:END%
-%TMPL:DEF{"skills:userview:repeated:prerating"}%%ICON{stargold}%%TMPL:END%
-%TMPL:DEF{"skills:userview:repeated:rating"}%%ICON{stargold}%%TMPL:END%
+%TMPL:DEF{"skills:userview:repeated:prerating"}%%TMPL:P{star}%%TMPL:END%
+%TMPL:DEF{"skills:userview:repeated:rating"}%%TMPL:P{star}%%TMPL:END%
 %TMPL:DEF{"skills:userview:repeated:postrating"}%%ICON{empty}%%TMPL:END%
 %TMPL:DEF{"skills:userview:repeated:userend"}% %COMMENTTIP% %TMPL:END%
 -->

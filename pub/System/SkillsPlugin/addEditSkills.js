@@ -14,22 +14,17 @@ SkillsPlugin.addEditSkills = function () {
             el.style.display = '';
     }
        
-    // resets the entire form to its initial state
-    var _resetForm = function(){
-        SkillsPlugin.main.populateCategorySelect('addedit');
-    }
-       
     return {
         // clears the rating and the comment
         resetSkillDetails: function(){
             // reset details
             var yuiEl = new YAHOO.util.Element();
-            var els = yuiEl.getElementsByClassName('skillsRating');
+            var els = yuiEl.getElementsByClassName('skillsFormRatingControl');
             for( var i in els) {
                 if (els[i].checked )
                     els[i].checked = false;
             }
-            var els = yuiEl.getElementsByClassName('skillsComment');
+            var els = yuiEl.getElementsByClassName('skillsFormCommentControl');
             for( var i in els)
                 els[i].value = '';
             _hideClearComment();
@@ -37,8 +32,6 @@ SkillsPlugin.addEditSkills = function () {
 
         // populates the rating and the comment for a skill
         populateSkillDetails: function() {
-            this.resetSkillDetails();
-
             // get selected category and skill
             var elSelect = document.getElementById(
                 "addedit-category-select");
@@ -56,7 +49,7 @@ SkillsPlugin.addEditSkills = function () {
                 if (!skid.rating == null)
                     skid.rating = 0;
                 var yuiEl = new YAHOO.util.Element();
-                var els = yuiEl.getElementsByClassName('skillsRating');
+                var els = yuiEl.getElementsByClassName('skillsFormRatingControl');
 
                 // select the rating radio button
                 for( var i in els) {
@@ -79,9 +72,8 @@ SkillsPlugin.addEditSkills = function () {
 
             SkillsPlugin.main.lockForm();
             SkillsPlugin.main.get(
-                "getSkillDetails?path1=" + encodeURIComponent(cat)
-                + ((subcat < 0) ? '' : ";path2=" + encodeURIComponent(subcat))
-                + ";path3=" + encodeURIComponent(skill),
+                "getSkillDetails?path="
+                + encodeURIComponent(cat + "/" + skill),
                 cbSkillDetails, cat, skill);
         },
         
@@ -89,8 +81,10 @@ SkillsPlugin.addEditSkills = function () {
         submit: function() {
             SkillsPlugin.main.submit(
                 'addEditSkill', 'addedit-skill-form',
-                "addedit-skills-message",
-                _resetForm);
+                function (o) {
+                    SkillsPlugin.main.displayMessage(
+                        o.responseText, "addedit-skills-message");
+                });
         },
         
         // clears the comment text field
@@ -114,26 +108,8 @@ SkillsPlugin.addEditSkills = function () {
 }();
 
 // register events
-YAHOO.util.Event.onAvailable(
-    "addedit-category-select",
-    function () {
-        SkillsPlugin.main.populateCategorySelect('addedit');
-    },
-    SkillsPlugin.addEditSkills, true);
-
 YAHOO.util.Event.addListener(
     "addedit-category-select", "change",
-    function() {
-        var elSelect = document.getElementById("addedit-subcategory-select");
-        this.resetSkillDetails();
-        if (elSelect)
-            SkillsPlugin.main.populateSubCategorySelect('addedit');
-        else
-            SkillsPlugin.main.populateSkillSelect('addedit');
-    }, SkillsPlugin.addEditSkills, true);
-
-YAHOO.util.Event.addListener(
-    "addedit-subcategory-select", "change",
     function() {
         this.resetSkillDetails();
         SkillsPlugin.main.populateSkillSelect('addedit');
@@ -142,21 +118,22 @@ YAHOO.util.Event.addListener(
 YAHOO.util.Event.addListener(
     "addedit-skill-select", "change",
     function () {
+        this.resetSkillDetails();
         this.populateSkillDetails();
     },
     SkillsPlugin.addEditSkills, true);
 
 YAHOO.util.Event.addListener(
     "addedit-skill-comment", "keyup",
-    this.commentKeyPress,
+    SkillsPlugin.addEditSkills.commentKeyPress,
     SkillsPlugin.addEditSkills, true);
 
 YAHOO.util.Event.addListener(
     "addedit-skill-comment-clear", "click",
-    this.clearComment,
+    SkillsPlugin.addEditSkills.clearComment,
     SkillsPlugin.addEditSkills, true);
 
 YAHOO.util.Event.addListener(
     "addedit-skill-submit", "click",
-    function () { this.submit() },
+    SkillsPlugin.addEditSkills.submit,
     SkillsPlugin.addEditSkills, true);

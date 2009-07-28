@@ -13,6 +13,13 @@ sub new {
     return $this;
 }
 
+# By default children are the same type as the parent
+sub newChild {
+    my $this = shift;
+    my $class = ref($this);
+    return $class->new(@_);
+}
+
 sub serializable {
     my ($this, $field) = @_;
     return $field eq 'name';
@@ -123,7 +130,7 @@ sub addByPath {
                 return $kid->addByPath($node, @_);
             }
         }
-        my $intermediate = ref($this)->new($child);
+        my $intermediate = $this->newChild($child);
         $this->appendChild($intermediate);
         $intermediate->addByPath($node, @_);
     }
@@ -187,7 +194,7 @@ sub hasChildren {
 
 sub stringify {
     my $this = shift;
-    my $out = $this->{name}.'('.ref($this).')';
+    my $out = ($this->{name}||'unnamed').'('.ref($this).')';
     if ($this->hasChildren()) {
         my @kids;
         foreach my $kid (@{$this->{childNodes}}) {

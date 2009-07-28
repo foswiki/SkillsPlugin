@@ -3,185 +3,147 @@
 #FDFAF1 - orange
 */
 
+/* Visual cue for a category name */
 .skillsplugin_category { 
   color:#06c;
   font-weight: bold;
   text-align: left;
 }
+
+/* Visual cue for a skill name */
 .skillsplugin_skill { 
   color:#0b6;
   font-weight: bold;
   text-align: right;
 }
 
-th.editall_category0 { 
+/* Visual cue for the title of a rating */
+.skillsplugin_rating {
+  text-align:center;
+  font-weight:bold;
 }
 
-th.editall_category1 { 
-  padding-left: 2em; /* indent */
+/* Hidden tooltip text */
+.skillsplugin_tooltip {
+  display:none;
 }
 
-th.editall_category2 { 
-  padding-left: 4em; /* indent */
+/**** Indent block nodes for categories/subcategories to depth 3 ****/
+.indent-category0 { 
 }
 
-th.editall_skill { 
+.indent-category1 { 
+  padding-left: 2em;
 }
 
-td.editall_radio { 
+.indent-category2 { 
+  padding-left: 4em;
+}
+
+.indent-category3 { 
+  padding-left: 6em;
+}
+
+/* indent for cascading category twisties */
+.indent-cascade { 
+  margin-left: 2em;
+}
+
+/* Styles used for forms on EditMySkills, SelectMySkills
+   and SearchSkills pages */
+
+/* All controls in an entry form carry this style. It is used by JS
+  to enable/disable controls */
+.skillsFormControl {
+}
+
+/* The activator link for twisties */
+.skillsplugin-twisty-link {
+}
+
+/* Used by JS to find all rating radio buttons */
+.skillsFormRatingControl {
+  text-align:center;
+}
+
+/* Used by JS to find all comment controls */
+.skillsFormCommentControl {
+}
+
+/* Tabulated form */
+table.skillsForm {
+  border-color:#ccc;
+  background-color:#fff;
+  margin:5px 0;
+  border-collapse:collapse;
+  padding:0;
+  border-spacing:0px;
+  empty-cells:show;
+  border-style:solid;
+  border-width:1px;
+}
+
+th.skillsFormHeadRow a:visited,
+th.skillsFormHeadRow a:link {
+  color:#06c;
+  text-decoration:none;
+}
+
+th.skillsFormHeadRow th a:hover {
+  border-color:#06c;
+  background-color:transparent;
+}
+
+th.skillsFormHeadRow {
+  padding:3px 6px;
+  height:2.5em;
+  vertical-align:middle;
+  text-align:center;
+  background-color:#FDFAF1;
+}
+
+th.skillsFormFirstCol {
+  padding:3px 15px;
+  height:2.5em;
+  vertical-align:middle;
+  text-align:center;
+  background-color:#FDFAF1;
+}
+
+td.skillsForm {
+  padding:5px 15px;
+  text-align:left;
+  vertical-align:middle;
+}
+
+td.skillsFormSubmit {
+  padding:5px 15px;
+  text-align:center;
+}
+
+div.skillsForm {
   text-align: center;
 }
 
-div.browseview_indented { 
-  margin-left: 16pt;
+td.skillsFormRatingCell {
+  text-align: center;
 }
 
-span.browseview_category { 
-}
-
-span.browseview_skill { 
-}
-
-/**** Table ****/
+/**** Table used on SelectMySkills and for search results ****/
 
 table.skillsTable {
-        border-color:#ccc;
-        background-color:#fff;
-
-	margin:5px 0;
-	border-collapse:separate;
-	border-spacing:0 2px; /* only way I could find to put gaps between rows */
-	padding:0px;
-	empty-cells:show;
-	border-style:solid;
-	border-width:1px;
+  border-color:#ccc;
+  background-color:#fff;
+  margin:5px 0;
+  border-collapse:separate;
+  border-spacing:0 2px; /* only way I could find to put gaps between rows */
+  padding:10px;
+  empty-cells:show;
+  border-style:solid;
+  border-width:1px;
 }
 
-table.skillsTable th {
-	padding:6px 0px;
-	height:1.4em;
-	text-align:left;
-	vertical-align:top;
-	/*background-color:#FDFAF1;*/
-	background-color:#F9FCFE;
-}
-
-table.skillsTable th.skillsHeading a:visited,
-table.skillsTable th.skillsHeading a:link {
-	color:#06c;
-	text-decoration:none;
-}
-table.skillsTable th.skillsHeading a:hover {
-	border-color:#06c;
-	background-color:transparent;
-}
-table.skillsTable th span.active,
-table.skillsTable td span.active {
-    color:#06c;
-    font-weight: bold;
-}
-table.skillsTable th span.active:hover,
-table.skillsTable td span.active:hover{
-    color:#06c;
-    cursor: pointer;
-}
-table.skillsTable th.skillsHeading {
-	padding:3px 6px;
-	height:2.5em;
-	vertical-align:middle;
-	text-align:center;
-	/*background-color:#F9FCFE;*/
-	background-color:#FDFAF1;
-}
-
-table.skillsTable td {
-	padding:2px 15px;
-	margin:0px;
-	border-collapse:collapse;
-	height:1.4em;
-	text-align:center;
-}
-
-table.skillsTable td.head2{
-	/*background-color:#F9FCFE;*/
-	background-color:#FDFAF1;
-}
-
-table.skillsTable td.userRow{
-	padding:0px 29px;
-}
-
-table.skillsTable td.skillsRatingHeader {
-	text-align:center;
-	font-weight:bold;
-}
-
-table.skillsTable td.skillsRating {
-	text-align:center;
-}
-
-.SkillsPlugins-comment-img:hover {
-    cursor: pointer;
-}
-
-table.skillsTable td.skillsFooter {
-	/*background-color:#F9FCFE;*/
-	vertical-align:bottom;
-	padding:0px 5px;
-	background-color:#FDFAF1;
-	font-size:75%;
-}
-
-/* aligns the skills with the user form on home page */
-/* at least on firefox, not quite on ie. */
-div.skills_UserHomePage table.skillsTable {
-	margin:5px 0;
-}
-
-/**** Form ****/
-table.skillsForm {
-	border-color:#ccc;
-	background-color:#fff;
-
-	margin:5px 0;
-	border-collapse:collapse;
-	padding:0px;
-	border-spacing:0px;
-	empty-cells:show;
-	border-style:solid;
-	border-width:1px;
-}
-table.skillsForm th a:visited,
-table.skillsForm th a:link {
-	color:#06c;
-	text-decoration:none;
-}
-table.skillsForm th a:hover {
-	border-color:#06c;
-	background-color:transparent;
-}
-table.skillsForm th {
-	padding:3px 6px;
-	/* stolen from TagMePlugin */
-	height:2.5em;
-	vertical-align:middle;
-	text-align:center;
-	background-color:#FDFAF1;
-}
-
-table.skillsForm td {
-	padding:5px 15px;
-	margin:0px;
-	height:1.4em;
-	text-align:left;
-	vertical-align:middle;
-}
-table.skillsForm td.skillsFormRating {
-	text-align:center;
-}
-
-/**** UI ****/
-/* stolen from TagMePlugin */
+/**** UI tabs ****/
 table.skillNavigation a {
   text-decoration: none;
   font-weight: bold;
@@ -205,15 +167,15 @@ table.skillNavigation td {
 }
 
 table.skillNavigation td.current {
-  border-left: 6em solid white;
-  border-right: 6em solid white;
+  border-left: 3em solid white;
+  border-right: 3em solid white;
   border-bottom: none;
   background-color: #EAE9DE;
 }
 
 table.skillNavigation td.other {
-  border-left: 6em solid white;
-  border-right: 6em solid white;
+  border-left: 3em solid white;
+  border-right: 3em solid white;
   border-bottom: 1em white;
   background-color: #F6F4EB;
 }
@@ -223,64 +185,11 @@ table.skillNavigation td.bottom {
   height: 1em;
 }
 
-.skillNotification {
-	background-color:#ffc;
-	color:#000;
-	padding:0 .25em;
-	white-space:nowrap;
-}
-div.skillNotification {
-	padding:.5em 20px; /* side padding same as twikiFormStep (assuming PatternSkin) */
-	margin:1em 0;
-}
-
-#skill-comment-clear {
-    cursor: pointer;
-}
-
+/***********************************************************/
 
 .yui-overlay { border:1px dotted black;padding:5px;margin:10px; }
 .yui-overlay .hd { border:1px solid black;padding:5px; }
 .yui-overlay .bd { border:1px solid black;padding:5px; font-size:larger; font-weight:bold; }
 .yui-overlay .ft { border:1px solid black;padding:5px; }
-.SkillsPlugin-close-comment-link{
-color:#06c;
-}
-.SkillsPlugin-close-comment-link:hover {
-    cursor: pointer;
-}
 
 #foo_Overlay { background:orange;width:100px;height:25px; }
-
-/* The flat cat table */
-table.skillsCatTable { }
-
-/* Banner row along top of skills cat table */
-.skillsCatTable_banner {
-  border-bottom: 1pt dotted black;
-}
-
-/* Footer row along bottom of skills cat table */
-.skillsCatTable_footer {
-  border-top: 1pt dotted black;
-}
-
-/* A category name cell (and row)) */
-.skillsCatTable_category {
-  border-top: 1pt dotted black;
-}
-
-/* A skill name cell (and row)) */
-.skillsCatTable_skill { }
-
-/* A radio button in the skills table */
-input.skillsCatTable { }
-
-td.skillsCatTable {
-  text-align: center;
-}
-
-/* Hidden tooltip text */
-.skillsTooltip {
-  display:none;
-}

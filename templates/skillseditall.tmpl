@@ -1,18 +1,18 @@
 <form name="editall-skills-form" id="editall-skills-form" >
- <table width="100%" cols="8" class="skillsCatTable" name="category">
+ <table width="100%" cols="8" class="skillsTable">
   <thead>
-   <tr class="skillsCatTable_banner">
-    <th class="editall_category0">Category</th>
-    <th class="editall_skill">Skill</th>
-    %SKILLRATINGS{format="<td class='skillsCatTable'>$name</td>"}%
-    <th>Comment</th>
+   <tr>
+    <th class="skillsplugin_category skillsFormHeadRow">Category</th>
+    <th class="skillsplugin_skill skillsFormHeadRow">Skill</th>
+    %SKILLRATINGS{format="<th class='skillsFormRatingControl skillsFormControl skillsFormHeadRow'>$name</th>"}%
+    <th class="skillsFormHeadRow">Comment</th>
    </tr>
   </thead>
   <tbody id="editall-tbody">
   </tbody>
   <tfoot>
    <tr>
-    <td colspan="8" class="skillsCatTable_footer">
+    <td colspan="8" class="skillsFormSubmit">
      <input name="editall-skills-submit" id="editall-skills-submit" type="button" value="Save Changes" class="foswikiSubmit"></td>
    </tr>
    <tr>

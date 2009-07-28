@@ -3,7 +3,9 @@ SkillsPlugin.editAllSkills = function () {
 
     // Create a table row introducing a category
     var createCategory = function(node, depth, context, count) {
-        var subcontext = context + '/' + node.name;
+        var subcontext =
+        context.length ? context + '/' + node.name : node.name;
+
         var id = SkillsPlugin.main.makeID(subcontext);
 
         // Create a table row to contain the category and
@@ -16,7 +18,7 @@ SkillsPlugin.editAllSkills = function () {
         var th = document.createElement('th');
         th.colSpan = 1000; // !! TRY IT
         var yth = new YAHOO.util.Element(th);
-        yth.addClass('editall_category' + depth);
+        yth.addClass('indent-category' + depth);
         yth.addClass('skillsplugin_category');
         
         //for (var i = 0; i < depth - 1; i++)
@@ -42,18 +44,28 @@ SkillsPlugin.editAllSkills = function () {
         var td = document.createElement('td');
         var ytd = new YAHOO.util.Element(td);
         tr.appendChild(td);
-        ytd.addClass("skillsCatTable");
+        ytd.addClass("skillsForm");
+        ytd.addClass("skillsFormRatingCell");
 
-        var inp = document.createElement('input');
+        var inp;
+        if (YAHOO.env.ua.ie > 0) {
+            // bloody IE crap
+            inp = document.createElement(
+                '<input type="radio" name="' + skid + '-rating" '+
+                ' id="' + skid + '-rating-' + idx +
+                ' value="' + idx + '">');
+        } else {
+            var inp = document.createElement('input');
+            inp.type = 'radio';
+            inp.name = skid + "-rating";
+            inp.id = skid + "-rating-" + idx;
+            inp.value = idx;
+        }
+
         var yinp = new YAHOO.util.Element(inp);
-        yinp.addClass("editall_radio");
-        yinp.addClass("skillsRating");
-        yinp.addClass("skillsControl");
+        yinp.addClass("skillsFormRatingControl");
+        yinp.addClass("skillsFormControl");
         td.appendChild(inp);
-        inp.type = 'radio';
-        inp.name = skid + "-rating";
-        inp.id = skid + "-rating-" + idx;
-        inp.value = idx;
         if (node.rating != null && node.rating == idx) {
             inp.checked = "checked";
         }
@@ -66,10 +78,12 @@ SkillsPlugin.editAllSkills = function () {
 
     // Create a table row for a skill
     var createSkillNode = function(node, depth, context, count) {
-        var subcontext = context + '/' + node.name;
+        var subcontext = context.length ?
+        context + '/' + node.name : node.name;
         var skid = SkillsPlugin.main.makeID(subcontext);
 
         var tr = document.createElement('tr');
+        tr.id = skid;
 
         catTableTBody.appendChild(tr);
 
@@ -78,13 +92,12 @@ SkillsPlugin.editAllSkills = function () {
 
         var th = document.createElement('th');
         var yth = new YAHOO.util.Element(th);
-        yth.addClass("editall_skill");
         yth.addClass("skillsplugin_skill");
         th.appendChild(document.createTextNode(node.name));
         th.id = skid + 'th';
         tr.appendChild(th);
 
-        SkillsPlugin.main.tipify(th);
+        SkillsPlugin.main.tipify(tr);
 
         // Radio buttons for the priority
         var prios = [ 0, 1, 2, 3, 4 ];
@@ -98,9 +111,8 @@ SkillsPlugin.editAllSkills = function () {
         inp = document.createElement('input');
         yinp = new YAHOO.util.Element(inp);
         td.appendChild(inp);
-        yinp.addClass("skillsCatTable");
-        yinp.addClass("skillsComment");
-        yinp.addClass("skillsControl");
+        yinp.addClass("skillsFormCommentControl");
+        yinp.addClass("skillsFormControl");
         inp.type = 'text';
         inp.name = skid + "-comment";
         inp.id = skid + "-comment";
@@ -133,7 +145,7 @@ SkillsPlugin.editAllSkills = function () {
     var cbSkillTree = function( tree ){
         catTableTBody = document.getElementById("editall-tbody");
         for (var i in tree.childNodes) {
-            createNode(tree.childNodes[i], 0, 'editall', 0);
+            createNode(tree.childNodes[i], 0, '', 0);
         }
         SkillsPlugin.main.unlockForm();
         SkillsPlugin.main.createTooltips();
@@ -173,7 +185,10 @@ SkillsPlugin.editAllSkills = function () {
         submit: function() {
             SkillsPlugin.main.submit(
                 'saveUserChanges', "editall-skills-form",
-                "editall-skills-message");
+                function (o) {
+                    SkillsPlugin.main.displayMessage(
+                        o.responseText, "editall-skills-message");
+                });
         }
     };
     
