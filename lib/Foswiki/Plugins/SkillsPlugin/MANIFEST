@@ -3,15 +3,8 @@
 data/System/SkillsAdminIntroduction.txt 0644
 data/System/SkillsAdvancedSearch.txt 0644
 data/System/SkillsBrowseAll.txt 0644
-data/System/SkillsCreateNewCategory.txt 0644
-data/System/SkillsCreateNewSkill.txt 0644
-data/System/SkillsDeleteCategory.txt 0644
-data/System/SkillsDeleteSkill.txt 0644
 data/System/SkillsDisplayOnHomePage.txt 0644
 data/System/SkillsEditMySkills.txt 0644
-data/System/SkillsMoveSkill.txt 0644
-data/System/SkillsRenameCategory.txt 0644
-data/System/SkillsRenameSkill.txt 0644
 data/System/SkillsSearch.txt 0644
 data/System/SkillsSelectMySkills.txt 0777
 lib/Foswiki/Plugins/SkillsPlugin.pm 0644

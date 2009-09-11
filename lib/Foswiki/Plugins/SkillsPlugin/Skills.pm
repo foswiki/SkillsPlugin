@@ -35,6 +35,25 @@ sub newChild {
     return new Foswiki::Plugins::SkillsPlugin::SkillNode(@_);
 }
 
+# Test if the skill is known to this skills DB
+sub isKnownSkill {
+    my ($this, $category, $skill) = @_;
+    my @path = split('/', $category);
+    push(@path, $skill);
+    my $node = $this;
+  FRONT:
+    while (my $front = shift(@path)) {
+        foreach my $subnode (@{$node->{childNodes}}) {
+            if ($subnode->{name} eq $front) {
+                $node = $subnode;
+                next FRONT;
+            }
+        }
+        return 0;
+    }
+    return 1;
+}
+
 # Deprecated: read skills from file in work area
 sub _getSkillsFromWorking {
     my $this = shift;
@@ -79,7 +98,7 @@ sub _load {
     my $topic = Foswiki::Func::getPreferencesValue('SKILLSPLUGIN_SKILLSTOPIC');
 
     if (!$topic) {
-        _getSkillsFromWorking();
+        $self->_getSkillsFromWorking();
     } else {
 
         (my $web, $topic) = Foswiki::Func::normalizeWebTopicName(

@@ -69,7 +69,7 @@ sub initPlugin {
 }
 
 sub _getLevels {
-    my $names = $Foswiki::cfg{SkillsPlugin}{Levels}
+    my $names = Foswiki::Func::getPreferencesValue('SKILLSPLUGIN_RATINGS')
       || "None,Ancient Knowledge,Working Knowledge,Expert,Guru";
     my @levels = split(/,\s*/, $names);
     return \@levels;
@@ -408,7 +408,8 @@ sub _tagBrowseSkills {
     my $commentTips = '';
 
     my $skills = new Foswiki::Plugins::SkillsPlugin::Skills();
-    my $out = Foswiki::Func::expandTemplate("skills:browseview:start");
+    my $userSkills = new Foswiki::Plugins::SkillsPlugin::UserSkills($skills);
+    my $template = Foswiki::Func::expandTemplate("skills:browseview:start");
 
     $skills->visit(
         sub {
@@ -418,7 +419,7 @@ sub _tagBrowseSkills {
                 _openCategory($node, @_);
             } else {
                 # No children: skill
-                _openSkill($node, @_);
+                _openSkill($node, $userSkills, @_);
             }
         },
         sub {
@@ -431,13 +432,13 @@ sub _tagBrowseSkills {
                 _closeSkill($node, @_);
             }
         },
-        \$out, \$commentTips
+        \$template, \$commentTips
        );
-    $out .= Foswiki::Func::expandTemplate("skills:browseview:end");
+    $template .= Foswiki::Func::expandTemplate("skills:browseview:end");
 
     _addHeads('browseSkills', $twisty);
 
-    return $out._genTooltips().$commentTips;
+    return $template._genTooltips().$commentTips;
 }
 
 sub _openCategory {
@@ -466,11 +467,10 @@ sub _closeCategory {
 }
 
 sub _openSkill {
-    my ($node, $out, $commentTips) = @_;
+    my ($node, $userSkills, $out, $commentTips) = @_;
 
     # iterate over users and find out if they have
     # this skill.
-    my $userSkills = new Foswiki::Plugins::SkillsPlugin::UserSkills;
     my @path = $node->getPathArray();
 
     my $tmplUserStart = Foswiki::Func::expandTemplate(
@@ -494,7 +494,7 @@ sub _openSkill {
         "skills:browseview:repeated:skillstart");
 
     $skillOut .= _compileAllUserSkills(
-        \@path, 'skills:browseview', $commentTips);
+        \@path, 'skills:browseview', $userSkills, $commentTips);
 
     $skillOut =~ s/%ID%/$node->getID()/ge;
     $skillOut =~ s/%NAME%/$node->{name}/ge;
@@ -515,9 +515,7 @@ sub _closeSkill {
 
 # Gather skills for all users
 sub _compileAllUserSkills {
-    my ($path, $templates, $commentTips, $matches) = @_;
-
-    my $userSkills = new Foswiki::Plugins::SkillsPlugin::UserSkills();
+    my ($path, $templates, $userSkills, $commentTips, $matches) = @_;
 
     my $out = '';
     my $it = Foswiki::Func::eachUser();
@@ -632,7 +630,7 @@ sub _rest_renameNode {
     $skills->save();
 
     # rename in users
-    my $users = new Foswiki::Plugins::SkillsPlugin::UserSkills();
+    my $users = new Foswiki::Plugins::SkillsPlugin::UserSkills($skills);
     my $it = Foswiki::Func::eachUser();
     while ($it->hasNext()) {
         my $user = $users->getUser($it->next());
@@ -661,7 +659,7 @@ sub _rest_deleteNode {
     $skills->save();
 
     # rename in users
-    my $users = new Foswiki::Plugins::SkillsPlugin::UserSkills();
+    my $users = new Foswiki::Plugins::SkillsPlugin::UserSkills($skills);
     my $it = Foswiki::Func::eachUser();
     while ($it->hasNext()) {
         my $user = $users->getUser($it->next());
@@ -695,7 +693,7 @@ sub _rest_moveNode {
     $skills->save();
 
     # move in users
-    my $users = new Foswiki::Plugins::SkillsPlugin::UserSkills();
+    my $users = new Foswiki::Plugins::SkillsPlugin::UserSkills($skills);
     my $it = Foswiki::Func::eachUser();
     while ($it->hasNext()) {
         my $user = $users->getUser($it->next());
@@ -742,7 +740,7 @@ sub _rest_getSkillTree {
         join('/', @path)." is not in the skills database" ) unless $node;
 
     my $userData;
-    my $users = new Foswiki::Plugins::SkillsPlugin::UserSkills();
+    my $users = new Foswiki::Plugins::SkillsPlugin::UserSkills($skills);
     my $user = $users->getUser(Foswiki::Func::getWikiName());
     if ($user) {
         # User has skills
@@ -753,6 +751,7 @@ sub _rest_getSkillTree {
 
 # Gets all the details for a particular skill for the user logged in
 # i.e. rating and comments
+# TODO: constrain the skills to the legal set
 sub _rest_getSkillDetails {
     my ( $session, $plugin, $verb, $response ) = @_;
 
@@ -818,10 +817,11 @@ sub _rest_saveUserChanges {
     my $request = Foswiki::Func::getCgiQuery();
     my $username = Foswiki::Func::getWikiName();
 
-    my $users = new Foswiki::Plugins::SkillsPlugin::UserSkills();
+    my $skills = new Foswiki::Plugins::SkillsPlugin::Skills();
+
+    my $users = new Foswiki::Plugins::SkillsPlugin::UserSkills($skills);
     my $user = $users->getUser($username);
 
-    my $skills = new Foswiki::Plugins::SkillsPlugin::Skills();
     my $added = 0;
     my $edited = 0;
 
@@ -899,8 +899,10 @@ sub _rest_search {
     my $commentTips = '';
     my $matches = 0;
 
+    my $userSkills = new Foswiki::Plugins::SkillsPlugin::UserSkills();
+
     $out .= _compileAllUserSkills(
-        \@path, 'skills:searchresults', \$commentTips, \$matches);
+        \@path, 'skills:searchresults', $userSkills, \$commentTips, \$matches);
 
     $out .= Foswiki::Func::expandTemplate("skills:searchresults:end");
 

@@ -80,7 +80,6 @@ The Plugin handles a =%<nop>SKILLS{}%= variable that performs different actions.
 ---++ Plugin Settings
 
 Plugin settings are stored as preferences variables in %LOCALSITEPREFS% (or in Web<nop>Preferences, or in individual topics).
-
    * __RECOMMENDED:__ By default, skills are taken from / added to an
      external file. You can use a standard Foswiki topic instead, by
      defining the =SKILLSPLUGIN_SKILLSTOPIC= preference to be a fully
@@ -88,7 +87,6 @@ Plugin settings are stored as preferences variables in %LOCALSITEPREFS% (or in W
       * =S<nop>et SKILLSPLUGIN_SKILLSTOPIC = My<nop>Web.My<nop>SkillSet=
      Normal Foswiki protections on this topic are respected. You *must*
      use a skills topic if you want skill descriptions to appear as tooltips.
-
    * You can override the default skill levels by setting the preference
      =SKILLSPLUGIN_RATINGS= to a comma-separated list of level names e.g.
       * =S<nop>et SKILLSPLUGIN_RATINGS = None,Child,Adolescent,Adult,Crusty=
@@ -130,9 +128,7 @@ Bad for everyone else
 
 Next:
 
-   * Start adding some categories and skills
-      * SkillsCreateNewCategory
-      * SkillsCreateNewSkill
+   * Create a skills topic, and add some categories and skills
 
 ---++ Plugin Info
 

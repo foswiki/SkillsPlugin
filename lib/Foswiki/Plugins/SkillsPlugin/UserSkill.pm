@@ -67,7 +67,7 @@ sub saveToMeta {
         foreach my $kid (@{$this->{childNodes}}) {
             $out .= $kid->saveToMeta($meta);
         }
-    } else {
+    } elsif (defined $this->{rating}) {
         my @path = $this->getPathArray();
         pop(@path); # get rid of the skill off the path
         $meta->putKeyed(

@@ -1,42 +1,86 @@
 %META:TOPICPARENT{name="SkillsPlugin"}%
----+!! !SkillsPlugin: Admin Introduction
+---+!! !SkillsPlugin: Admin
 
 %STARTINCLUDE%
-<table class="skillNavigation" border="0" cellpadding="3" cellspacing="0"><tr>
-<td>&nbsp; &nbsp;</td>
-<td bgcolor="#EAE9DE">&nbsp; *Introduction* &nbsp;</td>
-<td>&nbsp; &nbsp; &nbsp;</td>
-<td bgcolor="#F6F4EB">&nbsp; [[SkillsCreateNewSkill][Create Skill]] &nbsp;</td>
-<td>&nbsp;</td>
-<td bgcolor="#F6F4EB">&nbsp; [[SkillsRenameSkill][Rename Skill]] &nbsp;</td>
-<td>&nbsp;</td>
-<td bgcolor="#F6F4EB">&nbsp; [[SkillsMoveSkill][Move Skill]] &nbsp;</td>
-<td>&nbsp;</td>
-<td bgcolor="#F6F4EB">&nbsp; [[SkillsDeleteSkill][Delete Skill]] &nbsp;</td>
-<td>&nbsp; &nbsp; &nbsp;</td>
-<td bgcolor="#F6F4EB">&nbsp; [[SkillsCreateNewCategory][Create New Category]] &nbsp;</td>
-<td>&nbsp;</td>
-<td bgcolor="#F6F4EB">&nbsp; [[SkillsRenameCategory][Rename Category]] &nbsp;</td>
-<td>&nbsp;</td>
-<td bgcolor="#F6F4EB">&nbsp; [[SkillsDeleteCategory][Delete Category]] &nbsp;</td>
-</tr></table>
-<table border="0" cellpadding="5" cellspacing="0" style="width:100%;">
-<tr bgcolor="#EAE9DE"><td style="width:100%;"></td></tr>
-</table>
 %STARTSECTION{"adminintro"}%
+You can add and delete categories and skills by simply editing the skills
+definition topic pointed to by %<nop>SKILLSPLUGIN_SKILLSTOPIC%
+(%SKILLSPLUGIN_SKILLSTOPIC%). Additionally you can use this interface to
+rename skills/categories, and move skills between categories.
 
-Using the links above you can add, modify and delete skills/categories. %IF{"defined ALLOWADDSKILLS" then="Only the following can add new skills and categories: _[[%ALLOWADDSKILLS%]]_, and only administrators can modify or delete skills/categories." else="Everyone is allowed to add new skills and categories, however only administrators can modify or delete skills/categories."}%
+_Note: These operations may take a while, as they have to search though all users. Do not cancel._
 
-For more information:
-   * View the plugin topic at SkillsPlugin.
-   * Contact %WIKIWEBMASTER%.
+%IF{ "{Plugins}{SkillsPlugin}{Enabled}" then="%URLPARAM{"skillsmessage"}%" else="<table border='0' cellpadding='3' cellspacing='0' width='100%'><tr><td bgcolor='yellow'><font color='red'><strong>The Skills Plugin is not enabled on this site. The forms below are disabled.</strong></font></td></tr></table>" }%
+---++ Rename an existing Skill
+%STARTSECTION{"renameskill"}%
+<form name="renameskill" action="%SCRIPTURL{rest}%/SkillsPlugin/renameNode" method="post">
+<div class="foswikiFormSteps">
+<table class="foswikiTable" width="100%">
+<tr><td width="30%">Skill to rename: %BR%
+<select name="path">
+%SKILLS{action="showskills" format="<option value='$category/$skill'>$skill</option>" prefix="<optgroup label='$category'>" suffix="</optgroup>"}%
+</select>
+</td><td>
+New name for this skill: %BR%
+<input type="text" name="newname" class="foswikiInputField" size="20" />
+</td></tr><tr><td colspan=2>
+<input type="hidden" name="endPoint" value="%WEB%.%TOPIC%" />
+<input name="renameskill" type="submit" class="foswikiSubmit" value="%MAKETEXT{"Rename"}%" />
+</td></tr></table></div>
+</form>
+</noautolink>
+%ENDSECTION{"renameskill"}%
+
+---++ Move a skill to a different category
+%STARTSECTION{"moveskill"}%
+<form name="moveskill" action="%SCRIPTURL{rest}%/SkillsPlugin/moveNode" method="post">
+<div class="foswikiFormSteps">
+<table class="foswikiTable" width="100%">
+<tr><td width="30%">
+Skill to move: %BR%
+<select name="path">
+%SKILLS{action="showskills" format="<option value='$category/$skill'>$skill</option>" prefix="<optgroup label='$category'>" suffix="</optgroup>"}%
+</select>
+</td><td>
+New category: %BR%
+<select name="newparent">
+%SKILLS{action="showcategories" format="<option value='$category'>$category</option>" }%
+</select>
+</td></tr><tr><td colspan=2>
+<input type="hidden" name="endPoint" value="%WEB%.%TOPIC%" />
+<input name="moveskill" type="submit" class="foswikiSubmit" value="%MAKETEXT{"Move"}%" />
+</td></tr></table></div>
+</form>
+</noautolink>
+%ENDSECTION{"moveskill"}%
+
+---++ Rename a category
+%STARTSECTION{"renamecategory"}%
+<form name="renamecategory" action="%SCRIPTURL{rest}%/SkillsPlugin/renameNode" method="post">
+<div class="foswikiFormSteps">
+<table class="foswikiTable" width="100%">
+<tr><td width="30%">
+Category to rename: %BR%
+<select name="path">
+<option>%URLPARAM{path}%</option>
+%SKILLS{action="showcategories" format="<option value='$category'>$category</option>" }%
+</select>
+</td><td>
+New name for this category: %BR%
+<input type="text" value="%URLPARAM{"newname"}%" name="newname" class="foswikiInputField" size="20" />
+</td></tr><tr><td colspan=2>
+<input name="renamecategory" type="submit" class="foswikiSubmit" value="%MAKETEXT{"Rename"}%" />
+</td></tr></table></div>
+<input type="hidden" name="endPoint" value="%WEB%.%TOPIC%" />
+</form>
+
+For more information, view the plugin topic at SkillsPlugin.
 
 %ENDSECTION{"adminintro"}%
 
 %STOPINCLUDE%
 
 %STARTSECTION{"existingskills"}%
-%IF{"$SKILLSPLUGIN_SKILLSTOPIC" then="Note: you can modify existing skills by editing the topic %SKILLSPLUGIN_SKILLSTOPIC%%BR%"}%
 Existing Skills:
 %SKILLS{action="showskills" format="   * $category/$skill"}%
 
