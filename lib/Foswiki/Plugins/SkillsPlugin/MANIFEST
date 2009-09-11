@@ -1,5 +1,6 @@
 # Release manifest for SkillsPlugin
 !noci
+data/System/SkillsPlugin.txt 0644
 data/System/SkillsAdminIntroduction.txt 0644
 data/System/SkillsAdvancedSearch.txt 0644
 data/System/SkillsBrowseAll.txt 0644
