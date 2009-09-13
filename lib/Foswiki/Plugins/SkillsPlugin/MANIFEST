@@ -19,6 +19,11 @@ pub/System/SkillsPlugin/browseSkills.js 0644
 pub/System/SkillsPlugin/editAllSkills.js 0644
 pub/System/SkillsPlugin/main.js 0644
 pub/System/SkillsPlugin/searchSkills.js 0644
+pub/System/SkillsPlugin/addEditSkills_src.js 0644
+pub/System/SkillsPlugin/browseSkills_src.js 0644
+pub/System/SkillsPlugin/editAllSkills_src.js 0644
+pub/System/SkillsPlugin/main_src.js 0644
+pub/System/SkillsPlugin/searchSkills_src.js 0644
 pub/System/SkillsPlugin/skills_screenshot_full.png 0644
 pub/System/SkillsPlugin/skills_screenshot_search.png 0644
 pub/System/SkillsPlugin/skills_screenshot_thumb.png 0644

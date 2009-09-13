@@ -939,6 +939,8 @@ sub _addHeads {
     my $urlPath = '%PUBURLPATH%/%SYSTEMWEB%/SkillsPlugin';
     my $restPath = '%SCRIPTURL{"rest"}%/SkillsPlugin';
 
+    my $src = DEBUG ? '_src' : '';
+
     # add to head
     # FIXME: use the 'requires' parameter? for YUI?
     Foswiki::Func::addToHEAD( 'SKILLSPLUGIN_JS', <<THIS);
@@ -989,9 +991,9 @@ var SkillsPlugin = {
  }
 }
 </script>
-<script src="$urlPath/main.js" language="javascript" type="text/javascript">
+<script src="$urlPath/main$src.js" language="javascript" type="text/javascript">
 </script>
-<script src="$urlPath/$form.js" language="javascript" type="text/javascript">
+<script src="$urlPath/$form$src.js" language="javascript" type="text/javascript">
 </script>
 THIS
 }
