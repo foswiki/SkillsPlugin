@@ -7,25 +7,14 @@ This topic will show you how to get the users skills displayed on their home pag
 
 The topic you need to edit is [[%USERSWEB%.PatternSkinUserViewTemplate]].
 
----+++ Step 1.
-
-Firstly, add the following line to %USERSWEB%.PatternSkinUserViewTemplate. This needs to be anywhere between =%TMPL:INCLUDE{"view"}%= and =%TMPL:DEF{"formattop"}%=:
-
-<verbatim>%TMPL:DEF{"skills"}%<div style="margin:0 5px">%SKILLS{action="userskills" user="%TOPIC%"}%</div>%TMPL:END%</verbatim>
-
----+++ Step 2.
-
-Next, remove the line: 
+Change the line: 
 
 <verbatim>%TMPL:DEF{"formattop"}%%TMPL:P{"form"}%%TMPL:END%</verbatim> 
 
-and replace with the following:
+to:
 
 <verbatim>
-%TMPL:DEF{"formattop"}%<table width="100%" cellpadding="20px">
-<tr><td width="50%" valign="top">%TMPL:P{"form"}%</td>
-<td width="50%" valign="top" align="right" style="padding-right:50px;">%TMPL:P{"skills"}%</td></tr>
-</table>%TMPL:END%
+%TMPL:DEF{"formattop"}%<div style="float:right">%SKILLS{action="userskills" user="%TOPIC%"}%</div>%TMPL:P{"form"}%%TMPL:END%
 </verbatim>
 
 You should now be able to view the users skills on their home page!

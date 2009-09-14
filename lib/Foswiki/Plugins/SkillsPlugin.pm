@@ -18,6 +18,7 @@ package Foswiki::Plugins::SkillsPlugin;
 
 use strict;
 
+use Assert;
 use JSON ();
 
 use Foswiki::Plugins::SkillsPlugin::Skills ();
@@ -26,7 +27,7 @@ use Foswiki::Plugins::SkillsPlugin::SkillNode ();
 
 # Plugin Variables
 our $VERSION           = '$Rev$';
-our $RELEASE           = '28 Jul 2009';
+our $RELEASE           = '14 Sep 2009';
 our $NO_PREFS_IN_TOPIC = 1;
 our $SHORTDESCRIPTION =
   'Allows users to list their skills, which can then be searched';
@@ -473,21 +474,6 @@ sub _openSkill {
     # this skill.
     my @path = $node->getPathArray();
 
-    my $tmplUserStart = Foswiki::Func::expandTemplate(
-        "skills:browseview:repeated:userstart");
-    my $tmplUser = Foswiki::Func::expandTemplate(
-        "skills:browseview:repeated:user");
-    my $tmplUserEnd = Foswiki::Func::expandTemplate(
-        "skills:browseview:repeated:userend");
-    my $tmplPreRating = Foswiki::Func::expandTemplate(
-        "skills:browseview:repeated:prerating");
-    my $tmplRating = Foswiki::Func::expandTemplate(
-        "skills:browseview:repeated:rating");
-    my $tmplPostRating = Foswiki::Func::expandTemplate(
-        "skills:browseview:repeated:postrating");
-    my $tmplComment = Foswiki::Func::expandTemplate(
-        "skills:browseview:repeated:comment");
-
     my $levels = _getLevels();
 
     my $skillOut = Foswiki::Func::expandTemplate(
@@ -542,14 +528,17 @@ sub _compileUserSkill {
 
     my $tmplPreRating =
       Foswiki::Func::expandTemplate($templates.':repeated:prerating');
+
     my $i = 1;
     while ( $i < $skill->{rating} ) {
         $out .= $tmplPreRating;
         $i++;
     }
 
-    $out .= Foswiki::Func::expandTemplate($templates.':repeated:rating');
-    $i++;
+    if ($skill->{rating} > 0) {
+        $out .= Foswiki::Func::expandTemplate($templates.':repeated:rating');
+        $i++;
+    }
 
     my $tmplPostRating =
       Foswiki::Func::expandTemplate($templates.':repeated:postrating');
@@ -939,7 +928,7 @@ sub _addHeads {
     my $urlPath = '%PUBURLPATH%/%SYSTEMWEB%/SkillsPlugin';
     my $restPath = '%SCRIPTURL{"rest"}%/SkillsPlugin';
 
-    my $src = DEBUG ? '_src' : '';
+    my $src = (DEBUG) ? '_src' : '';
 
     # add to head
     # FIXME: use the 'requires' parameter? for YUI?

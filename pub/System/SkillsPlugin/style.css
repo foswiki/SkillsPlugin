@@ -129,17 +129,26 @@ td.skillsFormRatingCell {
   text-align: center;
 }
 
-/**** Table used on SelectMySkills and for search results ****/
+/**** Used on SelectMySkills and for search results ****/
 
-table.skillsTable {
+.skillsTable {
   border-color:#ccc;
   background-color:#fff;
   margin:5px 0;
   border-collapse:separate;
-  border-spacing:0 2px; /* only way I could find to put gaps between rows */
   padding:10px;
-  empty-cells:show;
   border-style:solid;
+  border-width:1px;
+}
+
+/**** Table used for user skills display on home page ****/
+
+.userSkills {
+  border-color:#ccc;
+  background-color:#fff;
+  border-collapse:separate;
+  padding:10px;
+  border-style:dotted;
   border-width:1px;
 }
 

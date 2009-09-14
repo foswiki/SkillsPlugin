@@ -138,6 +138,7 @@ Next:
 |  Plugin Release: | %$RELEASE% |
 |  Plugin Version: | %$VERSION% |
 |  Change History: | <!-- versions below in reverse order -->&nbsp; |
+|  14 Sep 2009 | Various minor bugfixes and enhancements |
 |  28 Jul 2009 | Foswiki:Tasks.Item8223: bare metal rewrite to support deep taxonomies. -- Foswiki:Main.CrawfordCurrie |
 |  17 Jul 2009 | Foswiki:Tasks.Item8217: add support for flat display of skills for bulk editing, added override for the hard-coded skill levels using a preference. *REMOVED* =ALLOWADDSKILLS=. Foswiki:Tasks.Item8219: add descriptions of the skills and categories to easy navigation - Foswiki:Main.CrawfordCurrie |
 |  20 Mar 2009 | Foswiki:Tasks.Item1260 - Ported to Foswiki as version 1.0; Small code improvements; Update docs & screenshots |
