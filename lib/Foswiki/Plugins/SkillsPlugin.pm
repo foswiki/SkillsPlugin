@@ -934,7 +934,7 @@ sub _addHeads {
     # FIXME: use the 'requires' parameter? for YUI?
     Foswiki::Func::addToHEAD( 'SKILLSPLUGIN_JS', <<THIS);
 <style type="text/css" media="all">
- \@import url("$urlPath/style.css");
+ \@import url("$urlPath/style$src.css");
 </style>
 <script type="text/javascript" src="$yui/build/yahoo-dom-event/yahoo-dom-event.js"></script>
 <script type="text/javascript" src="$yui/build/connection/connection-min.js">
