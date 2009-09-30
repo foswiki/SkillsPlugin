@@ -16,7 +16,7 @@ SkillsPlugin.editAllSkills = function () {
         SkillsPlugin.main.tipify(tr);
             
         var th = document.createElement('th');
-        th.colSpan = 1000; // !! TRY IT
+        th.colSpan = 4;
         var yth = new YAHOO.util.Element(th);
         yth.addClass('indent-category' + depth);
         yth.addClass('skillsplugin_category');
@@ -51,9 +51,9 @@ SkillsPlugin.editAllSkills = function () {
         if (YAHOO.env.ua.ie > 0) {
             // bloody IE crap
             inp = document.createElement(
-                '<input type="radio" name="' + skid + '-rating" '+
-                ' id="' + skid + '-rating-' + idx +
-                ' value="' + idx + '">');
+                '<input type="radio" name="' + skid
+                + '-rating" id="' + skid + '-rating-' + idx
+                + '" value="' + idx + '">');
         } else {
             var inp = document.createElement('input');
             inp.type = 'radio';
@@ -163,6 +163,7 @@ SkillsPlugin.editAllSkills = function () {
                     document.createElement('td');
                 var ytd = new YAHOO.util.Element(td);
                 ytd.addClass(td, "foswikiAlert");
+                td.colSpan = 4;
                 td.appendChild(
                     document.createTextNode("Please log in..."));
                 tr.appendChild(td);

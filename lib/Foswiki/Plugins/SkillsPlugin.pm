@@ -27,7 +27,7 @@ use Foswiki::Plugins::SkillsPlugin::SkillNode ();
 
 # Plugin Variables
 our $VERSION           = '$Rev$';
-our $RELEASE           = '14 Sep 2009';
+our $RELEASE           = '30 Sep 2009';
 our $NO_PREFS_IN_TOPIC = 1;
 our $SHORTDESCRIPTION =
   'Allows users to list their skills, which can then be searched';
