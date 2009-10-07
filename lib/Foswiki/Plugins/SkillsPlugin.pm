@@ -27,7 +27,7 @@ use Foswiki::Plugins::SkillsPlugin::SkillNode ();
 
 # Plugin Variables
 our $VERSION           = '$Rev$';
-our $RELEASE           = '30 Sep 2009';
+our $RELEASE           = '7 Oct 2009';
 our $NO_PREFS_IN_TOPIC = 1;
 our $SHORTDESCRIPTION =
   'Allows users to list their skills, which can then be searched';
@@ -1018,7 +1018,8 @@ sub returnRESTResult {
         $response->header(
             -status  => $status,
             -type    => 'text/plain',
-            -charset => 'UTF-8'
+            -charset => 'UTF-8',
+            -expires        => 'now',
         );
         $response->print($text);
     }
@@ -1034,7 +1035,8 @@ sub returnRESTResult {
                 -status         => $status,
                 -type           => 'text/plain',
                 -charset        => 'UTF-8',
-                -Content_length => $len
+                -Content_length => $len,
+                -expires        => 'now',
             );
             print $text;
         }

@@ -138,6 +138,7 @@ Next:
 |  Plugin Release: | %$RELEASE% |
 |  Plugin Version: | %$VERSION% |
 |  Change History: | <!-- versions below in reverse order -->&nbsp; |
+|  7 Oct 2009 | Foswiki:Tasks:Item8304: added cache expiry header to help IE |
 |  30 Sep 2009 | Foswiki:Tasks:Item8295: IE fixes |
 |  14 Sep 2009 | Various minor bugfixes and enhancements |
 |  28 Jul 2009 | Foswiki:Tasks.Item8223: bare metal rewrite to support deep taxonomies. -- Foswiki:Main.CrawfordCurrie |

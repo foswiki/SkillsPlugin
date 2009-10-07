@@ -124,7 +124,8 @@ SkillsPlugin.editAllSkills = function () {
             function() {
                 var elSubmit = document.getElementById(
                     "editall-skills-submit");
-                elSubmit.addClass("foswikiSubmit");
+                var yel = new YAHOO.util.Element(elSubmit);
+                yel.addClass("foswikiSubmit");
             }, this, true);
         inp.size = 15;
     };
