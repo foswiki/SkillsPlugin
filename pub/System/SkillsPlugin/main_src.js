@@ -30,7 +30,11 @@ SkillsPlugin.main = {
     },
     
     get: function(handler, fnCallback, x1, x2, x3) {
-        var url = SkillsPlugin.vars.restUrl + "/SkillsPlugin/" + handler;
+        // Workaround; add the date to block caching, since
+        // TWiki gets it wrong
+        var now = new Date();
+        var url = SkillsPlugin.vars.restUrl + "/SkillsPlugin/" + handler
+        + '?t=' + now;
         
         var obCallbacks = {
             success: function(o){                

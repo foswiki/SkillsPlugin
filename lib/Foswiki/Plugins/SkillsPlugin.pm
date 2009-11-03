@@ -27,7 +27,7 @@ use Foswiki::Plugins::SkillsPlugin::SkillNode ();
 
 # Plugin Variables
 our $VERSION           = '$Rev$';
-our $RELEASE           = '7 Oct 2009';
+our $RELEASE           = '3 Nov 2009';
 our $NO_PREFS_IN_TOPIC = 1;
 our $SHORTDESCRIPTION =
   'Allows users to list their skills, which can then be searched';
@@ -711,7 +711,7 @@ sub _rest_getChildNodes {
     my @kids = map { $_->{name} }
       grep { !($leafonly && $_->hasChildren) }
         @{$node->{childNodes}};
-    return JSON::to_json(\@kids);
+    return returnRESTResult($response, 200, JSON::to_json(\@kids));
 }
 
 # Returns complete skill tree rooted at a given path,
@@ -735,7 +735,7 @@ sub _rest_getSkillTree {
         # User has skills
         $userData = $user->getByPath(@path);
     }
-    return $node->toJSON($userData);
+    return returnRESTResult($response, 200, $node->toJSON($userData));
 }
 
 # Gets all the details for a particular skill for the user logged in
@@ -755,15 +755,17 @@ sub _rest_getSkillDetails {
         rating  => '',
         comment => '',
     };
-    return JSON::to_json($result) unless $user;
+    return returnRESTResult($response, 200, JSON::to_json($result))
+      unless $user;
     my $skill = $user->getByPath(@path);
 
-    return JSON::to_json($result) unless $skill;
+    return returnRESTResult($response, 200, JSON::to_json($result))
+      unless $skill;
 
     $result->{rating} = $skill->{rating};
     $result->{comment} = $skill->{text};
 
-    return JSON::to_json($result);
+    return returnRESTResult($response, 200, JSON::to_json($result));
 }
 
 # allows a user to add a new skill or edit an existing one
@@ -793,7 +795,8 @@ sub _rest_addEditSkill {
     $known->{text} = $comment;
     $users->save($user);
 
-    return "Skill '".$known->getPath()."' ${action}ed";
+    return returnRESTResult(
+        $response, 200, "Skill '".$known->getPath()."' ${action}ed");
 }
 
 # Save changes made in the flat category form
@@ -871,7 +874,7 @@ sub _rest_saveUserChanges {
         $message .= "$edited skill".($edited == 1 ? '' : 's')." edited."
           if $edited;
     }
-    return $message;
+    return returnRESTResult($response, 200, $message);
 }
 
 sub _rest_search {
@@ -901,7 +904,7 @@ sub _rest_search {
 
     $out = Foswiki::Func::expandCommonVariables($out);
 
-    return $out.$commentTips;
+    return returnRESTResult($response, 200, $out.$commentTips);
 }
 
 # ========================= FUNCTIONS
@@ -1026,6 +1029,9 @@ sub returnRESTResult {
     else {    # Pre-Foswiki-1.0.
               # Turn off AUTOFLUSH
               # See http://perl.apache.org/docs/2.0/user/coding/coding.html
+        # THIS DOES NOT WORK - TWiki still generates a response with no
+        # cache headers. Has the header already been generated? Worked around
+        # by adding time-based key to the requests.
         local $| = 0;
         my $query = Foswiki::Func::getCgiQuery();
         if ( defined($query) ) {

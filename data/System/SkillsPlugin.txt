@@ -138,6 +138,7 @@ Next:
 |  Plugin Release: | %$RELEASE% |
 |  Plugin Version: | %$VERSION% |
 |  Change History: | <!-- versions below in reverse order -->&nbsp; |
+|  3 Nov 2009 | Foswiki:Tasks:Item8304: added cache-defeating params to requests, as generating response headers in TWiki is fundamentally broken |
 |  7 Oct 2009 | Foswiki:Tasks:Item8304: added cache expiry header to help IE |
 |  30 Sep 2009 | Foswiki:Tasks:Item8295: IE fixes |
 |  14 Sep 2009 | Various minor bugfixes and enhancements |
